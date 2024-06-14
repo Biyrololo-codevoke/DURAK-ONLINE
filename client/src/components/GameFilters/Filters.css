@@ -1,0 +1,30 @@
+.filter-row{
+    display: flex;
+    gap: 13px;
+    align-items: center;
+}
+
+#filter-preview{
+    background: rgb(39, 57, 77);
+    box-sizing: border-box;
+    padding: 3px 2px;
+    border-bottom: 1px solid white;
+    cursor: pointer;
+    user-select: none;
+}
+
+#filter-game-settings{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#filter-preview-container{
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+#mobile-view #filter-preview-container > *{
+    scale: 0.8;
+}

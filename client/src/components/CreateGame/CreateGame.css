@@ -1,0 +1,41 @@
+#game-price-container{
+    margin-top: 20px;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 50px;
+}
+
+.settings-buttons{
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center
+}
+
+.settings-buttons > *{
+    flex-grow: 1;
+}
+
+.create-card-padding-container{
+    box-sizing: border-box;
+    padding: 0 50px;
+}
+
+.game-variants-column{
+    display: flex;
+    flex-direction: column;
+    width: 100px;
+}
+
+@media (max-width: 440px){
+    .responsive-button{
+        min-width: 0 !important;
+        width: 40px !important;
+    }
+}
+
+@media (max-width: 600px){
+    .create-card-padding-container{
+        padding: 0 25px;
+    }
+}

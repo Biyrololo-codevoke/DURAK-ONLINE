@@ -1,0 +1,43 @@
+body{
+    position: relative;
+    margin: 0 auto 0 auto;
+    padding: 0;
+    height: 100dvh;
+    overflow: hidden;
+    /* width: 600px; */
+    width: 100%;
+    /* border: 1px solid white; */
+}
+
+main{
+    height: 100%;
+}
+
+footer{
+    position: fixed;
+    bottom: 0;
+    left: auto;
+    right: auto;
+    /* width: 600px; */
+    width: 100%;
+}
+
+.currency{
+    width: 40px;
+}
+
+.currency-small{
+    width: 25px;
+}
+
+.currency-tiny{
+    width: 15px;
+}
+
+#mobile-view{
+    width: 100%;
+}
+
+#mobile-view footer{
+    width: 100%;
+}

@@ -1,0 +1,558 @@
+#game-page{
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+}
+
+#game-screen{
+    flex-grow: 1;
+    position: relative;
+    overflow: hidden;
+}
+
+#game-footer{
+    height: 100px;
+    background: white;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px;
+    border-top: 1px solid #C1C1C1;
+}
+
+.game-user-avatar-container{
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border-radius: 5px;
+    z-index: 2;
+}
+
+#mobile-view .game-user-avatar-container{
+    width: 65px;
+    height: 65px;
+}
+
+.game-user-avatar-container *{
+    user-select: none;
+}
+
+.enemy-cards{
+    position: absolute;
+    bottom: 40px;
+    left: 0;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    box-sizing: border-box;
+    z-index: 1;
+}
+
+.enemy-cards .enemy-card{
+    flex-grow: 1;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* Для WebKit (Chrome, Safari) */
+    -moz-tap-highlight-color: transparent; /* Для Firefox */
+    -ms-tap-highlight-color: transparent; /* Для IE */
+    tap-highlight-color: transparent; /* Общий вариант */
+}
+
+.enemy-cards .enemy-card:last-child{
+    width: 50px;
+    flex-grow: 0;
+}
+
+.enemy-cards .enemy-card > img{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 50px;
+    object-fit: cover;
+    user-select: none;
+    cursor: default;
+}
+
+.enemy-cards .enemy-card > img.new_card{
+    animation: enemy_card_distribution 1.5s ease-out forwards;
+}
+
+@keyframes enemy_card_distribution{
+    0% {
+        left: calc(var(--deck-x) - var(--box-x));
+        top: calc(var(--deck-y) - var(--box-y));
+        rotate: 20deg;
+        opacity: 1;
+    }
+    80%{
+        left: var(--offset);
+        top: 0;
+        rotate: 20deg;
+        opacity: 1;
+    }
+    100%{
+        left: 0;
+        top: 0;
+        opacity: 1;
+    }
+}
+
+.game-user-avatar{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+.game-user-achivement{
+    position: absolute;
+    bottom: -5px;
+    right: 4px;
+    width: 8px;
+    z-index: 5;
+}
+
+.game-user-level{
+    position: absolute;
+    top: -2px;
+    right: 2px;
+}
+
+.game-user-level-line{
+    position: absolute;
+    top: 15px;
+    right: 3px;
+    height: 2px;
+    background: #DDDDDD;
+}
+
+.game-user-name{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    color: #DDDDDD;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    padding: 0 4px;
+    background-color: rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+}
+
+.empty-avatar{
+    border: 1px dashed white;
+    cursor: pointer;
+}
+
+.user-avatar-container{
+    width: 80px;
+    height: 80px;
+    position: relative;
+    border-radius: 5px;
+}
+
+#mobile-view .user-avatar-container{
+    width: 65px;
+    height: 65px;
+}
+
+#players{
+    display: flex;
+    box-sizing: border-box;
+    width: 100%;
+    padding: 20px;
+    justify-content: space-evenly;
+    /* gap: 35px; */
+}
+
+#mobile-view #players{
+    justify-content: space-between;
+    gap: 35px !important;
+}
+
+@media (max-width: 440px){
+    #mobile-view .game-user-avatar-container{
+        width: 50px;
+        height: 50px;
+    }
+
+    #mobile-view .user-avatar-container{
+        width: 50px;
+        height: 50px;
+    }
+
+    #mobile-view .enemy-cards .enemy-card > img{
+        width: 45px;
+    }
+
+    #mobile-view .enemy-cards .enemy-card:last-child{
+        width: 45px;
+        flex-grow: 0;
+    }
+    
+
+    #mobile-view #players{
+        gap: 20px;
+    }
+}
+
+
+/* 6 players */
+
+.players-count-6 .user-avatar-container:nth-child(1),
+.players-count-6 .user-avatar-container:nth-child(5){
+    margin-top: 40px;
+}
+
+.players-count-6 .user-avatar-container:nth-child(2),
+.players-count-6 .user-avatar-container:nth-child(4){
+    margin-top: 20px;
+}
+
+/* 5 players */
+
+.players-count-5 .user-avatar-container:nth-child(1),
+.players-count-5 .user-avatar-container:nth-child(4){
+    margin-top: 20px;
+}
+
+#mobile-view .players-count-5 .user-avatar-container:nth-child(2){
+    margin-right: auto;
+}
+
+/* 4 players */
+
+.players-count-4 .user-avatar-container:nth-child(1),
+.players-count-4 .user-avatar-container:nth-child(3){
+    margin-top: 20px;
+}
+
+/* 3 players */
+
+.players-count-3{
+    justify-content: space-evenly !important;
+}
+
+/* 2 players */
+
+.players-count-2{
+    justify-content: center !important;
+}
+
+/* end */
+
+/* player cards */
+
+#player-cards{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    /* width: 100%; */
+    width: min(100%, 600px);
+    left: calc(50% - min(100%, 600px) / 2);
+    /*  */
+    display: flex;
+    justify-content: space-between;
+    box-sizing: border-box;
+    z-index: 2;
+    height: 200px;
+    padding: 0 10px;
+    transition: all 0.3s ease;
+}
+
+#player-cards > .player-card{
+    flex-grow: 1;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* Для WebKit (Chrome, Safari) */
+    -moz-tap-highlight-color: transparent; /* Для Firefox */
+    -ms-tap-highlight-color: transparent; /* Для IE */
+    tap-highlight-color: transparent; /* Общий вариант */
+    transition: all 0.3s ease;
+    bottom: 0;
+    z-index: 2;
+}
+
+#player-cards > .player-card:last-of-type{
+    width: 225px;
+    flex-grow: 0;
+}
+
+body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
+    /* z-index: 10; */
+    bottom: 60px;
+}
+
+#player-cards:not(.dragging) > .player-card.hovered{
+    /* z-index: 10; */
+    bottom: 60px !important;
+    transition: all 0s ease !important;
+}
+
+#player-cards > .player-card > .player-card-image{
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 225px;
+    height: 315px;
+    object-fit: cover;
+    user-select: none;
+}
+
+#player-cards .player-card.new_card{
+    animation: card_anim 2s forwards;
+}
+
+@keyframes card_anim{
+    0%{
+        z-index: 0;
+        width: 0px;
+    }
+    50%{
+        width: 0px;
+    }
+    100%{
+
+    }
+}
+
+#player-cards .player-card.new_card > img{
+    animation: player_recieve_card 1.5s ease-out forwards;
+}
+
+@keyframes player_recieve_card {
+    0%{
+        top: calc(var(--deck-y) - var(--player-cards-container-y) - 50px );
+        left: calc(var(--deck-x) - var(--player-cards-container-x) + var(--offset));
+        rotate: 20deg;
+        scale: 0.5;
+        opacity: 1;
+    }
+    10%{
+        scale: 0.5;
+        opacity: 1;
+    }
+    60%{
+        scale: 1;
+        top: 0;
+        left: calc(var(--offset) - 120px);
+        opacity: 1;
+    }
+    100%{
+        scale: 1;
+        left: 0;
+        opacity: 1;
+    }
+}
+
+#mobile-view #player-cards{
+    height: 130px;
+}
+
+#mobile-view #player-cards > .player-card > .player-card-image{
+    width: 135px;
+    height: 189px;
+}
+
+#mobile-view #player-cards > .player-card:last-of-type{
+    width: 135px;
+}
+
+#dragging-card{
+    --padding-x: 0;
+    --padding-y: 0;
+    position: absolute;
+    width: 225px;
+    height: 315px;
+    z-index: 60;
+    display: none;
+    cursor: grab;
+    pointer-events: none;
+}
+
+#card-deck{
+    position: absolute;
+    width: 90px;
+    top: 40%;
+    transform: translateY(-50%);
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    z-index: 50;
+}
+
+#mobile-view #card-deck{
+    width: 65px;
+}
+
+#card-deck-rest{
+    position: relative;
+    margin-left: 10px;
+    color: #FFFFFF;
+    user-select: none;
+}
+
+#card-deck-container{
+    position: relative;
+}
+
+#card-deck #card-deck-container > img{
+    position: absolute;
+    width: 100%;
+    object-fit: cover;
+    user-select: none;
+    rotate: 20deg;
+    left: -70%;
+    user-select: none;
+}
+
+#card-deck #card-deck-container #card-deck-back{
+    z-index: 15;
+}
+
+#card-deck #card-deck-container #card-deck-trump{
+    rotate: 110deg;
+    left: -40%;
+    top: 15px;
+    z-index: 10;
+}
+
+/* game board */
+
+#game-desk{
+    width: 400px;
+    height: 250px;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 50px;
+    margin: auto;
+}
+
+#mobile-view #game-desk{
+    margin-top: 50px;
+    width: 100%;
+    gap: 30px;
+}
+
+#game-desk .game-desk-card{
+    position: relative;
+    width: 100px;
+    height: 144px;
+}
+
+#mobile-view #game-desk .game-desk-card{
+    width: 75px;
+    height: 108px;
+}
+
+@media (max-width: 300px){
+    #game-desk .game-desk-card{
+        width: 60px !important;
+        height: 90px !important;
+    }
+
+    #game-desk{
+        gap: 20px;
+    }
+}
+
+#game-desk .game-desk-card > img{
+    width: 100%;
+    user-select: none;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+#game-desk .game-desk-card .dropped-now{
+    left: var(--drag-x);
+    top: var(--drag-y);
+    animation: putting-card 0.3s ease-out forwards;
+}
+
+@keyframes putting-card{
+    0%{
+        scale: 2.2;
+        rotate: 0deg;
+        z-index: 100;
+    }
+    100%{
+        scale: 1;
+        left: 0px;
+        top: 0px;
+    }
+}
+
+#game-desk .game-desk-card .game-desk-card-lower{
+    /* border: 1px solid rgba(0, 0, 0, 0); */
+    rotate: -5deg;
+    border-radius: 10px;
+}
+
+#game-desk .game-desk-card .game-desk-card-upper.dropped-now{
+    left: var(--drag-x);
+    top: var(--drag-y);
+    animation: putting-card-upper 0.3s ease-out forwards;
+}
+
+@keyframes putting-card-upper{
+    0%{
+        scale: 2.2;
+        rotate: 0deg;
+        z-index: 100;
+    }
+    100%{
+        scale: 1;
+        left: 20px;
+        top: 20px;
+    }
+}
+
+
+#game-desk .game-desk-card .game-desk-card-upper{
+    position: absolute;
+    rotate: 5deg;
+    top: 20px;
+    left: 20px;
+}
+
+#game-desk-container{
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: calc(100% - 400px);
+    width: 100%;
+}
+
+#mobile-view #game-desk-container{
+    height: calc(100% - 300px);
+    box-sizing: border-box;
+    padding: 0 25px;
+}
+
+.game-desk-card-dragging .game-desk-card:hover .aviable-to-drop{
+    /* border-color: red !important; */
+    border: 3px solid red;
+}
+
+.game-desk-card-transfering{
+    transition: 0.1s;
+}
+
+.game-desk-card-transfering:hover{
+    border-color: red !important;
+}
+
+.game-desk-card-transfering:hover .game-desk-card-transfering-icon{
+    opacity: 0.7 !important;
+}
