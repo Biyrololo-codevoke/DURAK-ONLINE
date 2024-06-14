@@ -1,0 +1,62 @@
+#profile{
+    background: white;
+    box-shadow: rgba(0, 0, 0, 0.19) 0px 10px 20px, rgba(0, 0, 0, 0.23) 0px 6px 6px;
+}
+
+#profile-title{
+    padding: 10px 0 10px 0;
+    border-bottom: 1px solid #C1C1C1;
+}
+
+#profile-avatar{
+    width: 150px;
+    aspect-ratio: 1;
+    object-fit: cover;
+}
+
+#mobile-view #profile-avatar, #mobile-view #player-avatar-container{
+    width: 100px;
+    height: 100px;
+}
+
+#profile-section{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 13px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+
+#player-money{
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+#player-avatar-container{
+    width: 150px;
+    height: 150px;
+    position: relative;
+}
+
+#profile-achivement{
+    position: absolute;
+    bottom: -11px;
+    right: 14px;
+    width: 20px;
+}
+
+#profile-level{
+    position: absolute;
+    top: 0;
+    right: 5px;
+}
+
+#profile-level-line{
+    position: absolute;
+    top: 30px;
+    right: 4px;
+    height: 2px;
+    background: #DDDDDD;
+}

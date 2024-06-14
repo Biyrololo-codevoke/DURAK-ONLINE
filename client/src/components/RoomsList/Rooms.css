@@ -1,0 +1,41 @@
+.room{
+    border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+    padding: 2px 30px 20px 30px;
+    cursor: pointer;
+}
+
+.room:hover{
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.room-info{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.room-info > section{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.room-controlled-opacity{
+    opacity: 0.5;
+}
+
+#mobile-view .room-info > section{
+    gap: 3px;
+}
+
+#dialog-container{
+    padding: 20px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+    width: 300px;
+}
