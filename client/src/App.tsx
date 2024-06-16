@@ -3,6 +3,7 @@ import './App.css';
 import './Main.css';
 import axios from 'axios';
 import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage } from 'pages';
+import {SettingsPage} from 'pages';
 import { GamePage, ConnectingPage } from 'pages';
 import { GameFiltersPage, PrivateGamesPage } from 'pages';
 import Footer from 'components/Footer/Footer';
@@ -38,6 +39,7 @@ function App() {
           <Route path="/register" Component={RegisterPage} />
           <Route path="/login" Component={LoginPage} />
           <Route path="/profile" Component={ProfilePage} />
+          <Route path="/settings" Component={SettingsPage} />
           <Route path="/create-game" Component={CreateGamePage} />
           <Route path="/open" Component={OpenGamesPage} />
           <Route path="/filters" Component={GameFiltersPage} />
