@@ -18,6 +18,9 @@ SMTP_PORT = 465
 SMTP_LOGIN = "durak2.online@yandex.ru"
 SMTP_PASSWORD = "nrddetakhuebpakk"
 
+LOGO_PATH = os.getenv("LOGO_PATH")
+SERVER = "https://servername"  # replcae actual servername
+
 KAFKA_URI = os.getenv("KAFKA_URI") or "localhost:9092"
 KAFKA_TOPIC = "send_email"
 
@@ -25,6 +28,8 @@ consumer = None
 
 
 async def send_email(email: str, username: str, code: str) -> None:
+    global SMTP_LOGIN, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT, SERVER, LOGO_PATH
+
     message = MIMEMultipart("alternative")
     message["Subject"] = "Подтвердите ваш адрес электронной почты"
     message["From"] = SMTP_LOGIN
@@ -34,7 +39,7 @@ async def send_email(email: str, username: str, code: str) -> None:
         username,
         code,
     )
-    html = render_template(username, code)
+    html = render_template(username, code, SERVER + LOGO_PATH)
 
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
