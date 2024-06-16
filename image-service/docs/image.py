@@ -2,7 +2,7 @@ from .docs import BaseDocs
 
 
 class Image(BaseDocs):
-    path = "/api/image/<image_id:int>"
+    path = "/image/<image_id:int>"
 
     @classmethod
     def get(cls):

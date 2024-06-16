@@ -1,4 +1,4 @@
-from .image import ImageExceptions
+from .ImageModel import ImageExceptions
 
 
 class Exceptions:

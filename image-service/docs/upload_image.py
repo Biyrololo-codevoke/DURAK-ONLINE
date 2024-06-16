@@ -2,7 +2,7 @@ from .docs import BaseDocs
 
 
 class UploadImage(BaseDocs):
-    path = "/api/upload"
+    path = "/image/upload"
 
     @classmethod
     def post(cls):
