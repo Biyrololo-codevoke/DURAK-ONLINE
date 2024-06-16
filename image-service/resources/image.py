@@ -9,6 +9,8 @@ from .api import BaseResource
 
 
 class Image(BaseResource):
+    path = "/api/image/<int:image_id>"
+    
     @jwt_required()
     def get(self, image_id):
         user_id = get_jwt_identity()
@@ -24,5 +26,5 @@ class Image(BaseResource):
 
             return send_file(image_bytes, mimetype="image/jpg")
 
-        except exc.ImageNotFound:
+        except exc.Image.NotFound:
             return {"message": "image not found"}, HTTPStatus.NOT_FOUND

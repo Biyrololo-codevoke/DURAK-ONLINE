@@ -3,7 +3,7 @@ import os
 from flask import Flask
 from flask_cors import CORS
 
-from resources import init_app as api_init_app
+from .resources import init_app as api_init_app
 from .models import init_app as db_init_app
 from .docs import init_app as docs_init_app
 
