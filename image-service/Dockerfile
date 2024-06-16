@@ -8,6 +8,6 @@ RUN pip install -r requirements.txt
 
 COPY . /image-service
 
-EXPOSE 5050
+EXPOSE 5200
 
-CMD ["flask", "run", "--host", "localhost", "--port", "5050"]
+CMD ["flask", "run", "--host", "localhost", "--port", "5200"]

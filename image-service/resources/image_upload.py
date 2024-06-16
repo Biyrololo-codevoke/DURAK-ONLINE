@@ -10,23 +10,26 @@ from .image_handling import handle_image
 
 
 class ImageUpload(BaseResource):
-    path = "/api/image"
+    path = "/image/upload"
 
     @jwt_required()
     def post(self):
-        user_id = get_jwt_identity()
+        user_id = get_jwt_identity()["id"]
         image = request.json.get("image")
 
         if not image:
             return {"message": "image is not base64 or invalid"}, HTTPStatus.BAD_REQUEST
 
         try:
-            image_path = handle_image(image)
+            image_path = handle_image(image, user_id)
 
         except ValueError:
             return {"message": "image is not base64 or invalid"}, HTTPStatus.BAD_REQUEST
 
-        image = ImageModel(user_id, image_path)
+        image = ImageModel(
+            user_id=user_id, 
+            path=image_path
+        )
         image.save()
 
         return {
