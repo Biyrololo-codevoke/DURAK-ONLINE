@@ -19,7 +19,7 @@ SMTP_LOGIN = "durak2.online@yandex.ru"
 SMTP_PASSWORD = "nrddetakhuebpakk"
 
 LOGO_PATH = os.getenv("LOGO_PATH")
-SERVER = "https://servername"  # replcae actual servername
+SERVER = "http://servername"  # replace actual servername
 
 KAFKA_URI = os.getenv("KAFKA_URI") or "localhost:9092"
 KAFKA_TOPIC = "send_email"
