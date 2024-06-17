@@ -38,9 +38,8 @@ class ImageUpload(BaseResource):
 
         return image.json(), HTTPStatus.CREATED
 
-    @classmethod
     @jwt_required()
-    def delete(cls):
+    def delete(self):
         user_id = get_jwt_identity()
         image_id = request.json.get("image_id")
 
