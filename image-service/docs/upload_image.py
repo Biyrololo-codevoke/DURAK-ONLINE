@@ -24,8 +24,10 @@ class UploadImage(BaseDocs):
                 schema:
                   type: object
                   properties:
-                    message:
-                      type: string
+                    id:
+                      type: integer
+                    user_id:
+                      type: integer
                     path:
                       type: string
           '400':
