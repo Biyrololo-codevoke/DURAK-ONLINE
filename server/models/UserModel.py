@@ -22,7 +22,7 @@ class UserModel(BaseModel):  # type: ignore
 
     id = db.Column(db.Integer, primary_key=True)
     _email = db.Column(db.String(120), unique=True)
-    username = db.Column(db.String(120), unique=True)
+    _username = db.Column(db.String(120), unique=True)
     money = db.Column(db.Integer, default=100)
     _password = db.Column(db.String(87), nullable=False)
     verified = db.Column(db.Boolean, default=False, nullable=False)
@@ -38,14 +38,29 @@ class UserModel(BaseModel):  # type: ignore
         }
     
     def __init__(self, email: str, username: str, password: str) -> None:
-        self.email = email
-        self.username = username
-        self.password = password
+        try:
+            self.email = email
+            self.username = username
+            self.password = password
+            self.save()
+        except UserExceptions.AlreadyExists as e:
+            raise UserExceptions from e
 
     def verify_user(self, code: str) -> None:
-        self.set_verified(
-            VerifyCodeModel.verify(self.id, code)
-        )
+        user_verify = VerifyCodeModel.verify(self.id, code)
+        self.set_verified(user_verify)
+
+    @propetry
+    def username(self) -> str:
+        return self._username
+
+    @username.setter
+    def username(self, username) -> None:
+        try:
+            self.get_by_username(username)
+            raise UserExceptions.AlreadyExists
+        except UserExceptions.NotFound: 
+            self._username = username
 
     @property
     def password(self) -> str:
