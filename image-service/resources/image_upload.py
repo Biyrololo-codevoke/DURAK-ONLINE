@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from ..models import ImageModel, Exceptions as exc
+from ..models import ImageModel, UserModel, Exceptions as exc
 
 from .api import BaseResource
 from .image_handling import handle_image
@@ -31,6 +31,10 @@ class ImageUpload(BaseResource):
             path=image_path
         )
         image.save()
+
+        user = UserModel.get_by_id(user_id)
+        user.image_id = image.id
+        user.save()
 
         return {
             "message": "Successfully uploaded image",
