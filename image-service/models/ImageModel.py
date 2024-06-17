@@ -16,6 +16,13 @@ class ImageModel(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
     path = db.Column(db.String)
 
+    def json(self):
+        return {
+            "id": self.id,
+            "user_id": self.user_id,
+            "path": self.path
+        }
+
     def save(self) -> None:
         db.session.add(self)
         db.session.commit()
