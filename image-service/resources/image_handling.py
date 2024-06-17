@@ -11,6 +11,9 @@ def handle_image(image: str, id: int) -> str:
     try:
         photo_file_path = 'images/%d.jpeg' % id
 
+        if "base64," in image[:50]:
+            image = image.split("base64,")[1]
+
         base64_to_jpg(image, photo_file_path)
         return photo_file_path
     
