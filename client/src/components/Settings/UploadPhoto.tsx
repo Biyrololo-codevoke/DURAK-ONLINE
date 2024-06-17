@@ -46,26 +46,54 @@ export default function UploadPhoto(){
             image: base64_str
         }
 
-        axios.delete(url)
-        .then(
-            res => {
-                return axios.post(url, data);
-            }
-        )
-        .then(
-            res => {
-                const data : ApiTypes.GetUserPhotoResponseType = res.data;
-                const {path} = data;
-                localStorage.setItem('user_photo', path);
-                navigate(0);
-            }
-        )
-        .catch(
-            err => {
-                toast.error('Не удалось загрузить фото');
-                console.log(err);
-            }
-        )
+        let image_id = localStorage.getItem('image_id');
+
+        if(image_id){
+            axios.delete(url, {
+                data:{
+                    image_id: parseInt(image_id)
+                }
+            }, 
+            )
+            .then(
+                res => {
+                    return axios.post(url, data);
+                }
+            )
+            .then(
+                res => {
+                    const data : ApiTypes.GetUserPhotoResponseType = res.data;
+                    const {path} = data;
+                    localStorage.setItem('user_photo', path);
+                    navigate(0);
+                }
+            )
+            .catch(
+                err => {
+                    toast.error('Не удалось загрузить фото');
+                    console.log(err);
+                }
+            )
+        }
+
+        else{
+            axios.post(url, data)
+            .then(
+                res => {
+                    const data : ApiTypes.GetUserPhotoResponseType = res.data;
+                    const {path} = data;
+                    localStorage.setItem('user_photo', path);
+                    navigate(0);
+                }
+            )
+            .catch(
+                err => {
+                    toast.error('Не удалось загрузить фото');
+                    console.log(err);
+                }
+            )
+        }
+
     }
 
     return (

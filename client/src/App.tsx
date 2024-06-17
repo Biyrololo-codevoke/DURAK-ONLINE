@@ -16,7 +16,8 @@ import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
 
 function App() {
 
-  axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
+  // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
+  axios.defaults.baseURL = '/api';
 
   if(isMobile){
     document.body.id = 'mobile-view';
@@ -41,6 +42,7 @@ function App() {
           localStorage.setItem('username', data.user.username);
           localStorage.setItem('verified', `${data.user.verified}`);
           localStorage.setItem('user_id', `${data.user.id}`);
+          localStorage.setItem('image_id', `${data.user.image_id}`);
 
           return axios.get(`/image/${data.user.image_id}`);
         }
@@ -53,6 +55,7 @@ function App() {
             localStorage.setItem('user_photo', path);
           else{
             localStorage.removeItem('user_photo');
+            localStorage.removeItem('image_id');
           }
         }
       )
