@@ -20,6 +20,7 @@ app.config["PROPAGATE_EXCEPTIONS"] = True
 app.config["JWT_SECRET_KEY"] = (
     "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 )
+app.config['JWT_REFRESH_TOKEN_EXPIRES'] = None
 
 # initialization app to db
 db_init_app(app)
