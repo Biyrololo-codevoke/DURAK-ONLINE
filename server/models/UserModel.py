@@ -26,13 +26,15 @@ class UserModel(BaseModel):  # type: ignore
     money = db.Column(db.Integer, default=100)
     _password = db.Column(db.String(87), nullable=False)
     verified = db.Column(db.Boolean, default=False, nullable=False)
+    image_id = db.Column(db.String, default=None, nullable=True)
 
     def json(self) -> dict[str, int | bool | str]:
         return {
             "id": self.id,
             "username": self.username,
             "verified": self.verified,
-            "money": self.money
+            "money": self.money,
+            "image_id": self.image_id
         }
     
     def __init__(self, email: str, username: str, password: str) -> None:
