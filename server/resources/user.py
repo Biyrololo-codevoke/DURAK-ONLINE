@@ -7,11 +7,9 @@ from ..models import UserModel, Exceptions as exc
 
 from .api import BaseResource
 from .utils import (
-    parser_factory,
-    String,
-    verified_user,
-    validate_username,
-    validate_email,
+    validate_username, validate_email,
+    parser_factory, String,
+    verified_user, send_verification
 )
 
 
@@ -38,20 +36,32 @@ class User(BaseResource):
     @jwt_required()
     @verified_user
     def patch(cls) -> tuple[dict, HTTPStatus]:
+        user_id = get_jwt_identity()["id"]
         parser = parser_factory(
             {
                 "_username": (String[4, 16], validate_username),
-                "_email": (String[120], validate_email()),
+                "_email": (String[120], validate_email),
             }
         )
         args = parser.parse_args()
 
-        user = UserModel.get_by_id(get_jwt_identity()["id"])
         try:
-            user.username = args.username or user.username
-            user.email = args.email or user.email  # if None -> not changed
+            user = UserModel.get_by_id(user_id)
+            
+            if args.username:
+                user.username = args.username
+            
+            if args.email:
+                user.email = args.email
+                user.verified = False
+                send_verification(user)
+
             user.save()
+
             return {"user": user.json()}, HTTPStatus.OK
+        
+        except exc.User.AlreadyExists:
+            return {"error": "this email or username already taken"}, HTTPStatus.BAD_REQUEST
 
         except exc.User.NotFound:
             return {"error": "user not found"}, HTTPStatus.NOT_FOUND
