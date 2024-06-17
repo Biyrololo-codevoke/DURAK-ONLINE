@@ -36,10 +36,7 @@ class ImageUpload(BaseResource):
         user.image_id = image.id
         user.save()
 
-        return {
-            "message": "Successfully uploaded image",
-            "path": "/api/image/" + str(image.id)
-        }, HTTPStatus.CREATED
+        return image.json(), HTTPStatus.CREATED
 
     @jwt_required()
     @classmethod
