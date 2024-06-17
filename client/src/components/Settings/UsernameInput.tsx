@@ -1,16 +1,33 @@
 import { IconButton, TextField } from "@mui/material";
 import { useState } from "react";
 import CheckIcon from '@mui/icons-material/Check';
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function UsernameInput(){
+
+    const navigate = useNavigate();
 
     const def_username = localStorage.getItem('username') || '!!!ОШИБКА!!!';
 
     const [username, setUsername] = useState<string>(def_username);
 
     // Request to change username
-    function handle_change_username(){
-        // todo 
+    async function handle_change_username(){
+        axios.patch("/user", {
+            username
+        })
+        .then(
+            res => {
+                localStorage.setItem('username', username);
+                navigate(0);
+            }
+        )
+        .catch(
+            err => {
+                console.log(err);
+            }
+        )
     }
 
     return (
@@ -31,7 +48,7 @@ export default function UsernameInput(){
             onChange={(e) => setUsername(e.target.value)}
             onKeyPress={(e) => {
                 if(e.key === 'Enter'){
-                    localStorage.setItem('username', username);
+                    handle_change_username();
                 }
             }}
             InputProps={

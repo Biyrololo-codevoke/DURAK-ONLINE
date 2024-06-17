@@ -2,6 +2,8 @@ type UserType = {
     id: number;
     username: string;
     verified: boolean;
+    image_id: string;
+    money: number;
 }
 
 // Login user
@@ -45,11 +47,29 @@ export type {ConfirmEmailRequestType, ConfirmEmailResponseType};
 
 // Get User
 
-type GetUserRequestType = {
+type GetUserResponseType = {
     user: UserType
 }
 
-export type {GetUserRequestType};
+export type {GetUserResponseType};
+
+// Get user Photo
+
+type GetUserPhotoResponseType = {
+    message: string;
+    path: string;
+}
+
+export type {GetUserPhotoResponseType};
+
+
+// Upload user Photo
+
+type UploadUserPhotoRequestType = {
+    image: string
+}
+
+export type {UploadUserPhotoRequestType};
 
 // Create Room
 
