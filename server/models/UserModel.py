@@ -76,7 +76,7 @@ class UserModel(BaseModel):  # type: ignore
 
     @classmethod
     def get_by_email(cls, email: str) -> UserModel:
-        user = cls.query.filter_by(email=email).first()
+        user = cls.query.filter_by(_email=email).first()
         if not user:
             raise UserExceptions.NotFound
         return user
