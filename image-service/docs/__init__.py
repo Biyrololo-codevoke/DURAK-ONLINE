@@ -33,8 +33,8 @@ paths:
         for DocsClass in [UploadImage, Image]:
             file.write(DocsClass.gen_docs() + "\n")
 
-    app.add_url_rule("/api/docs/openapi", view_func=openapi)
-    app.add_url_rule("/api/docs", view_func=docs)
+    app.add_url_rule("/api/image/docs/openapi", view_func=openapi)
+    app.add_url_rule("/api/image/docs", view_func=docs)
 
 
 def openapi() -> Response:
