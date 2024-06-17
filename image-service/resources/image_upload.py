@@ -40,7 +40,7 @@ class ImageUpload(BaseResource):
 
     @jwt_required()
     def delete(self):
-        user_id = get_jwt_identity()
+        user_id = get_jwt_identity()["id"]
         image_id = request.json.get("image_id")
 
         try:
@@ -49,7 +49,7 @@ class ImageUpload(BaseResource):
         except exc.Image.PermissionDenied:
             return {"message": "you don't have permission to delete image"}, HTTPStatus.BAD_REQUEST
 
-        except exc.ImageNotFound:
+        except exc.Image.NotFound:
             return {"message": "image not found"}, HTTPStatus.NOT_FOUND
 
         return {"message": "Successfully deleted image"}, HTTPStatus.OK
