@@ -43,20 +43,8 @@ function App() {
           localStorage.setItem('verified', `${data.user.verified}`);
           localStorage.setItem('user_id', `${data.user.id}`);
           localStorage.setItem('image_id', `${data.user.image_id}`);
-
-          return axios.get(`/image/${data.user.image_id}`);
-        }
-      )
-      .then(
-        res=>{
-          const data : GetUserPhotoResponseType = res.data;
-          const {path} = data;
-          if(path)
-            localStorage.setItem('user_photo', path);
-          else{
-            localStorage.removeItem('user_photo');
-            localStorage.removeItem('image_id');
-          }
+          localStorage.setItem('player_money', `${data.user.money}`);
+          localStorage.setItem('user_photo', `/image/${data.user.image_id}`);
         }
       )
       .catch(

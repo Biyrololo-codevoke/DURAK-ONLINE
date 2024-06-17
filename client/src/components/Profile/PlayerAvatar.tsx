@@ -17,7 +17,7 @@ export default function PlayerAvatar() {
             alt="achivement"
             id="profile-achivement" 
             />
-            <Typography variant="h6" component="span" style={{color: '#DDDDDD'}} id="profile-level">11</Typography>
+            <Typography variant="h6" component="span" style={{color: '#DDDDDD', background: 'rgba(0, 0, 0, 0.15)'}} id="profile-level">11</Typography>
             <span id="profile-level-line" style={{width: 'calc(2ch + 4px)'}}></span>
         </div>
     )
