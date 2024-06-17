@@ -69,6 +69,10 @@ class User(BaseDocs):
                           type: string
                         verified:
                           type: boolean
+                        image_id:
+                          type: integer
+                          nullable: true
           '404':
-            description: User not found
+        security:
+          - jwt_auth: []
         """
