@@ -1,4 +1,5 @@
 from .db import db
+from .UserModel import UserModel
 
 
 class ImageExceptions:
@@ -29,9 +30,12 @@ class ImageModel(db.Model):
 
     def delete(self, user_id, image_id) -> None:
         image = ImageModel.query.filter_by(id = image_id).first()
+        user = UserModel.get_by_id(user_id).first()
 
         if image.user_id != user_id:
             raise ImageExceptions.PermissionDenied
         else:
+            user.image_id = None
+            user.save()
             db.session.delete(image)
             db.session.commit()
