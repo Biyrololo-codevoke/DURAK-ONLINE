@@ -77,7 +77,21 @@ export default function UploadPhoto(){
         }
 
         else{
-
+            axios.post(url, data)
+            .then(
+                res => {
+                    const data : ApiTypes.GetUserPhotoResponseType = res.data;
+                    const {path} = data;
+                    localStorage.setItem('user_photo', path);
+                    navigate(0);
+                }
+            )
+            .catch(
+                err => {
+                    toast.error('Не удалось загрузить фото');
+                    console.log(err);
+                }
+            )
         }
 
     }
