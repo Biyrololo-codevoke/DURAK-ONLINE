@@ -50,7 +50,7 @@ class UserModel(BaseModel):  # type: ignore
         user_verify = VerifyCodeModel.verify(self.id, code)
         self.set_verified(user_verify)
 
-    @propetry
+    @property
     def username(self) -> str:
         return self._username
 
