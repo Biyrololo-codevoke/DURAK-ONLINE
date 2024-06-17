@@ -1,10 +1,14 @@
 import { Typography } from "@mui/material";
+import { EMPTY_USER_PHOTO_URL } from "constants/StatisPhoto";
 
 export default function PlayerAvatar() {
+
+    const photo = localStorage.getItem('user_photo') || EMPTY_USER_PHOTO_URL;
+
     return (
         <div id="player-avatar-container">
             <img 
-            src="https://sun9-21.userapi.com/impg/NNnZ7AyblPR_Gr5guTUMShZQ5BFXpe1r7hGV9Q/R_YyktJNuws.jpg?size=100x100&quality=96&sign=d26729b966df36b5b0ae86617f35f52e&type=album" 
+            src={photo} 
             alt="user avatar" 
             id="profile-avatar"
             />

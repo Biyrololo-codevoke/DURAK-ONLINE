@@ -18,4 +18,8 @@ function confirmEmail(){
     return `/confirm_email`
 }
 
-export {loginUser, registerUser, getUser, createRoom, confirmEmail}
+function uploadPhoto(){
+    return `/image/upload`
+}
+
+export {loginUser, registerUser, getUser, createRoom, confirmEmail, uploadPhoto}

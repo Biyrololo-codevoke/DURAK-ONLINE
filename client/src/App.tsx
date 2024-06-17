@@ -3,6 +3,7 @@ import './App.css';
 import './Main.css';
 import axios from 'axios';
 import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage } from 'pages';
+import {SettingsPage} from 'pages';
 import { GamePage, ConnectingPage } from 'pages';
 import { GameFiltersPage, PrivateGamesPage } from 'pages';
 import Footer from 'components/Footer/Footer';
@@ -11,6 +12,7 @@ import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import Cookies from 'js-cookie';
 import { useEffect } from 'react';
+import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
 
 function App() {
 
@@ -26,6 +28,37 @@ function App() {
       if(access_token){
         axios.defaults.headers.common['Authorization'] = `Bearer ${access_token}`;
       }
+
+      const user_id = localStorage.getItem('user_id');
+      if(!user_id){
+        return;
+      }
+
+      axios.get(`/user?id=${user_id}`)
+      .then(
+        res=>{
+          const data : GetUserResponseType = res.data;
+          localStorage.setItem('username', data.user.username);
+          localStorage.setItem('verified', `${data.user.verified}`);
+          localStorage.setItem('user_id', `${data.user.id}`);
+
+          return axios.get(`/image/${data.user.image_id}`);
+        }
+      )
+      .then(
+        res=>{
+          const data : GetUserPhotoResponseType = res.data;
+          const {path} = data;
+          if(path)
+            localStorage.setItem('user_photo', path);
+          else{
+            localStorage.removeItem('user_photo');
+          }
+        }
+      )
+      .catch(
+        err=>console.log(err)
+      )
     },
     []
   )
@@ -38,6 +71,7 @@ function App() {
           <Route path="/register" Component={RegisterPage} />
           <Route path="/login" Component={LoginPage} />
           <Route path="/profile" Component={ProfilePage} />
+          <Route path="/settings" Component={SettingsPage} />
           <Route path="/create-game" Component={CreateGamePage} />
           <Route path="/open" Component={OpenGamesPage} />
           <Route path="/filters" Component={GameFiltersPage} />
