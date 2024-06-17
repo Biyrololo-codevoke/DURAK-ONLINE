@@ -34,7 +34,7 @@ export default function UploadPhoto(){
             if(reader.result){
                 const base64 = reader.result as string;
 
-                upload_photo(base64);
+                upload_photo(base64.split(',')[1]);
             }
         }
     }

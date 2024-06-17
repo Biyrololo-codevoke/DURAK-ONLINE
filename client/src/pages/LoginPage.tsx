@@ -48,7 +48,7 @@ export default function LoginPage(){
 
                 // запоминаю данные юзера
                 localStorage.setItem('username', data.user.username);
-                localStorage.setItem('id', `${data.user.id}`);
+                localStorage.setItem('user_id', `${data.user.id}`);
                 localStorage.setItem('verified', `${data.user.verified}`);
                 Cookies.set('access_token', data.access_token, {expires: 5});
 
