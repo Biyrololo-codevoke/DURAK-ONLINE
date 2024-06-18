@@ -17,7 +17,7 @@ import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
 function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
-  axios.defaults.baseURL = 'http://185.250.46.225/api';
+  axios.defaults.baseURL = '/api';
 
   if(isMobile){
     document.body.id = 'mobile-view';
