@@ -48,7 +48,7 @@ export default function UploadPhoto(){
 
         let image_id = localStorage.getItem('image_id');
 
-        if(image_id){
+        if(image_id && image_id !== 'null'){
             axios.delete(url, {
                 data:{
                     image_id: parseInt(image_id)
