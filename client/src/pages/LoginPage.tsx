@@ -55,6 +55,23 @@ export default function LoginPage(){
                 // задаю токен, чтобы он юзался при отправке запросов
                 axios.defaults.headers.common['Authorization'] = `Bearer ${data.access_token}`;
 
+                return axios.get(`/user?id=${data.user.id}`)
+            }
+        )
+        .then(
+            res=>{
+                const data : ApiTypes.GetUserResponseType = res.data;
+                localStorage.setItem('username', data.user.username);
+                localStorage.setItem('verified', `${data.user.verified}`);
+                localStorage.setItem('user_id', `${data.user.id}`);
+                localStorage.setItem('image_id', `${data.user.image_id}`);
+                localStorage.setItem('player_money', `${data.user.money}`);
+                if(data.user.image_id === null){
+                    localStorage.removeItem('user_photo');
+                }
+                else{
+                    localStorage.setItem('user_photo', `/image/${data.user.image_id}`);
+                }
                 // перекидываем на дефолтную страницу
                 navigate('/');
             }
