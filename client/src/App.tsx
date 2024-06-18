@@ -50,7 +50,7 @@ function App() {
             localStorage.removeItem('user_photo');
           }
           else{
-            localStorage.setItem('user_photo', `/image/${data.user.image_id}`);
+            localStorage.setItem('user_photo', `/api/image/${data.user.image_id}`);
           }
         }
       )
