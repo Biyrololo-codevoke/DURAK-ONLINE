@@ -64,7 +64,12 @@ export default function UploadPhoto(){
                 res => {
                     const data : ApiTypes.GetUserPhotoResponseType = res.data;
                     const {path} = data;
-                    localStorage.setItem('user_photo', path);
+                    let newPath = path.replace('.jpeg', '');
+                    newPath = newPath.replace('images/', 'image/');
+                    // newPath - image/{image_id}
+                    let image_id = newPath.split('/')[1];
+                    localStorage.setItem('image_id', image_id);
+                    localStorage.setItem('user_photo', newPath);
                     navigate(0);
                 }
             )

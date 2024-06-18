@@ -17,7 +17,7 @@ import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
 function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
-  axios.defaults.baseURL = '/api';
+  axios.defaults.baseURL = 'http://185.250.46.225/api';
 
   if(isMobile){
     document.body.id = 'mobile-view';
@@ -32,6 +32,8 @@ function App() {
 
       const user_id = localStorage.getItem('user_id');
       if(!user_id){
+        const clearing_keys = ['username', 'verified', 'user_id', 'image_id', 'player_money', 'user_photo'];
+        clearing_keys.forEach(key => localStorage.removeItem(key));
         return;
       }
 
@@ -44,7 +46,12 @@ function App() {
           localStorage.setItem('user_id', `${data.user.id}`);
           localStorage.setItem('image_id', `${data.user.image_id}`);
           localStorage.setItem('player_money', `${data.user.money}`);
-          localStorage.setItem('user_photo', `/image/${data.user.image_id}`);
+          if(data.user.image_id === null){
+            localStorage.removeItem('user_photo');
+          }
+          else{
+            localStorage.setItem('user_photo', `/image/${data.user.image_id}`);
+          }
         }
       )
       .catch(

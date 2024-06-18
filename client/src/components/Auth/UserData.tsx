@@ -51,9 +51,17 @@ export default function UserData() {
         .then(
             res=>{
                 const data : ApiTypes.RegisterResponseType = res.data;
-                localStorage.setItem('id', `${data.user.id}`);
+                localStorage.setItem('user_id', `${data.user.id}`);
                 localStorage.setItem('username', `${data.user.username}`);
                 localStorage.setItem('verified', `${data.user.verified}`);
+                localStorage.setItem('image_id', `${data.user.image_id}`);
+                localStorage.setItem('player_money', `${data.user.money}`);
+                if(data.user.image_id === null){
+                    localStorage.removeItem('user_photo');
+                }
+                else{
+                    localStorage.setItem('user_photo', `/image/${data.user.image_id}`);
+                }
 
                 
                 Cookies.set('access_token', data.access_token, {expires: 5});
