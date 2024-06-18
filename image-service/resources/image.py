@@ -20,11 +20,7 @@ class Image(BaseResource):
     def get(self, image_id):        
         try:
             logger.info("image_id: %d" % image_id)
-            image = ImageModel.query.filter_by(
-                id = image_id
-            ).first()
-
-            logger.info("image path: %s" % image.path)
+            image = ImageModel.get_by_id(image_id)
 
             with open(image.path, "rb") as file:
                 image_bytes = file.read()

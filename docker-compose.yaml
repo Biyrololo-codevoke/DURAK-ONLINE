@@ -77,7 +77,7 @@ services:
       - '5100:5100'
     environment:
       - KAFKA_URI=kafka:9092
-      - LOGO_PATH=/static/logo512.png
+      - LOGO_PATH=http://185.250.46.225/static/logo512.png
     depends_on:
       - server
     command: python main.py

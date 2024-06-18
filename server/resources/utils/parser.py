@@ -107,8 +107,11 @@ class JSONRequestParser:
     def _check_field_types(self, request: Request) -> None | ValueError:
         for field in self.fields:
             if field in self.types:
-                _field_value = request.get_json()[field]
+                _field_value = request.get_json().get(field)
                 _field_type = self.types[field]
+
+                if not _field_value:
+                    continue
 
                 try:
                     _field_type(_field_value)
@@ -127,8 +130,12 @@ class JSONRequestParser:
     def _check_fields(self, request: Request) -> None:
         for field in self.fields:
             if field in self.handlers:
+                field_value = request.get_json().get(field)
+                if not field_value:
+                    continue
+
                 handler = self.handlers[field]
-                valid, reason = handler(request.get_json()[field])
+                valid, reason = handler()
 
                 if not valid:
                     if field not in self.error_log:

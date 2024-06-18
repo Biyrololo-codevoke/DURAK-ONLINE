@@ -26,7 +26,7 @@ consumer = None
 
 
 async def send_email(email: str, username: str, code: str) -> None:
-    global SMTP_LOGIN, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT, SERVER, LOGO_PATH
+    global SMTP_LOGIN, SMTP_PASSWORD, SMTP_SERVER, SMTP_PORT, LOGO_PATH
 
     message = MIMEMultipart("alternative")
     message["Subject"] = "Подтвердите ваш адрес электронной почты"
@@ -37,7 +37,7 @@ async def send_email(email: str, username: str, code: str) -> None:
         username,
         code,
     )
-    html = render_template(username, code, SERVER + LOGO_PATH)
+    html = render_template(username, code, LOGO_PATH)
 
     part1 = MIMEText(text, "plain")
     part2 = MIMEText(html, "html")
@@ -55,7 +55,7 @@ async def send_email(email: str, username: str, code: str) -> None:
         )
         return True
     except Exception as e:
-        logger.WARNING(f"Ошибка отправки письма: {e}")
+        logger.error(f"Ошибка отправки письма: {e}")
         return False
 
 

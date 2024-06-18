@@ -44,7 +44,7 @@ class ImageUpload(BaseResource):
         image_id = request.json.get("image_id")
 
         try:
-            ImageModel.delete(user_id, image_id)
+            ImageModel.delete_user_image(user_id, image_id)
         
         except exc.Image.PermissionDenied:
             return {"message": "you don't have permission to delete image"}, HTTPStatus.BAD_REQUEST

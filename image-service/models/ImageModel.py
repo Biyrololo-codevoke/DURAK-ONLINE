@@ -24,18 +24,36 @@ class ImageModel(db.Model):
             "path": self.path
         }
 
-    def save(self) -> None:
-        db.session.add(self)
-        db.session.commit()
+    @classmethod
+    def get_by_id(cls, image_id) -> ImageModel:
+         image = cls.query.filter_by(id = image_id).first()
 
-    def delete(self, user_id, image_id) -> None:
-        image = ImageModel.query.filter_by(id = image_id).first()
-        user = UserModel.get_by_id(user_id).first()
+         if not image:
+             raise ImageExceptions.NotFound
+         else:
+             return image
+        
+    @classmethod
+    def delete_user_image(cls, user_id, image_id) -> None:
+        image = cls.query.filter_by(id = image_id).first()
+        user = UserModel.get_by_id(user_id)
+
+        if not image:
+            raise ImageExceptions.NotFound
 
         if image.user_id != user_id:
             raise ImageExceptions.PermissionDenied
         else:
             user.image_id = None
             user.save()
-            db.session.delete(image)
-            db.session.commit()
+            image.delete()
+
+    def save(self) -> None:
+        db.session.add(self)
+        db.session.commit()
+
+    def delete(self) -> None:
+        db.session.delete(self)
+        db.session.commit()
+
+    
