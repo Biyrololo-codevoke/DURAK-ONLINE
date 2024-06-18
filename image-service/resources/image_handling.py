@@ -15,8 +15,8 @@ def handle_image(image: str, id: int) -> str:
             image = image.split("base64,")[1]
 
         base64_to_jpg(image, photo_file_path)
-        return photo_file_path
-    
+        return "api/image/%d" % id
+
     except Exception as e:
         logger.error(e)
         raise ValueError    

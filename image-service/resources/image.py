@@ -19,6 +19,7 @@ class Image(BaseResource):
     
     def get(self, image_id):        
         try:
+            logger.info("image_id: %d" % image_id)
             image = ImageModel.query.filter_by(
                 id = image_id
             ).first()

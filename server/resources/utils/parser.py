@@ -70,7 +70,7 @@ class JSONRequestParser:
         parsed_args = {}
         for field in self.fields:
             if self.types[field]:
-                arg_name = field if self.required[field] else "_" + field
+                arg_name = field
                 _type = self.types[field]
                 typed_arg = _type(request.json[arg_name])
                 if issubclass(self.types[field], Type):
@@ -82,8 +82,9 @@ class JSONRequestParser:
 
     @staticmethod
     def _check_request(request: Request) -> None:
-        if request.method != "POST":
-            abort(HTTPStatus.BAD_REQUEST, "Request must be POST")
+        allowed_methods = ["POST", "PUT", "PATCH", "DELETE"]
+        if request.method not in allowed_methods:
+            abort(HTTPStatus.METHOD_NOT_ALLOWED, "Request method must be in" + str(allowed_methods))
 
         if not request.is_json:
             abort(HTTPStatus.BAD_REQUEST, "Request must be JSON")
@@ -106,11 +107,7 @@ class JSONRequestParser:
     def _check_field_types(self, request: Request) -> None | ValueError:
         for field in self.fields:
             if field in self.types:
-                if self.required[field]:
-                    _field_value = request.get_json()[field]
-                else:
-                    _field_value = request.get_json()["_" + field]
-
+                _field_value = request.get_json()[field]
                 _field_type = self.types[field]
 
                 try:

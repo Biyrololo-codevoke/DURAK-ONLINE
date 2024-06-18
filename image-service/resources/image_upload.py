@@ -27,7 +27,7 @@ class ImageUpload(BaseResource):
             return {"message": "image is not base64 or invalid"}, HTTPStatus.BAD_REQUEST
 
         image = ImageModel(
-            user_id=user_id, 
+            user_id=user_id,
             path=image_path
         )
         image.save()

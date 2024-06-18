@@ -37,6 +37,7 @@ class User(BaseResource):
     @verified_user
     def patch(cls) -> tuple[dict, HTTPStatus]:
         user_id = get_jwt_identity()["id"]
+        cls.logger.info("id: %d" % user_id)
         parser = parser_factory(
             {
                 "_username": (String[4, 16], validate_username),
@@ -44,9 +45,11 @@ class User(BaseResource):
             }
         )
         args = parser.parse_args()
+        cls.logger.info("args: %s" % str(args))
 
         try:
             user = UserModel.get_by_id(user_id)
+            cls.logger.info("user: %s" % str(user.json()))
             
             if args.username:
                 user.username = args.username
