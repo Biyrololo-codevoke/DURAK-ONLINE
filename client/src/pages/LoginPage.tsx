@@ -72,6 +72,12 @@ export default function LoginPage(){
                 else{
                     localStorage.setItem('user_photo', `/api/image/${data.user.image_id}`);
                 }
+
+                if(!data.user.verified){
+                    navigate('/confirm-email');
+                    return;
+                }
+
                 // перекидываем на дефолтную страницу
                 navigate('/');
             }
