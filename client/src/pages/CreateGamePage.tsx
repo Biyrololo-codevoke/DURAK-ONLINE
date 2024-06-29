@@ -43,7 +43,7 @@ export default function CreateGamePage() {
             throw_type: all_tossing ? 'all' : 'neighborhood',
             win_type: is_classic ? 'classic' : 'draw',
             private: password !== false,
-            _password: password || ''
+            password: password || ''
         }
         axios.post(ApiUrls.createRoom(), body)
         .then(

@@ -82,7 +82,7 @@ type CreateRoomRequestType = {
   throw_type: 'all' | 'neighborhood',
   win_type: 'classic' | 'draw',
   private: boolean,
-  _password: string
+  password: string
 }
 
 type CreateRoomResponseType = {
