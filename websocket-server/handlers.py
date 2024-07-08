@@ -4,7 +4,7 @@ from typing import Union
 
 import jwt
 
-from data import *
+from data import room_list, authed_sockets, socket_user_id
 from kafka_producer import send_event
 
 
