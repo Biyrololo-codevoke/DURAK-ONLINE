@@ -61,7 +61,7 @@ def auth_socket(message, socket):
             auth_sockets_id.append(id(socket))
 
 
-start_server = websockets.serve(handle, "localhost", 8765)
+start_server = websockets.serve(handle, "localhost", 9000)
 asyncio.get_event_loop().run_until_complete(start_server)
-print("Server listen: localhost:8765")
+print("Server listen: localhost:9000")
 asyncio.get_event_loop().run_forever()
