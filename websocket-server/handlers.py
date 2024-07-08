@@ -1,13 +1,18 @@
+import os
 import json
 from typing import Union
 
 import jwt
 
-from data import *
+from data import room_list, authed_sockets, socket_user_id
 from kafka_producer import send_event
 
 
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+
 def handle_jwt_token(token: str) -> Union[bool, int]:
+    global JWT_SECRET_KEY
     try:
         # Decode the JWT token
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
