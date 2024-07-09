@@ -65,10 +65,24 @@ services:
     environment:
       - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
       - KAFKA_URI=kafka:9092
+      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
     depends_on:
       - kafka
       - zookeeper
     command: flask run --host 0.0.0.0 --port 5000
+
+  websocket-server:
+    build: ./websocket-server
+    restart: on-failure
+    ports:
+      - '9000:9000'
+    environment:
+      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
+      - KAFKA_URI=kafka:9092
+    depends_on:
+      - kafka
+      - zookeeper
+    command: python server.py
 
   email-sender:
     build: ./email-sender-service
