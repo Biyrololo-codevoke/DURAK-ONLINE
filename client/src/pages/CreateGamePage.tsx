@@ -34,6 +34,12 @@ export default function CreateGamePage() {
      * Создание игры
      */
     async function handle_create_game() {
+
+        if(password === '') {
+            toast.error('Пароль не может быть пустым');
+            return;
+        }
+
         const body : ApiTypes.CreateRoomRequestType = {
             reward: game_price,
             players_count,
@@ -43,7 +49,7 @@ export default function CreateGamePage() {
             throw_type: all_tossing ? 'all' : 'neighborhood',
             win_type: is_classic ? 'classic' : 'draw',
             private: password !== false,
-            password: password || ''
+            password: password || null
         }
         axios.post(ApiUrls.createRoom(), body)
         .then(
