@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from .db import db
 from .UserModel import UserModel
 
@@ -20,8 +22,7 @@ class ImageModel(db.Model):
     def json(self):
         return {
             "id": self.id,
-            "user_id": self.user_id,
-            "path": self.path
+            "user_id": self.user_id
         }
 
     @classmethod

@@ -82,7 +82,7 @@ services:
     depends_on:
       - kafka
       - zookeeper
-    command: python server.py
+    command: python main.py
 
   email-sender:
     build: ./email-sender-service
@@ -91,7 +91,7 @@ services:
       - '5100:5100'
     environment:
       - KAFKA_URI=kafka:9092
-      - LOGO_PATH=http://185.250.46.225/static/logo512.png
+      - LOGO_PATH=https://codevoke.ru/static/logo512.png
     depends_on:
       - server
     command: python main.py

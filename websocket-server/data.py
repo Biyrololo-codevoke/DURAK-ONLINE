@@ -1,3 +1,7 @@
+from websocket_logger import logger
+
+
+logger.info("start init data")
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 
@@ -10,13 +14,13 @@ class RoomListObserver:
     def __init__(self, rooms: dict[int, int] = None, followers: list = None):
         self._rooms = rooms or dict()
         self._followers = followers or list()
-        self.notifiy()
+        self.notify()
     
-    def add_room(self, room_id: int, room_count: int):
+    def add_room(self, room_id: int, room_count: int = 1):
         self._rooms[room_id] = room_count
         self.notify()
 
-    def update_room(self, room_id: int, room_count: int = 1):
+    def update_room(self, room_id: int, room_count: int):
         self._rooms[room_id] = room_count
         self.notify()
 
@@ -31,6 +35,7 @@ class RoomListObserver:
         self._followers.append(callback)
 
     def notify(self):
+        logger.info("new event! notify followers...")
         for callback in self._followers:
             callback(self.get_rooms())
 
