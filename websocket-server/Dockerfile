@@ -10,4 +10,4 @@ COPY . /websocket-server
 
 EXPOSE 9000
 
-CMD ["python", "server.py"]
+CMD ["python", "main.py"]
