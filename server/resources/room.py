@@ -5,7 +5,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models import RoomModel, UserModel, Exceptions as exc
 
 from .api import BaseResource
-from .utils import parser_factory, Int, String, Enum, verified_user
+from .utils import parser_factory, Int, String, Enum, verified_user, send_new_room
 
 
 class Room(BaseResource):
@@ -42,6 +42,8 @@ class Room(BaseResource):
 
             author = UserModel.get_by_id(get_jwt_identity()["id"])
             room.add_player(author.id)
+            
+            send_new_room(room.id)
 
             return {"room": room.json()}, HTTPStatus.CREATED
 

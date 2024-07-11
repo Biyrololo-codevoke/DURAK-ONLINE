@@ -1,17 +1,18 @@
 import os
 import json
-from typing import Union
+from typing import Any
 
 import jwt
 
 from data import room_list, authed_sockets, socket_user_id
 from kafka_producer import send_event
+from websocket_logger import logger
 
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
 
 
-def handle_jwt_token(token: str) -> Union[bool, int]:
+def handle_jwt_token(token: str) -> tuple[bool, Any] | tuple[bool, str]:
     global JWT_SECRET_KEY
     try:
         # Decode the JWT token
@@ -77,3 +78,5 @@ def send_to_room(room_id, payload: dict):
 
 def serialize_payload(payload: dict):
     return json.dumps(payload)
+
+logger.info("init handlers.py")

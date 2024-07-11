@@ -9,13 +9,13 @@ logger = logging.getLogger("image service logger")
 
 def handle_image(image: str, id: int) -> str:
     try:
-        photo_file_path = 'images/%d.jpeg' % id
+        photo_file_path = 'image/%d.jpg' % id
 
         if "base64," in image[:50]:
             image = image.split("base64,")[1]
 
         base64_to_jpg(image, photo_file_path)
-        return "api/image/%d" % id
+        return photo_file_path
 
     except Exception as e:
         logger.error(e)
@@ -32,4 +32,4 @@ def base64_to_jpg(base64_text, output_file, width=100, height=100):
     with open(output_file, 'w+') as photo_file:
         photo_file.close()
 
-    image.save(output_file, format='JPEG')
+    image.save(output_file, format='JPG')

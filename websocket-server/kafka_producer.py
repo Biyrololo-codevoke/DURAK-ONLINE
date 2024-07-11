@@ -14,8 +14,8 @@ config = {
     "client.id": "python-producer",
 }
 
-logger.info("waiting 40s for kafka to be ready")
-time.sleep(40)
+logger.info("waiting 30s for kafka to be ready")
+time.sleep(30)
 
 # try to establish connection
 logger.info(f"try to establish connection with kafka by uri: {KAFKA_URI}")
@@ -24,6 +24,7 @@ producer = Producer(config)
 try:
     producer.produce("test", value="test")
     producer.flush()
+    logger.info("successfully connected to kafka")
 except Exception as e:
     logger.info(f"Failed to connect to kafka: {e}")
     exit(-1)
@@ -56,3 +57,5 @@ def send_event(payload):
     partition = key_partitions.get(key)
 
     produce(KAFKA_TOPIC, payload, partition=partition, key=payload["event"])
+
+logger.info("init kafka producer")

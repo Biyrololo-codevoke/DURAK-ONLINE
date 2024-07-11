@@ -1,0 +1,4 @@
+websockets
+jwt
+confluent_kafka
+aiokafka

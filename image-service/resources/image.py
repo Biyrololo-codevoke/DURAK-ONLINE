@@ -4,7 +4,6 @@ import logging
 from io import BytesIO
 
 from flask import send_file
-from flask_jwt_extended import jwt_required, get_jwt_identity
 
 from ..models import ImageModel, Exceptions as exc
 
@@ -24,7 +23,6 @@ class Image(BaseResource):
 
             with open(image.path, "rb") as file:
                 image_bytes = file.read()
-
             byte_io = BytesIO(image_bytes)
 
             return send_file(byte_io, mimetype="image/jpg")

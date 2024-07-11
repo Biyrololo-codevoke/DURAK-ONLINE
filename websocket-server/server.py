@@ -1,15 +1,19 @@
 import json
-import asyncio
 import websockets
 import threading as th
 
 from handlers import handle_list, handle_room, handle_jwt_token
 from data import auth_sockets_id, authed_sockets
+from websocket_logger import logger
 
 
 async def handle (websocket, path):
+    logger.info(path + "->" + str(websocket))
     async for message in websocket:
-        router(path, message, websocket)
+        await router(path, message, websocket)
+        
+        
+logger.info("handle made")
 
 
 async def router (path, payload, websocket):
@@ -20,14 +24,14 @@ async def router (path, payload, websocket):
             target=auth_socket, 
             args=(payload, websocket)
         )
-        await thread.start()
+        thread.start()
 
     if path == "/ws/room/list":
         thread = th.Thread(
             target=handle_list, 
             args=websocket
         )
-        await thread.start()
+        thread.start()
 
     elif path.startswith("/ws/room/"):
         try:
@@ -37,12 +41,16 @@ async def router (path, payload, websocket):
                 target=handle_room,
                 args=(payload, websocket)
             )
+            thread.start()
 
         except ValueError:
             websocket.send(json.dumps({
                 "status": "error",
                 "message": "room_id must be int"
             }))
+
+logger.info("router made")
+
 
 def auth_socket(message, socket):
     if "access_token" not in message.keys():
@@ -62,7 +70,10 @@ def auth_socket(message, socket):
             auth_sockets_id.append(id(socket))
 
 
-start_server = websockets.serve(handle, "localhost", 9000)
-asyncio.get_event_loop().run_until_complete(start_server)
-print("Server listen: localhost:9000")
-asyncio.get_event_loop().run_forever()
+logger.info("auth_socket made")
+
+
+logger.info("Server listen: localhost:9000")
+logger.info("running")
+
+start_server = websockets.serve(handle, "0.0.0.0", 9000)

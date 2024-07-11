@@ -17,7 +17,7 @@ class Room:
 
     class ThrowType(Enum):
         ALL = "all"  # все
-        NEIGHBOURHOOD = "NEIGHBOURHOOD"  # соседи
+        NEIGHBOURHOOD = "neighborhood"  # соседи
 
     class WinType(Enum):
         CLASSIC = "classic"  # классический
