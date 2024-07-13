@@ -15,6 +15,10 @@ CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI") or "sqlite:///base.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 300  # Таймаут в секундах
+app.config['SQLALCHEMY_POOL_SIZE'] = 100
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 0
+
 
 # configure jwt manager key
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")

@@ -1,3 +1,6 @@
+import json
+from asyncio import gather
+
 from websocket_logger import logger
 
 
@@ -31,13 +34,26 @@ class RoomListObserver:
     def get_rooms(self) -> dict[int, int]:
         return self._rooms
     
-    def subscribe(self, callback):
-        self._followers.append(callback)
+    def subscribe(self, follower):
+        self._followers.append(follower)
 
     def notify(self):
-        logger.info("new event! notify followers...")
-        for callback in self._followers:
-            callback(self.get_rooms())
+        logger.info("new event! notify followers... (%s)" % ", ".join(
+            [str(socket.remote_address) for socket in self._followers]
+        ))
+        tasks = []
+        data = self.get_rooms()
+        
+        for follower in self._followers:
+            tasks.append(
+                send_data(follower, data)
+            )
+        gather(*tasks)
+
+
+async def send_data(socket, payload):
+    serialized = json.dumps(payload)
+    await socket.send(serialized)
 
 
 room_list = RoomListObserver()

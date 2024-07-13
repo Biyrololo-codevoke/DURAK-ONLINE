@@ -9,7 +9,7 @@ from websocket_logger import logger
 from data import room_list
 
 KAFKA_URI = os.getenv("KAFKA_URI") or "localhost:9092"
-KAFKA_TOPIC = "socket_answers"
+KAFKA_TOPIC = "socket_events"
 
 consumer = None
 
@@ -21,12 +21,15 @@ def handle_message(message):
     recipient_id = message.get("dest_id")
 
     if destination_type == "room":
+        logger.info("event for room")
         send_to_room(recipient_id, message)
 
     elif destination_type == "user":
+        logger.info("event for user")   
         send_event(recipient_id, message)
         
     elif destination_type == "list":  # { "dest_type": "list", ... }
+        logger.info("event for list")   
         event_type = message["event_type"]
         
         if event_type == "create_room":  # { "event_type": "new_room", "room_id": 1 }
@@ -41,9 +44,6 @@ def handle_message(message):
 
 async def start_consumer() -> None:
     global consumer, KAFKA_URI
-
-    logger.info("waiting 40s for kafka to be ready")
-    await asyncio.sleep(40)
 
     logger.info(f"try to connect to kafka by uri: {KAFKA_URI}")
     consumer = AIOKafkaConsumer(
