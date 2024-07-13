@@ -18,7 +18,7 @@ import {Protected} from 'hocs';
 function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
-  axios.defaults.baseURL = '/api';
+  axios.defaults.baseURL = '/api'; //https://codevoke.ru/api
 
   if(isMobile){
     document.body.id = 'mobile-view';
