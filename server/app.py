@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from flask import Flask
 from flask_cors import CORS
@@ -22,7 +23,7 @@ app.config['SQLALCHEMY_MAX_OVERFLOW'] = 0
 
 # configure jwt manager key
 app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = None
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
 
 # initialization app to db
 db_init_app(app)
