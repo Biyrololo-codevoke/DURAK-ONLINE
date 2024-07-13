@@ -1,73 +1,68 @@
+from asyncio import create_task
 import json
 import websockets
-import threading as th
+from threading import Thread
 
 from handlers import handle_list, handle_room, handle_jwt_token
-from data import auth_sockets_id, authed_sockets
+from data import auth_sockets_id, authed_sockets, room_list
 from websocket_logger import logger
 
 
-async def handle (websocket, path):
-    logger.info(path + "->" + str(websocket))
+def s(data: dict) -> str:  # serializes dict to json string
+    return json.dumps(data)
+
+
+def d(raw: str) -> dict:  # deserializes string json to dict
+    return json.loads(raw)
+
+
+async def handle(websocket, path):
     async for message in websocket:
-        await router(path, message, websocket)
+        payload = d(message)
+        logger.info(path + "->" + str(websocket.remote_address) + " :>> " + str(payload) +" "+ str(type(payload)))
+        await handle_auth(path, payload, websocket)
         
         
 logger.info("handle made")
 
 
-async def router (path, payload, websocket):
-    w_id = id(websocket)
+async def handle_auth(path: str, payload: dict, socket):
+    await auth_socket(payload, socket)
+    await router(path, payload, socket)
 
-    if w_id not in auth_sockets_id:
-        thread = th.Thread(
-            target=auth_socket, 
-            args=(payload, websocket)
-        )
-        thread.start()
-
+async def router(path: str, payload: str, socket):
     if path == "/ws/room/list":
-        thread = th.Thread(
-            target=handle_list, 
-            args=websocket
-        )
-        thread.start()
-
+        await handle_list(socket)
+        
     elif path.startswith("/ws/room/"):
         try:
-            room_id = int(path.replace("/ws/room/", ""))
+            room_id = int(path.split('/')[-1])
             payload["room_id"] = room_id
-            thread = th.Thread(
-                target=handle_room,
-                args=(payload, websocket)
-            )
-            thread.start()
+            await handle_room(payload, socket)
+
 
         except ValueError:
-            websocket.send(json.dumps({
-                "status": "error",
-                "message": "room_id must be int"
-            }))
-
+            await socket.send(
+                s({ "status": "error", "message": "room_id must be int" })
+            )
 logger.info("router made")
 
 
-def auth_socket(message, socket):
+async def auth_socket(message: dict, socket):
     if "access_token" not in message.keys():
-        socket.send({
-            "status": "error",
-            "message": "access token wasn't found in request"
-        })
+        await socket.send(
+            s({ "status": "error", "message": "access token wasn't found in request" })
+        )
     else:
         status, data = handle_jwt_token(message["access_token"])
         if not status:
-            socket.send({
-                "status": "error",
-                "message": data
-            })
+            await socket.send(
+                s({ "status": "error", "message": data })
+            )
         else:
             authed_sockets[data] = socket
             auth_sockets_id.append(id(socket))
+            await socket.send(s({ "status": "success" }))
 
 
 logger.info("auth_socket made")

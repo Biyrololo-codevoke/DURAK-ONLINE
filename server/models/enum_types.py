@@ -4,7 +4,7 @@ from enum import Enum
 class Room:
     class CardsCount(Enum):
         SMALL = 24
-        MEDIUM = 48
+        MEDIUM = 36
         LARGE = 52
 
     class Speed(Enum):

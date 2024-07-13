@@ -47,5 +47,9 @@ def send_mail_letter(name:str , email:str, code:int) -> None:
     produce(KAFKA_TOPIC_email, message)
     
 def send_new_room(room_id: int) -> None:
-    message = { "event_type": "new_room", "room_id": room_id }
+    message = {
+      "dest_type": "list",
+      "event_type": "create_room", 
+      "room_id": room_id
+    }
     produce(KAFKA_TOPIC_room, message)
