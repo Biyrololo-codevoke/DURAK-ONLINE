@@ -1,8 +1,10 @@
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { Room } from "types/Room"
 import RoomComponent from "./Room";
 import './Rooms.css'
 import { PRICES } from "constants/Prices";
+import { roomListWS } from "constants/ApiUrls";
+import Cookies from 'js-cookie';
 
 export default function RoomsList(){
 
@@ -61,6 +63,39 @@ export default function RoomsList(){
             is_private: false
         }
     ]);
+
+    const [socket, setSocket] = useState<WebSocket | null>(null);
+
+    function handle_message(data: any){
+        console.log(data);
+    }
+
+    useEffect(() => {
+        const new_socket = new WebSocket(roomListWS());
+        
+        new_socket.onmessage = (event) => {
+            const data = JSON.parse(event.data);
+            handle_message(data);
+        }
+
+        new_socket.onopen = () => {
+            const _data = JSON.stringify({
+                access_token: Cookies.get('access_token'),
+            })
+            new_socket.send(_data);
+        }
+
+        setSocket(new_socket);
+
+        return () => {
+            if(new_socket.readyState === 1){
+                new_socket.close();
+            }
+        }
+
+    }, [])
+
+    // filter start
 
     const prices : [number, number] = JSON.parse(localStorage.getItem('prices') || '[1, 16]');
 
@@ -147,6 +182,8 @@ export default function RoomsList(){
     }
 
     const filtered_rooms = filter_rooms();
+
+    // filter end
 
     return (
         <div id="rooms-list">
