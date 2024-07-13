@@ -10,13 +10,13 @@ export function handleAddRoom(room_id : number, setter : React.Dispatch<React.Se
     axios
         .get(url)
         .then((response) => {
-            const room : CreateRoomRequestType & {user_ids: number[], name: string, id: number}= response.data.room;
+            const room : CreateRoomRequestType & {user_ids: number[], name: string, id: number, players_count: number}= response.data.room;
 
             const c_room : Room = {
                 id: room.id,
                 title: room.name,
                 currcent_player_count: room.user_ids.length,
-                players_count: 4, // max players count TODO
+                players_count: room.players_count, 
                 cards_count: room.cards_count,
                 game_speed: room.speed,
                 is_transfering: room.game_type === 'translate',
