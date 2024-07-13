@@ -28,4 +28,10 @@ function roomListWS(){
 
 export {roomListWS}
 
+function getRoomInfo(room_id: number){
+    return `/room?id=${room_id}`
+}
+
+export {getRoomInfo}
+
 export {loginUser, registerUser, getUser, createRoom, confirmEmail, uploadPhoto}

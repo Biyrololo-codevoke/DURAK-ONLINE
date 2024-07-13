@@ -5,70 +5,96 @@ import './Rooms.css'
 import { PRICES } from "constants/Prices";
 import { roomListWS } from "constants/ApiUrls";
 import Cookies from 'js-cookie';
+import {Api as Types} from 'types'
+import handleAddRooms from "features/RoomList/handleAddRoom";
 
 export default function RoomsList(){
 
     const [rooms, setRooms] = useState<Room[]>([
-        {
-            id: 1,
-            game_price: 25000,
-            currcent_player_count: 3,
-            players_count: 5,
-            cards_count: 24,
-            game_speed: 1,
-            is_transfering: false,
-            all_tossing: true,
-            is_classic: true,
-            title: 'бакл, хорош, yes',
-            is_private: false
-        },
-        {
-            id: 2,
-            game_price: 100000,
-            players_count: 6,
-            currcent_player_count: 5,
-            cards_count: 52,
-            game_speed: 2,
-            is_transfering: true,
-            all_tossing: true,
-            is_classic: false,
-            title: 'SNAKE, капибара, игорь, ***, айайай',
-            is_private: false
+        // {
+        //     id: 1,
+        //     game_price: 25000,
+        //     currcent_player_count: 3,
+        //     players_count: 5,
+        //     cards_count: 24,
+        //     game_speed: 1,
+        //     is_transfering: false,
+        //     all_tossing: true,
+        //     is_classic: true,
+        //     title: 'бакл, хорош, yes',
+        //     is_private: false
+        // },
+        // {
+        //     id: 2,
+        //     game_price: 100000,
+        //     players_count: 6,
+        //     currcent_player_count: 5,
+        //     cards_count: 52,
+        //     game_speed: 2,
+        //     is_transfering: true,
+        //     all_tossing: true,
+        //     is_classic: false,
+        //     title: 'SNAKE, капибара, игорь, ***, айайай',
+        //     is_private: false
             
-        },
-        {
-            id: 3,
-            game_price: 50000,
-            players_count: 5,
-            currcent_player_count: 4,
-            cards_count: 32,
-            game_speed: 1,
-            is_transfering: true,
-            all_tossing: false,
-            is_classic: true,
-            title: 'Рандомные, ники, чтобы, были',
-            is_private: false
-        },
-        {
-            id: 4,
-            game_price: 500000,
-            players_count: 6,
-            currcent_player_count: 6,
-            cards_count: 52,
-            game_speed: 2,
-            is_transfering: true,
-            all_tossing: true,
-            is_classic: true,
-            title: 'Четыре, слова, вместо, Ников, а нет, Шесть',
-            is_private: false
-        }
+        // },
+        // {
+        //     id: 3,
+        //     game_price: 50000,
+        //     players_count: 5,
+        //     currcent_player_count: 4,
+        //     cards_count: 32,
+        //     game_speed: 1,
+        //     is_transfering: true,
+        //     all_tossing: false,
+        //     is_classic: true,
+        //     title: 'Рандомные, ники, чтобы, были',
+        //     is_private: false
+        // },
+        // {
+        //     id: 4,
+        //     game_price: 500000,
+        //     players_count: 6,
+        //     currcent_player_count: 6,
+        //     cards_count: 52,
+        //     game_speed: 2,
+        //     is_transfering: true,
+        //     all_tossing: true,
+        //     is_classic: true,
+        //     title: 'Четыре, слова, вместо, Ников, а нет, Шесть',
+        //     is_private: false
+        // }
     ]);
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
-    function handle_message(data: any){
+    function handle_message(data: Types.RoomListResponseType |
+        Types.RoomListStatusType |
+        Types.RoomListEvent
+        ){
         console.log(data);
+
+        if('status' in data){
+            // ...
+        }
+        else{
+            const rooms_ids = Object.keys(data).filter(key => key !== 'type').map(key => parseInt(key));
+
+            if('type' in data && data.type === 'delete_room'){
+                // delete Rooms
+                setRooms(rooms.filter((room) => !rooms_ids.includes(room.id)));
+                return
+            }
+
+            // new Rooms or create Rooms or update Rooms
+
+            handleAddRooms(rooms_ids, setRooms);
+        }
     }
+
+    useEffect(()=>{
+        console.log('rooms', rooms)
+    }, [rooms])
 
     useEffect(() => {
         const new_socket = new WebSocket(roomListWS());

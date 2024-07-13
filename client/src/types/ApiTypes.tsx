@@ -85,18 +85,42 @@ type CreateRoomRequestType = {
   password: string | null
 }
 
+type RoomType = {
+    id: number,
+    name: string,
+    reward: number,
+    cards_count: number,
+    speed: 1 | 2,
+    game_type: string,
+    throw_type: string,
+    win_type: string,
+    private: boolean
+}
+
+export type {RoomType}
+
 type CreateRoomResponseType = {
-    room: {
-        id: 0,
-        name: string,
-        reward: number,
-        cards_count: number,
-        speed: 1 | 2,
-        game_type: string,
-        throw_type: string,
-        win_type: string,
-        private: boolean
-    } 
+    room: RoomType
 }
 
 export type {CreateRoomRequestType, CreateRoomResponseType};
+
+// RoomList wss
+
+type RoomListResponseType = {
+    [key: number]: number
+}
+
+type RoomListEvent = {
+    type: 'create_room' | 'update_room' | 'delete_room',
+    [key: number]: number
+}
+
+type RoomListStatusType = {
+    status: 'success'
+} | {
+    status: 'error',
+    message: string
+}
+
+export type {RoomListResponseType, RoomListStatusType, RoomListEvent};
