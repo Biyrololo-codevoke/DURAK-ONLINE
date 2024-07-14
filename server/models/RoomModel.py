@@ -34,6 +34,7 @@ class RoomModel(BaseModel):  # type: ignore
             "id": self.id,
             "name": self.name,
             "reward": self.reward,
+            "players_count": self.players_count,
             "cards_count": self.cards_count,
             "speed": self.speed,
             "game_type": self.game_type,
