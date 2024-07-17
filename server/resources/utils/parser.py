@@ -1,8 +1,13 @@
 from __future__ import annotations
 
+import json
+import logging
 from http import HTTPStatus
 
 from flask import request as flask_request, Request, make_response, abort
+
+
+logger = logging.getLogger("api_logger")
 
 
 def parser_factory(args: dict[str, type | Type | tuple]) -> JSONRequestParser:
@@ -56,6 +61,7 @@ class JSONRequestParser:
         self.required[field] = is_required
 
     def parse_args(self, request: Request = flask_request) -> ArgsDict:
+        logger.info("request: " + json.dumps(request.json, indent=4))
         self.error_log = {}
         self._check_request(request)
         self._check_available(request)
@@ -69,8 +75,8 @@ class JSONRequestParser:
 
         parsed_args = {}
         for field in self.fields:
-            if self.types[field]:
-                arg_name = field if self.required[field] else "_" + field
+            if self.types[field] and request.json.get(field) is not None:
+                arg_name = field
                 _type = self.types[field]
                 typed_arg = _type(request.json[arg_name])
                 if issubclass(self.types[field], Type):
@@ -82,8 +88,9 @@ class JSONRequestParser:
 
     @staticmethod
     def _check_request(request: Request) -> None:
-        if request.method != "POST":
-            abort(HTTPStatus.BAD_REQUEST, "Request must be POST")
+        allowed_methods = ["POST", "PUT", "PATCH", "DELETE"]
+        if request.method not in allowed_methods:
+            abort(HTTPStatus.METHOD_NOT_ALLOWED, "Request method must be in" + str(allowed_methods))
 
         if not request.is_json:
             abort(HTTPStatus.BAD_REQUEST, "Request must be JSON")
@@ -106,12 +113,11 @@ class JSONRequestParser:
     def _check_field_types(self, request: Request) -> None | ValueError:
         for field in self.fields:
             if field in self.types:
-                if self.required[field]:
-                    _field_value = request.get_json()[field]
-                else:
-                    _field_value = request.get_json()["_" + field]
-
+                _field_value = request.get_json().get(field)
                 _field_type = self.types[field]
+
+                if not _field_value:
+                    continue
 
                 try:
                     _field_type(_field_value)
@@ -130,8 +136,12 @@ class JSONRequestParser:
     def _check_fields(self, request: Request) -> None:
         for field in self.fields:
             if field in self.handlers:
+                field_value = request.get_json().get(field)
+                if not field_value:
+                    continue
+
                 handler = self.handlers[field]
-                valid, reason = handler(request.get_json()[field])
+                valid, reason = handler(field_value)
 
                 if not valid:
                     if field not in self.error_log:

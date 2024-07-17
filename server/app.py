@@ -1,4 +1,5 @@
 import os
+import datetime
 
 from flask import Flask
 from flask_cors import CORS
@@ -15,12 +16,14 @@ CORS(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI") or "sqlite:///base.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 app.config["PROPAGATE_EXCEPTIONS"] = True
+app.config['SQLALCHEMY_POOL_RECYCLE'] = 300  # Таймаут в секундах
+app.config['SQLALCHEMY_POOL_SIZE'] = 100
+app.config['SQLALCHEMY_MAX_OVERFLOW'] = 0
+
 
 # configure jwt manager key
-app.config["JWT_SECRET_KEY"] = (
-    "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
-)
-app.config['JWT_REFRESH_TOKEN_EXPIRES'] = None
+app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = datetime.timedelta(days=30)
 
 # initialization app to db
 db_init_app(app)

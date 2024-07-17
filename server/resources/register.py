@@ -29,12 +29,13 @@ class Register(BaseResource):  # type: ignore
         args = parser.parse_args()
         
         try:
+            cls.logger.info("create user object")
             new_user = UserModel(
                 args.email,
                 args.username,
                 args.password
             )
-
+            cls.logger.info("send verification email")
             send_verification(new_user)
             
             access_token = create_access_token(identity=new_user.json())

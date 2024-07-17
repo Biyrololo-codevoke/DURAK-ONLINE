@@ -1,17 +1,24 @@
+import os
 import json
-from typing import Union
+from typing import Any
+from asyncio import create_task
 
 import jwt
 
-from data import *
+from data import room_list, authed_sockets, socket_user_id
 from kafka_producer import send_event
+from websocket_logger import logger
 
 
-def handle_jwt_token(token: str) -> Union[bool, int]:
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
+
+
+def handle_jwt_token(token: str) -> tuple[bool, Any] | tuple[bool, str]:
+    global JWT_SECRET_KEY
     try:
         # Decode the JWT token
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
-        return True, payload["id"]
+        return True, payload["sub"]["id"]
     except jwt.ExpiredSignatureError:
         # Token has expired
         return False, "Token has expired"
@@ -46,15 +53,12 @@ def handle_room(payload, socket):
         send_event(user_id, event)
 
 
-def handle_list(socket):
-    list_changes_callback = lambda payload: socket.send(
-        serialize_payload(payload)
-    )
+async def handle_list(socket):
+    logger.info("handle_list called...")
     current_room_list = room_list.get_rooms()
-    socket.send({
-        current_room_list
-    })
-    room_list.subscribe(list_changes_callback)
+    
+    await send_payload(current_room_list, socket)
+    room_list.subscribe(socket)
 
 
 def send_event(user_id: int, payload: dict):
@@ -72,3 +76,10 @@ def send_to_room(room_id, payload: dict):
 
 def serialize_payload(payload: dict):
     return json.dumps(payload)
+
+
+async def send_payload(payload, socket):
+    await socket.send(serialize_payload(payload))
+
+
+logger.info("init handlers.py")

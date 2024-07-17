@@ -7,7 +7,7 @@ from typing import TypeAlias, Literal, get_args
 
 class Card:
     Suites: TypeAlias = Literal["♠️", "♥️", "♣️", "♦️"]
-    Deck_sizes: TypeAlias = Literal[52, 44, 36]
+    Deck_sizes: TypeAlias = Literal[52, 36, 24]
 
     def __init__(self, suit: Suites, value: int, is_trump=False):
         self.suit: Card.Suites = suit
@@ -16,7 +16,7 @@ class Card:
 
     @classmethod
     def make_deck(cls, size: Deck_sizes = 52) -> list[Card]:
-        deck_min_card_value = size % 10
+        deck_min_card_value = {52: 2, 36: 6, 24: 9}[size]
         card_list = []
 
         for suit in get_args(cls.Suites):

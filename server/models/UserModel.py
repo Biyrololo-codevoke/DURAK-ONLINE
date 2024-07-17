@@ -50,7 +50,7 @@ class UserModel(BaseModel):  # type: ignore
         user_verify = VerifyCodeModel.verify(self.id, code)
         self.set_verified(user_verify)
 
-    @propetry
+    @property
     def username(self) -> str:
         return self._username
 
@@ -98,7 +98,7 @@ class UserModel(BaseModel):  # type: ignore
 
     @classmethod
     def get_by_username(cls, username: str) -> UserModel:
-        user = cls.query.filter_by(username=username).first()
+        user = cls.query.filter_by(_username=username).first()
         if not user:
             raise UserExceptions.NotFound
         return user

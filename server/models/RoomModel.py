@@ -34,27 +34,31 @@ class RoomModel(BaseModel):  # type: ignore
             "id": self.id,
             "name": self.name,
             "reward": self.reward,
+            "players_count": self.players_count,
             "cards_count": self.cards_count,
             "speed": self.speed,
             "game_type": self.game_type,
             "throw_type": self.throw_type,
             "win_type": self.win_type,
             "private": self.private,
+            "user_ids": self.user_ids,
         }
 
-    def get_by_id(self, room_id: int) -> RoomModel:  # type: ignore
-        room = self.query.filter_by(id=room_id).first()
+    @classmethod
+    def get_by_id(cls, room_id: int) -> RoomModel:  # type: ignore
+        room = cls.query.filter_by(id=room_id).first()
         if not room:
             raise RoomExceptions.NotFound
         return room
 
     def add_player(self, user_id: int) -> None:
-        if len(self.user_ids) == self._players_count:
-            raise RoomExceptions.IsFull
         if self.user_ids is None:
-            self.user_ids = [user_id]
-        else:
-            self.user_ids.append(user_id)
+            self.user_ids = []
+
+        if len(self.user_ids) >= self._players_count:
+            raise RoomExceptions.IsFull
+
+        self.user_ids.append(user_id)
 
     def check_password(self, password: str) -> bool:
         return self.password == password

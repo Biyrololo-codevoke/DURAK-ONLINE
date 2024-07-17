@@ -9,22 +9,27 @@ from websocket_logger import logger
 from data import room_list
 
 KAFKA_URI = os.getenv("KAFKA_URI") or "localhost:9092"
-KAFKA_TOPIC = "socket_answers"
+KAFKA_TOPIC = "socket_events"
 
 consumer = None
 
 
 def handle_message(message):
-    destination_type = message["dest_type"]  # "room" or "user" or "list"
-    recepient_id = message["dest_id"]
+    logger.info(message)
+    destination_type = message.get("dest_type")  # "room" or "user" or "list"
+
+    recipient_id = message.get("dest_id")
 
     if destination_type == "room":
-        send_to_room(recepient_id, message)
+        logger.info("event for room")
+        send_to_room(recipient_id, message)
 
     elif destination_type == "user":
-        send_event(recepient_id, message)
+        logger.info("event for user")   
+        send_event(recipient_id, message)
         
-    elif destination_type == "list": 
+    elif destination_type == "list":  # { "dest_type": "list", ... }
+        logger.info("event for list")   
         event_type = message["event_type"]
         
         if event_type == "create_room":  # { "event_type": "new_room", "room_id": 1 }
@@ -37,11 +42,8 @@ def handle_message(message):
             room_list.remove_room(message["room_id"])
 
 
-async def main() -> None:
+async def start_consumer() -> None:
     global consumer, KAFKA_URI
-
-    logger.info("waiting 40s for kafka to be ready")
-    await asyncio.sleep(40)
 
     logger.info(f"try to connect to kafka by uri: {KAFKA_URI}")
     consumer = AIOKafkaConsumer(
@@ -52,17 +54,22 @@ async def main() -> None:
 
     try:
         await consumer.start()
-        logger.info("successfully connected")
+        logger.info("successfully connected (huy)")
 
     except kafka_errors.KafkaConnectionError:
         logger.info("can't connect to host.")
         await consumer.stop()
         exit(-1)
+        
+    finally:
+        logger.info("starting consumer loop")
 
+    logger.info("starting consumer loop")
     # handling messages in loop
     try:
         async for message in consumer:
-            await handle_message(message)
+            logger.info(dir(message))
+            handle_message(message.value)
 
     except KeyboardInterrupt:
         await consumer.stop()
@@ -70,8 +77,4 @@ async def main() -> None:
     except Exception as e:
         logger.error("Exit with unhandled exception:\n" + str(e))
         await consumer.stop()
-
-
-if __name__ == "__main__":
-    logger.info("start websocket kafka consumer")
-    asyncio.run(main())
+        raise Exception from e
