@@ -3,9 +3,9 @@ from websockets import WebSocketServerProtocol as WebSocket, serve as make_webso
 
 from typing import Tuple
 
-
-from handlers import handle_list, handle_room, handle_jwt_token
+from handlers import handle_path, handle_list, handle_room, handle_jwt_token
 from websocket_logger import logger
+from data import socket_identity
 
 
 def serialize(dict_json: dict) -> str:  # serializes dict to json string
@@ -29,31 +29,36 @@ async def handle(socket: WebSocket, path: str):
         if not auth:
             auth, message = auth_socket(payload)
             await socket.send(serialize(message))
-        else:
+            if auth:
+                socket_identity[socket_id] = message["user_id"]
+
+        if auth:
             await router(path, payload, socket)
 
 
 async def router(path: str, payload: dict, socket: WebSocket):
-    if path == "/ws/room/list":
-        await handle_list(socket)
+    endpoint, data = handle_path(path)
 
-    elif path.startswith("/ws/room/"):
-        try:
-            room_id = int(path.split('/')[-1])
-            payload["room_id"] = room_id
+    match endpoint:
+        case "room-list":
+            await handle_list(socket)
+
+        case "room":
+            # pre-handling shit requests
+            if data.get('room_id') is None or data.get('key') is None:
+                await socket.send(
+                    serialize(
+                        {"status": "error", "message": "missed one of required args (room_id or key)"}
+                    )
+                )
+                await socket.close()
+
+            payload["req"] = data  # add request params to payload
             await handle_room(payload, socket)
 
-        except ValueError:
-            await socket.send(
-                serialize({"status": "error", "message": "room_id must be int"})
-            )
-
-    else:
-        await socket.send(serialize({"status": "error", "message": "path not found"}))
-        await socket.close()
-
-
-logger.info("router made")
+        case _:
+            await socket.send(serialize({"status": "error", "message": f"{endpoint=} not found"}))
+            await socket.close()
 
 
 def auth_socket(message: dict) -> Tuple[bool, dict]:
@@ -65,7 +70,7 @@ def auth_socket(message: dict) -> Tuple[bool, dict]:
         if not status:
             return False, {"status": "error", "message": data}
         else:
-            return True, {"status": "success", "message": "Successfully authorized"}
+            return True, {"status": "success", "message": "Successfully authorized", "user_id": data}
 
 
 start_server = make_websocket_server(handle, "0.0.0.0", 9000)

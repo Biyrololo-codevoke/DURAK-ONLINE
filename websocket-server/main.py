@@ -11,4 +11,4 @@ asyncio.get_event_loop().run_until_complete(asyncio.gather(
     start_consumer()
 ))
 asyncio.get_event_loop().run_forever()
-logger.info("Server successfully uped")
+logger.info("Server successfully upped")
