@@ -1,22 +1,14 @@
-import json
 from websockets import WebSocketServerProtocol as WebSocket, serve as make_websocket_server
 
 from typing import Tuple
 
-from handlers import handle_path, handle_list, handle_room, handle_jwt_token
+from utils import serialize, deserialize, handle_path, handle_jwt_token
+from socket_event_handlers import handle_list, handle_room
 from websocket_logger import logger
 from data import socket_identity
 
 
-def serialize(dict_json: dict) -> str:  # serializes dict to json string
-    return json.dumps(dict_json)
-
-
-def deserialize(str_json: str) -> dict:  # deserializes string json to dict
-    return json.loads(str_json)
-
-
-async def handle(socket: WebSocket, path: str):
+async def socket_listener(socket: WebSocket, path: str):
     socket_id = id(socket)
     logger.info(f"{socket.remote_address}[id: {socket_id}] -> {path}")
     auth = False
@@ -34,6 +26,18 @@ async def handle(socket: WebSocket, path: str):
 
         if auth:
             await router(path, payload, socket)
+
+
+def auth_socket(message: dict) -> Tuple[bool, dict]:
+    if "access_token" not in message.keys():
+        return False, {"status": "error", "message": "access token wasn't found in request"}
+
+    else:
+        status, data = handle_jwt_token(message["access_token"])
+        if not status:
+            return False, {"status": "error", "message": data}
+        else:
+            return True, {"status": "success", "message": "Successfully authorized", "user_id": data}
 
 
 async def router(path: str, payload: dict, socket: WebSocket):
@@ -61,16 +65,4 @@ async def router(path: str, payload: dict, socket: WebSocket):
             await socket.close()
 
 
-def auth_socket(message: dict) -> Tuple[bool, dict]:
-    if "access_token" not in message.keys():
-        return False, {"status": "error", "message": "access token wasn't found in request"}
-
-    else:
-        status, data = handle_jwt_token(message["access_token"])
-        if not status:
-            return False, {"status": "error", "message": data}
-        else:
-            return True, {"status": "success", "message": "Successfully authorized", "user_id": data}
-
-
-start_server = make_websocket_server(handle, "0.0.0.0", 9000)
+start_server = make_websocket_server(socket_listener, "0.0.0.0", 9000)

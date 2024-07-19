@@ -4,7 +4,7 @@ import asyncio
 
 from aiokafka import AIOKafkaConsumer, errors as kafka_errors
 
-from handlers import send_event, send_to_room
+from socket_event_handlers import send_event, send_to_room
 from websocket_logger import logger
 from data import room_list
 

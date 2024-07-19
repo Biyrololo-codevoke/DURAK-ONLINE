@@ -49,4 +49,4 @@ async def handle_list(socket: WebSocket):
     # subscribe for future updates
     room_list.subscribe(socket)
 
-logger.info("init handlers.py")
+logger.info("init socket_event_handlers.py")
