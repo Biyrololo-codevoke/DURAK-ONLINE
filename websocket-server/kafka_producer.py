@@ -50,12 +50,13 @@ key_partitions = {
 }
 
 
-def send_event(payload):
+def send_kafka_event(payload: dict):
     global key_partitions
 
     key = payload["event"]
     partition = key_partitions.get(key)
 
     produce(KAFKA_TOPIC, payload, partition=partition, key=payload["event"])
+
 
 logger.info("init kafka producer")
