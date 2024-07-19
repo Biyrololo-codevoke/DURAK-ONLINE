@@ -1,0 +1,4 @@
+const PLAYERS_COUNT = [2, 3, 4, 5, 6];
+const CARDS_COUNT = [24, 36, 52]
+
+export {PLAYERS_COUNT, CARDS_COUNT}

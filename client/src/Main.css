@@ -1,0 +1,239 @@
+/* displays */
+
+.d-flex{
+    display: flex;
+}
+
+.d-grid{
+    display: grid;
+}
+
+/* flex properties */
+
+/* flex direction */
+
+.fd-column{
+    flex-direction: column;
+}
+
+.fd-row{
+    flex-direction: row;
+}
+
+/* flex grow */
+
+.fg-1{
+    flex-grow: 1;
+}
+
+.fg-2{
+    flex-grow: 2;
+}
+
+/* justify content */
+
+.jc-center{
+    justify-content: center;
+}
+
+.jc-space-between{
+    justify-content: space-between;
+}
+
+/* align items */
+
+.ai-center{
+    align-items: center;
+}
+
+.ai-flex-end{
+    align-items: flex-end;
+}
+
+.ai-flex-start{
+    align-items: flex-start;
+}
+
+/* gap */
+
+.g-5{
+    gap: 5px;
+}
+
+.g-10{
+    gap: 10px;
+}
+
+.g-15{
+    gap: 15px;
+}
+
+.g-20{
+    gap: 20px;
+}
+
+.g-30{
+    gap: 30px;
+}
+
+.g-40{
+    gap: 40px;
+}
+
+.g-50{
+    gap: 50px;
+}
+
+.g-05rem{
+    gap: 0.5rem;
+}
+
+.g-1rem{
+    gap: 1rem;
+}
+
+/* width */
+
+.w-100{
+    width: 100%;
+}
+
+.w-250px{
+    width: 250px;
+}
+
+/* background */
+
+.bg-white{
+    background-color: white;
+}
+
+/* margin */
+
+.m-20{
+    margin: 20px;
+}
+
+.mt-10{
+    margin-top: 10px;
+}
+
+.mt-20{
+    margin-top: 20px;
+}
+
+.mt-40{
+    margin-top: 40px;
+}
+
+.mtb-20{
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+.mb-20{
+    margin-bottom: 20px;
+}
+
+.mtb-40{
+    margin-top: 40px;
+    margin-bottom: 40px;
+}
+
+/* padding */
+
+.p-5{
+    padding: 5px;
+}
+
+.p-10{
+    padding: 10px;
+}
+
+.p-20{
+    padding: 20px;
+}
+
+.p-30{
+    padding: 30px;
+}
+
+.pt-40{
+    padding-top: 40px;
+}
+
+/* border radius */
+
+.br-20{
+    border-radius: 20px;
+}
+
+.br-13{
+    border-radius: 13px;
+}
+
+/* box sizing */
+
+.bs-border-box{
+    box-sizing: border-box;
+}
+
+/* text align */
+
+.ta-center{
+    text-align: center;
+}
+
+/* font weight */
+
+.fw-bold{
+    font-weight: bold;
+}
+
+/* font size */
+
+.fs-13{
+    font-size: 13px;
+}
+
+/* grid properties */
+
+.t-2{
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.h-margin-0{
+    margin: 0;
+    padding: 0;
+    margin-block: 0;
+}
+
+/* bg color */
+
+.bg-deep-green{
+    background-color: #5C784B;
+}
+
+.bg-deep-red{
+    background-color: #A45047;
+}
+
+/* text color */
+
+.c-deep-green{
+    color: #5C784B;
+}
+
+.c-deep-red{
+    color: #A45047;
+}
+
+/* position */
+
+.p-relative{
+    position: relative;
+}
+
+.p-absolute{
+    position: absolute;
+}

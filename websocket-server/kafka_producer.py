@@ -50,7 +50,7 @@ key_partitions = {
 }
 
 
-def send_kafka_event(payload):
+def send_kafka_event(payload: dict):
     global key_partitions
 
     key = payload["event"]

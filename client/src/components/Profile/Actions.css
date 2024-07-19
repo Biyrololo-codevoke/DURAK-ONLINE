@@ -1,0 +1,22 @@
+#profile-actions{
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+#profile-actions > div:first-child{
+    grid-column: 1 / -1;
+}
+
+#profile-actions > div{
+    box-sizing: border-box;
+    padding: 15px 0;
+    border-bottom: 1px solid white;
+}
+
+#profile-actions > div:nth-child(2n){
+    border-right: 1px solid white;
+}
+
+#mobile-view #profile-actions > div{
+    padding: 10px 0;
+}
