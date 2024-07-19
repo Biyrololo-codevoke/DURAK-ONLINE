@@ -1,13 +1,18 @@
 from websockets import WebSocketServerProtocol as WebSocket
 from kafka_producer import send_kafka_event
 
-from data import room_list, socket_identity
+from data import room_list, socket_identity, user_socket
 from websocket_logger import logger
 from utils import serialize
 
 
 async def send_to_socket(socket: WebSocket, payload: dict):
     await socket.send(serialize(payload))
+
+
+async def send_to_user(user_id: int, payload: dict):
+    socket = user_socket[user_id]
+    await send_to_socket(socket, payload)
 
 
 async def send_to_room(room_id: int, payload: dict):
