@@ -8,8 +8,9 @@ logger.info("start init data")
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 
-socket_identity = dict()
-user_socket = dict()
+auth_sockets_id = list()  # [socket_id]
+authed_sockets  = dict()  # {user_id: socket}
+socket_user_id  = dict()  # {socket_id: user_id}
 
 
 class RoomListObserver:

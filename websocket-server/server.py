@@ -1,68 +1,74 @@
-from websockets import WebSocketServerProtocol as WebSocket, serve as make_websocket_server
+from asyncio import create_task
+import json
+import websockets
+from threading import Thread
 
-from typing import Tuple
-
-from utils import serialize, deserialize, handle_path, handle_jwt_token
-from socket_event_handlers import handle_list, handle_room
+from handlers import handle_list, handle_room, handle_jwt_token
+from data import auth_sockets_id, authed_sockets, room_list
 from websocket_logger import logger
-from data import socket_identity
 
 
-async def socket_listener(socket: WebSocket, path: str):
-    socket_id = id(socket)
-    logger.info(f"{socket.remote_address}[id: {socket_id}] -> {path}")
-    auth = False
-
-    async for message in socket:
-        payload = deserialize(message)
-        logger.info(" :>> " + str(payload) + " " + str(type(payload)))
-
-        # auth
-        if not auth:
-            auth, message = auth_socket(payload)
-            await socket.send(serialize(message))
-            if auth:
-                socket_identity[socket_id] = message["user_id"]
-
-        if auth:
-            await router(path, payload, socket)
+def s(data: dict) -> str:  # serializes dict to json string
+    return json.dumps(data)
 
 
-def auth_socket(message: dict) -> Tuple[bool, dict]:
+def d(raw: str) -> dict:  # deserializes string json to dict
+    return json.loads(raw)
+
+
+async def handle(websocket, path):
+    async for message in websocket:
+        payload = d(message)
+        logger.info(path + "->" + str(websocket.remote_address) + " :>> " + str(payload) +" "+ str(type(payload)))
+        await handle_auth(path, payload, websocket)
+        
+        
+logger.info("handle made")
+
+
+async def handle_auth(path: str, payload: dict, socket):
+    await auth_socket(payload, socket)
+    await router(path, payload, socket)
+
+async def router(path: str, payload: str, socket):
+    if path == "/ws/room/list":
+        await handle_list(socket)
+        
+    elif path.startswith("/ws/room/"):
+        try:
+            room_id = int(path.split('/')[-1])
+            payload["room_id"] = room_id
+            await handle_room(payload, socket)
+
+
+        except ValueError:
+            await socket.send(
+                s({ "status": "error", "message": "room_id must be int" })
+            )
+logger.info("router made")
+
+
+async def auth_socket(message: dict, socket):
     if "access_token" not in message.keys():
-        return False, {"status": "error", "message": "access token wasn't found in request"}
-
+        await socket.send(
+            s({ "status": "error", "message": "access token wasn't found in request" })
+        )
     else:
         status, data = handle_jwt_token(message["access_token"])
         if not status:
-            return False, {"status": "error", "message": data}
+            await socket.send(
+                s({ "status": "error", "message": data })
+            )
         else:
-            return True, {"status": "success", "message": "Successfully authorized", "user_id": data}
+            authed_sockets[data] = socket
+            auth_sockets_id.append(id(socket))
+            await socket.send(s({ "status": "success" }))
 
 
-async def router(path: str, payload: dict, socket: WebSocket):
-    endpoint, data = handle_path(path)
-
-    match endpoint:
-        case "room-list":
-            await handle_list(socket)
-
-        case "room":
-            # pre-handling shit requests
-            if data.get('room_id') is None or data.get('key') is None:
-                await socket.send(
-                    serialize(
-                        {"status": "error", "message": "missed one of required args (room_id or key)"}
-                    )
-                )
-                await socket.close()
-
-            payload["req"] = data  # add request params to payload
-            await handle_room(payload, socket)
-
-        case _:
-            await socket.send(serialize({"status": "error", "message": f"{endpoint=} not found"}))
-            await socket.close()
+logger.info("auth_socket made")
 
 
-start_server = make_websocket_server(socket_listener, "0.0.0.0", 9000)
+logger.info("Server listen: localhost:9000")
+logger.info("running")
+
+start_server = websockets.serve(handle, "0.0.0.0", 9000)
