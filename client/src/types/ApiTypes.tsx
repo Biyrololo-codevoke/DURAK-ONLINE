@@ -123,4 +123,9 @@ type RoomListStatusType = {
     message: string
 }
 
-export type {RoomListResponseType, RoomListStatusType, RoomListEvent};
+type RoomListJoinEventType = {
+    status: string;
+    key: string | number;
+}
+
+export type {RoomListResponseType, RoomListStatusType, RoomListEvent, RoomListJoinEventType};

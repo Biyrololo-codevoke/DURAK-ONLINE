@@ -4,7 +4,7 @@ import { Room } from "types/Room";
 import {getRoomInfo} from "constants/ApiUrls";
 import { CreateRoomRequestType } from "types/ApiTypes";
 
-export function handleAddRoom(room_id : number, setter : React.Dispatch<React.SetStateAction<Room[]>>) {
+export function handleAddRoom(room_id : number, setter : React.Dispatch<React.SetStateAction<Room[]>>, are_open_games = true) {
     const url = getRoomInfo(room_id);
 
     axios
@@ -24,6 +24,14 @@ export function handleAddRoom(room_id : number, setter : React.Dispatch<React.Se
                 is_classic: room.win_type === 'classic',
                 is_private: room.private,
                 game_price: room.reward
+            }
+
+            if(are_open_games && c_room.is_private){
+                return
+            }
+
+            if(!are_open_games && !c_room.is_private){
+                return;
             }
 
             setter((prev) => {
@@ -46,8 +54,8 @@ export function handleAddRoom(room_id : number, setter : React.Dispatch<React.Se
         });
 }
 
-export default function handleAddRooms(room_ids : number[], setter : React.Dispatch<React.SetStateAction<Room[]>>) {
+export default function handleAddRooms(room_ids : number[], setter : React.Dispatch<React.SetStateAction<Room[]>>, are_open_games = true) {
     room_ids.forEach((room_id) => {
-        handleAddRoom(room_id, setter);
+        handleAddRoom(room_id, setter, are_open_games);
     });
 }

@@ -556,3 +556,79 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 .game-desk-card-transfering:hover .game-desk-card-transfering-icon{
     opacity: 0.7 !important;
 }
+
+
+
+@media (max-height: 800px) and (min-height: 561px){
+    .game-user-avatar-container{
+        width: 65px;
+        height: 65px;
+    }
+
+    .enemy-cards .enemy-card:last-child{
+        width: 40px;
+        flex-grow: 0;
+    }
+
+    .enemy-cards .enemy-card > img{
+        width: 40px;
+    }
+
+    #game-desk-container{
+        height: (100% - 300px);
+    }
+
+    #game-desk{
+        height: 100%;
+    }
+
+    #game-desk .game-desk-card{
+        width: 75px;
+        height: 108px;
+    }
+
+    #player-cards > .player-card:last-of-type{
+        width: 150px;
+        flex-grow: 0;
+    }
+
+    #player-cards > .player-card > .player-card-image{
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 150px;
+        height: 210px;
+        object-fit: cover;
+        user-select: none;
+    }
+
+    #player-cards{
+        height: 130px;
+    }
+}
+
+@media (max-height: 560px){
+
+    #player-cards > .player-card:last-of-type{
+        width: 100px !important;
+        flex-grow: 0;
+    }
+
+    #game-desk{
+        height: 100%;
+    }
+
+    #game-desk .game-desk-card{
+        width: 50px !important;
+        height: 72px !important;
+    }
+
+    #player-cards > .player-card > .player-card-image{
+        width: 100px !important;
+        height: 140px !important;
+    }
+
+    #player-cards{
+        height: 75px !important;
+    }
+}

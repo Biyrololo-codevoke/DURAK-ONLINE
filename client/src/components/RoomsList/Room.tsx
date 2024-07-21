@@ -18,15 +18,18 @@ const fontSize : 'h6' | 'subtitle1' = isMobile ? 'subtitle1' : 'h6';
 const titleFontSize: 'h5' | 'h6' = isMobile ? 'h6' : 'h5';
 
 
-export default function RoomComponent(room: Room) {
+export default function RoomComponent(room: Room & {onClick: (room_id: number) => void}) {
 
     const price_index = PRICES.indexOf(room.game_price);
 
     const price_label = PRICES_LABELS[price_index];
 
+    function handleSetRoomId(){
+        localStorage.setItem('_room_id', String(room.id));
+    }
+
     return (
-        <Link to={`/game/${room.id}`} style={{textDecoration: 'none', color: 'white'}}>
-            <section className="room">
+            <section className="room" onClick={()=>{room.onClick(room.id)}}>
                 <center>
                     <Typography
                         variant={titleFontSize}
@@ -83,7 +86,6 @@ export default function RoomComponent(room: Room) {
                     </section>
                 </div>
             </section>
-        </Link>
     )
 
 }
