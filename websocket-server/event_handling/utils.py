@@ -1,7 +1,8 @@
 import os
-import jwt
 import json
 from typing import Any, Tuple
+
+import jwt
 
 
 JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY")
