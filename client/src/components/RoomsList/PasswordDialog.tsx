@@ -1,12 +1,16 @@
 import { Dialog, TextField, Typography, Button } from "@mui/material";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 type Props = {
     room_id: number | null;
     setRoomId: React.Dispatch<React.SetStateAction<number | null>>;
+    onSubmit: (password: string) => void;
 }
 
 export default function PasswordDialog({room_id, setRoomId}: Props) {
+
+    const navigate = useNavigate();
 
     const [password, setPassword] = useState('');
 
@@ -15,6 +19,14 @@ export default function PasswordDialog({room_id, setRoomId}: Props) {
      */
     function submit() {
         //TODO
+        // проверка пароля
+        if(!password){
+            return
+        }
+
+        //подключение к комнате
+        localStorage.setItem('_room_id', String(room_id));
+        navigate('/game')
     }
 
     return (

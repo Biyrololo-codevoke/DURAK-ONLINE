@@ -6,9 +6,13 @@ import { PRICES } from "constants/Prices";
 import { roomListWS } from "constants/ApiUrls";
 import Cookies from 'js-cookie';
 import {Api as Types} from 'types'
-import handleAddRooms from "features/RoomList/handleAddRoom";
+import { useNavigate } from "react-router-dom";
+import handle_message from "features/RoomList/handleEvents";
+import joinRoom from "features/RoomList/JoiningRoom";
 
 export default function RoomsList(){
+
+    const navigate = useNavigate();
 
     const [rooms, setRooms] = useState<Room[]>([
         // {
@@ -68,40 +72,25 @@ export default function RoomsList(){
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
-    function handle_message(data: Types.RoomListResponseType |
+    function _handle_message(data: Types.RoomListResponseType |
         Types.RoomListStatusType |
-        Types.RoomListEvent
+        Types.RoomListEvent |
+        Types.RoomListJoinEventType
         ){
-        console.log(data);
-
-        if('status' in data){
-            // ...
-        }
-        else{
-            const rooms_ids = Object.keys(data).filter(key => key !== 'type').map(key => parseInt(key));
-
-            if('type' in data && data.type === 'delete_room'){
-                // delete Rooms
-                setRooms(rooms.filter((room) => !rooms_ids.includes(room.id)));
-                return
-            }
-
-            // new Rooms or create Rooms or update Rooms
-
-            handleAddRooms(rooms_ids, setRooms);
-        }
+        handle_message(data, navigate, rooms, setRooms)
     }
 
-    useEffect(()=>{
-        console.log('rooms', rooms)
-    }, [rooms])
+    // useEffect(()=>{
+    //     console.log('rooms', rooms)
+    // }, [rooms])
 
+    // init ws
     useEffect(() => {
         const new_socket = new WebSocket(roomListWS());
         
         new_socket.onmessage = (event) => {
             const data = JSON.parse(event.data);
-            handle_message(data);
+            _handle_message(data);
         }
 
         new_socket.onopen = () => {
@@ -120,6 +109,10 @@ export default function RoomsList(){
         }
 
     }, [])
+
+    function handle_join_room(room_id: number){
+        joinRoom(socket, room_id)
+    }
 
     // filter start
 
@@ -219,6 +212,7 @@ export default function RoomsList(){
                         <RoomComponent
                             key={room.id}
                             {...room}
+                            onClick={handle_join_room}
                         />
                     )
                 )
