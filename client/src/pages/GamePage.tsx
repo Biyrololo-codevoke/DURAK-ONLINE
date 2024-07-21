@@ -26,6 +26,10 @@ export default function GamePage(){
             new_socket.onopen = () => {
                 //TODO
             }
+
+            new_socket.onerror = () => {
+                setSocket(null)
+            }
     
             setSocket(new_socket);
     

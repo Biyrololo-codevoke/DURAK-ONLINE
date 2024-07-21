@@ -1,6 +1,6 @@
 import { BottomNavigation, BottomNavigationAction } from '@mui/material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import PermIdentityIcon from '@mui/icons-material/PermIdentity';
 import SearchIcon from '@mui/icons-material/Search';

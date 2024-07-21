@@ -32,7 +32,7 @@ type str_num_nu = string | number | null;
 
 function gameWS(key: str_num_nu, room_id: str_num_nu){
     if(!key || !room_id){
-        throw new Error('Incorrect data')
+        return ''
     }
     return `/ws/room?room_id=${room_id}&key=${key}`;
 }
