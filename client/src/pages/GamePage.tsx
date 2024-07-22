@@ -2,6 +2,7 @@ import { GameFooter, GameScreen } from "components/Game"
 import 'components/Game/Game.css'
 import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
+import Cookies from "js-cookie";
 
 export default function GamePage(){
 
@@ -24,7 +25,10 @@ export default function GamePage(){
             }
 
             new_socket.onopen = () => {
-                //TODO
+                const _data = JSON.stringify({
+                    access_token: Cookies.get('access_token'),
+                })
+                new_socket.send(_data)
             }
 
             new_socket.onerror = () => {

@@ -602,6 +602,11 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
         user-select: none;
     }
 
+    #dragging-card{
+        width: 150px;
+        height: 210px;
+    }
+
     #player-cards{
         height: 130px;
     }
@@ -624,6 +629,11 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     }
 
     #player-cards > .player-card > .player-card-image{
+        width: 100px !important;
+        height: 140px !important;
+    }
+
+    #dragging-card{
         width: 100px !important;
         height: 140px !important;
     }
