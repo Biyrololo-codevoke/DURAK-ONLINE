@@ -1,7 +1,7 @@
 import asyncio
 
 from server import start_server
-from kafka_consumer import start_consumer
+from .kafka import start_consumer
 from websocket_logger import logger
 
 
