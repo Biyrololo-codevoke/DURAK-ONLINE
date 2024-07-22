@@ -339,7 +339,8 @@ export default function PlayerCards(props: Props) {
             >
                 {
                     draggin_card !== -1 &&
-                    <img src={getCardImage(props.cards[draggin_card])} alt="card" 
+                    <img src={getCardImage(props.cards[draggin_card])} alt="card"
+                    style={{width: '100%', height: '100%'}} 
                     onContextMenu={(e) => e.preventDefault()}
                     onDragStart={(e) => e.preventDefault()}
                     />

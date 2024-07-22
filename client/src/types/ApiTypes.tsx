@@ -100,6 +100,7 @@ type RoomType = {
 export type {RoomType}
 
 type CreateRoomResponseType = {
+    key: string;
     room: RoomType
 }
 
