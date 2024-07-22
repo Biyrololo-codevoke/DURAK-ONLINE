@@ -32,6 +32,15 @@ class RoomModel(Base):
     password = Column(String, nullable=True)
 
     _user_ids = Column(ARRAY(Integer), default=[])
+    
+    @classmethod
+    def current_list(cls) -> dict[int, list[int]]:
+        data = dict()
+
+        for room in session.query(cls).all():
+            data[room.id] = room.user_ids
+
+        return data
 
     @classmethod
     def get_by_id(cls, room_id: int) -> Type[RoomModel]:

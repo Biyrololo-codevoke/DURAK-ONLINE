@@ -1,5 +1,5 @@
-from .UserModel import UserExceptions as _user
-from .RoomModel import RoomExceptions as _room
+from .user_model import UserExceptions as _user
+from .room_model import RoomExceptions as _room
 
 
 class Exceptions(BaseException):

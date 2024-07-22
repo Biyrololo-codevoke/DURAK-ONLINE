@@ -1,7 +1,6 @@
 from websockets import WebSocketServerProtocol as WebSocket
 
-from ..websocket_logger import logger
-from ..kafka import send_kafka_event
+from websocket_logger import logger
 
 from .data import room_list, socket_identity, user_socket
 from .utils import serialize
@@ -24,6 +23,7 @@ async def send_to_room(room_id: int, payload: dict):
 
 
 def handle_room(payload: dict, socket: WebSocket):
+    logger.info(f"{id(socket)} {payload=} send event to room")
     socket_id = id(socket)
     room_id = payload['req']["room_id"]
     user_id = socket_identity[socket_id]
@@ -38,10 +38,13 @@ def handle_room(payload: dict, socket: WebSocket):
 
         match event:
             case "join_room":
+                logger.info("try to join room")
                 room_id = payload["req"]["room_id"]
                 key = payload["req"]["key"]
 
                 status, message = room_list.connect_to_room(room_id, user_id, key)
+                
+                logger.info(f"{status=} {message=}")
 
                 if not status:
                     send_to_socket(socket, {"status": "error", "message": message})
@@ -56,6 +59,7 @@ def handle_room(payload: dict, socket: WebSocket):
                         "status": "success",
                         "message": "you successfully joined to room %d" % room_id
                     }
+                    send_to_socket(socket, response)
 
 
 async def handle_list(socket: WebSocket, payload: dict):
@@ -68,17 +72,14 @@ async def handle_list(socket: WebSocket, payload: dict):
         event = payload["event"]
         match event:
             case "join_room":
-                if payload.get("req") is None:
+                if payload.get("room_id") is None:
                     await send_to_socket(socket, {"status": "error", "message": "room_id is missed"})
 
-                room_id = payload["req"].get("room_id")
+                room_id = payload.get("room_id")
+                passsword = payload.get("password")  # nullable
                 player_id = socket_identity[id(socket)]
-                passsword = payload["req"].get("password")  # nullable
 
-                if not room_id:
-                    await send_to_socket(socket, {"status": "error", "message": "room_id is missed"})
-
-                status, message = room_list.join_room(room_id, player_id, passsword)
+                status, message = room_list.join_to_room(room_id, player_id, passsword)
 
                 if status:
                     await send_to_socket(socket, {"status": "success", "key": message})

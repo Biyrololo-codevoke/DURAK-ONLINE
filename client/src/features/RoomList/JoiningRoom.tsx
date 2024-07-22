@@ -8,6 +8,7 @@ export default function joinRoom(ws: WebSocket | null, room_id : number, passwor
     localStorage.setItem('_room_id', String(room_id));
 
     const _data = JSON.stringify({
+        event: "join_room",
         room_id,
         ...(password ? {password} : {})
     })

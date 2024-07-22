@@ -1,14 +1,14 @@
 services:
   client:
     container_name: client
-    build: ./client 
+    build: ./client
     restart: on-failure
     ports:
       - "3000:3000"
     command: serve -s build
     depends_on:
       - server
- 
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -31,7 +31,7 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
-    
+
   kafka-ui:
     image: provectuslabs/kafka-ui
     container_name: kafka-ui
@@ -79,6 +79,7 @@ services:
     ports:
       - '9000:9000'
     environment:
+      - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
       - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
       - KAFKA_URI=kafka:9092
     depends_on:

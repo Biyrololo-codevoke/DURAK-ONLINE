@@ -2,19 +2,23 @@ from typing import Tuple
 
 from websockets import WebSocketServerProtocol as WebSocket, serve as make_websocket_server
 
-from .websocket_logger import logger
-from .event_handling.data import socket_identity, user_socket
-from .event_handling import serialize, deserialize, router, auth_socket
+from websocket_logger import logger
+
+from event_handling.data import socket_identity, user_socket
+from event_handling import serialize, deserialize, router, auth_socket
 
 
 async def socket_listener(socket: WebSocket, path: str):
     socket_id = id(socket)
     logger.info(f"{socket.remote_address}[id: {socket_id}] -> {path}")
     auth = False
+    
+    if path.startswith("/ws/room?"):
+        await router(path, {}, socket)
 
     async for message in socket:
         payload = deserialize(message)
-        logger.info(" :>> " + str(payload) + " " + str(type(payload)))
+        logger.info(f"[id: {socket_id}] ({path}) <- {payload}")
 
         # auth
         if not auth:

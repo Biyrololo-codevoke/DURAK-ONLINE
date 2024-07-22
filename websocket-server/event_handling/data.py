@@ -3,7 +3,7 @@ import time
 from asyncio import gather
 from uuid import uuid4
 
-from ..models import RoomModel, Exceptions
+from models import RoomModel, Exceptions
 
 from websocket_logger import logger
 
@@ -18,10 +18,16 @@ user_socket = dict()
 class RoomListObserver:
     def __init__(self, rooms: dict[int, int] = None, followers: list = None):
         self._rooms = rooms or dict()
+        self._rooms.update(
+            self.load_from_db()
+        )
         self._rooms_join_keys = dict()
         self.expired_join_keys = []
         self._followers = followers or list()
         self.notify()
+        
+    def load_from_db(self) -> dict[int, list[int]]:
+        return RoomModel.current_list()
     
     def add_room(self, room_id: int, room_count: int = 1):
         self._rooms[room_id] = room_count

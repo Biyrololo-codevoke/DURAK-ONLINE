@@ -1,12 +1,11 @@
 import os
 import json
-import asyncio
 
 from aiokafka import AIOKafkaConsumer, errors as kafka_errors
 
-from handlers import send_event, send_to_room
+from event_handling import send_to_user, send_to_room, room_list
 from websocket_logger import logger
-from data import room_list
+
 
 KAFKA_URI = os.getenv("KAFKA_URI") or "localhost:9092"
 KAFKA_TOPIC = "socket_events"
@@ -26,7 +25,7 @@ def handle_message(message):
 
     elif destination_type == "user":
         logger.info("event for user")   
-        send_event(recipient_id, message)
+        send_to_user(recipient_id, message)
         
     elif destination_type == "list":  # { "dest_type": "list", ... }
         logger.info("event for list")   
