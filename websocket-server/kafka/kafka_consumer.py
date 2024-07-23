@@ -32,7 +32,11 @@ def handle_message(message):
         event_type = message["event_type"]
         
         if event_type == "create_room":  # { "event_type": "new_room", "room_id": 1 }
-            room_list.add_room(message["room_id"])
+            room_list.add_room(
+                message["room_id"],          
+                author_id=message["author_id"],
+                key=message["key"]
+            )
 
         if event_type == "update_room":  # { "event_type": "update_room", "room_id": 1, "room_count": 2 }
             room_list.update_room(message["room_id"], message["room_count"])

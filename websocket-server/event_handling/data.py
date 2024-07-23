@@ -29,9 +29,19 @@ class RoomListObserver:
     def load_from_db(self) -> dict[int, list[int]]:
         return RoomModel.current_list()
     
-    def add_room(self, room_id: int, room_count: int = 1):
+    def add_room(self, room_id: int, *, room_count: int = 1, author_id=None, key=None):
         self._rooms[room_id] = room_count
         self._rooms_join_keys[room_id] = []
+        
+        if author_id and key and key.startswith("athr")
+            self._rooms_join_keys[room_id].append({
+                "key": key,
+                "player_id": author_id,
+                "time": int(round(time.time() * 1000)),
+            })
+            logger.info("create room and add author there")
+        else:
+            logger.info("create room")
         self.notify()
 
     def join_to_room(self, room_id, player_id, password = None) -> tuple[bool, str]:

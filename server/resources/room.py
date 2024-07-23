@@ -1,4 +1,5 @@
 from http import HTTPStatus
+from uuid4 import uuid4
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
@@ -58,9 +59,14 @@ class Room(BaseResource):
             room.add_player(author_id)
             room.save()
 
-            send_new_room(room.id)
+            key = "athr" + uuid4().hex
 
-            return {"room": room.json()}, HTTPStatus.CREATED
+            send_new_room(room.id, author_id, key)
+
+            return {
+                "room": room.json(),
+                "key": key
+            }, HTTPStatus.CREATED
 
         except exc.DBError as e:
             if room:

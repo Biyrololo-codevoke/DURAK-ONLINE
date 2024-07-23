@@ -27,7 +27,8 @@ kafka_file_handler = logging.FileHandler("logs/api_kafka_consumer/%s.log" % (dat
 kafka_file_handler.setLevel(logging.INFO)
 
 # log format
-formatter = logging.Formatter("%(levelname)s [%(asctime)s] %(name)s -> %(message)s")
+date_format = "%d.%m.%y %H:%M"
+formatter = logging.Formatter("[%(asctime)s] %(name)s -> %(message)s", datefmt=date_format)
 
 console_handler.setFormatter(formatter)
 file_handler.setFormatter(formatter)
