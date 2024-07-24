@@ -7,6 +7,8 @@ import CardDeck from "./CardDeck";
 import EnemyCards from "./EnemyCards";
 import {GameBoardContext} from "contexts/game";
 import GameBoard from "./Board";
+import { GameStateContext } from "contexts/game";
+import { useContext } from "react";
 
 type UserIdType = number | 'me'
 
@@ -21,10 +23,13 @@ type EnemyCardDelta = {
 
 export default function GameScreen(){
 
+    const game_state = useContext(GameStateContext);
+
     const is_transfering = true;
 
     const [users_ids, setUsersIds] = useState<UserIdType[]>(
-        [3, 5, 'me', 4, 6]
+        //[3, 5, 'me', 4, 6]
+        [-1, -2, 'me', -4, -5]
     );
 
     const [trump_card, setTrumpCard] = useState<CardType>(
@@ -35,19 +40,20 @@ export default function GameScreen(){
     )
 
     const [users_cards, setUsersCards] = useState<UserCards>({
-        3 : 4,
-        5 : 7,
-        'me' : [
-            {suit: 3, value: 10},
-            {suit: 3, value: 9},
-            {suit: 3, value: 8},
-            {suit: 2, value: 7},
-            {suit: 2, value: 14},
-            {suit: 1, value: 14},
-            {suit: 4, value: 13},
-        ],
-        4 : 4,
-        6 : 8
+        // 3 : 4,
+        // 5 : 7,
+        // 'me' : [
+        //     {suit: 3, value: 10},
+        //     {suit: 3, value: 9},
+        //     {suit: 3, value: 8},
+        //     {suit: 2, value: 7},
+        //     {suit: 2, value: 14},
+        //     {suit: 1, value: 14},
+        //     {suit: 4, value: 13},
+        // ],
+        // 4 : 4,
+        // 6 : 8
+        'me': []
     })
 
 
@@ -80,38 +86,38 @@ export default function GameScreen(){
     const prev_users = users_ids.slice(0, users_ids.indexOf('me'));
 
     const [game_board, setGameBoard] = useState<GameBoardCard[]>([
-            {
-                lower: {
-                    suit: 4,
-                    value: 1
-                },
-                upper: {
-                    suit: 3,
-                    value: 13
-                }
-            },
-            {
-                lower: {
-                    suit: 2,
-                    value: 5
-                },
-            },
-            {
-                lower: {
-                    suit: 1,
-                    value: 2
-                },
-            },
-            {
-                lower: {
-                    suit: 4,
-                    value: 5
-                },
-                upper: {
-                    suit: 3,
-                    value: 7
-                }
-            },
+            // {
+            //     lower: {
+            //         suit: 4,
+            //         value: 1
+            //     },
+            //     upper: {
+            //         suit: 3,
+            //         value: 13
+            //     }
+            // },
+            // {
+            //     lower: {
+            //         suit: 2,
+            //         value: 5
+            //     },
+            // },
+            // {
+            //     lower: {
+            //         suit: 1,
+            //         value: 2
+            //     },
+            // },
+            // {
+            //     lower: {
+            //         suit: 4,
+            //         value: 5
+            //     },
+            //     upper: {
+            //         suit: 3,
+            //         value: 7
+            //     }
+            // },
         ],
     )
 
@@ -270,8 +276,13 @@ export default function GameScreen(){
                         })
                     }
                 </section>
-                <CardDeck trump_card={trump_card}/>
-                <GameBoard is_transfering={is_transfering}/>
+                {
+                    game_state === 2 && 
+                    <>
+                        <CardDeck trump_card={trump_card}/>
+                        <GameBoard is_transfering={is_transfering}/>
+                    </>
+                }
                 <PlayerCards 
                 cards={sorted_player_cards} 
                 throwCard={handleThrowCard}

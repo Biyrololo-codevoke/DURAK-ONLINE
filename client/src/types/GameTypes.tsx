@@ -29,3 +29,7 @@ export type {UserShort}
 export type {CardSuitType, CardValueType, CardType}
 
 export type {GameBoardCard, GameBoardType}
+
+type GameStateType = 0 | 1 | 2;
+
+export type {GameStateType}
