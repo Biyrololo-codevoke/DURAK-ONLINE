@@ -26,7 +26,7 @@ async def router(path: str, payload: dict, socket: WebSocket):
 
             payload["req"] = data  # add request params to payload
             payload["event"] = "join_room"
-            await handle_room(payload, socket)
+            handle_room(payload, socket)
 
         case _:
             await socket.send(serialize({"status": "error", "message": f"{endpoint=} not found"}))

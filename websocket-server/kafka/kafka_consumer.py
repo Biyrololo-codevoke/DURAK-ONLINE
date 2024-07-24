@@ -71,7 +71,6 @@ async def start_consumer() -> None:
     # handling messages in loop
     try:
         async for message in consumer:
-            logger.info(dir(message))
             handle_message(message.value)
 
     except KeyboardInterrupt:

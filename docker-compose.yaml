@@ -14,6 +14,7 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: ERROR
     ports:
       - 2181:2181
 
@@ -31,6 +32,8 @@ services:
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=ERROR,kafka.producer.async.DefaultEventHandler=ERROR,state.change.logger=ERROR,kafka.network.RequestChannel$=ERROR,kafka.request.logger=ERROR,kafka.coordinator.group.GroupMetadataManager=ERROR,kafka.log.LogCleaner=ERROR,state.change.logger=ERROR,kafka.authorizer.logger=ERROR"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: ERROR
 
   kafka-ui:
     image: provectuslabs/kafka-ui
@@ -45,6 +48,11 @@ services:
     links:
       - kafka
       - zookeeper
+    logging:
+       driver: "json-file"
+       options:
+         max-size: "10m"
+         max-file: "5"
 
   postgres:
     image: 'postgres:latest'

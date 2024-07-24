@@ -18,7 +18,8 @@ file_handler = logging.FileHandler("logs/%s.log" % (date, ))  # file logger
 file_handler.setLevel(logging.WARNING)
 
 # log format
-formatter = logging.Formatter("%(levelname)s [%(asctime)s] %(name)s -> %(message)s")
+date_format = "%d.%m.%y %H:%M"
+formatter = logging.Formatter("[%(asctime)s] %(name)s -> %(message)s", datefmt=date_format)
 
 console_handler.setFormatter(formatter)
 file_handler.setFormatter(formatter)

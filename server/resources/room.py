@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from uuid4 import uuid4
+from uuid import uuid4
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request

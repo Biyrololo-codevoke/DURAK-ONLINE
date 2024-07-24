@@ -4,8 +4,8 @@ from asyncio import gather
 from uuid import uuid4
 
 from models import RoomModel, Exceptions
-
 from websocket_logger import logger
+
 
 
 logger.info("start init data")
@@ -21,8 +21,9 @@ class RoomListObserver:
         self._rooms.update(
             self.load_from_db()
         )
-        self._rooms_join_keys = dict()
         self.expired_join_keys = []
+        self._rooms_join_keys = dict()
+        
         self._followers = followers or list()
         self.notify()
         
@@ -33,7 +34,7 @@ class RoomListObserver:
         self._rooms[room_id] = room_count
         self._rooms_join_keys[room_id] = []
         
-        if author_id and key and key.startswith("athr")
+        if author_id and key and key.startswith("athr"):
             self._rooms_join_keys[room_id].append({
                 "key": key,
                 "player_id": author_id,
@@ -84,24 +85,28 @@ class RoomListObserver:
         except Exceptions.Room.NotFound:
             return False, "Room not found"
 
-    def connect_to_room(self, room_id, player_id, key) -> tuple[bool, str]:
+    def connect_to_room(self, room_id: int, key: str) -> tuple[bool, str]:
         if room_id not in self._rooms_join_keys:
             return False, "Room not found"
 
-        player_connection = list(
-            filter(lambda x: x["player_id"] == player_id, self._rooms_join_keys[room_id])
-        )
+        player_connection = list(filter(lambda x: x["key"] == key, self._rooms_join_keys[room_id]))[0]
+        
         if not player_connection:
             if key in self.expired_join_keys:
-                return False, "key was expireda because of you not joined to room in 15 seconds"
-            return False, "you must try connect to room first with event: join_room, path: /ws/room-list"
-
-        if player_connection[0]["key"] != key:
-            return "Incorrect key"
+                self.expired_join_keys.remove(key)
+                return False, "token expired"
+            else:
+                return False, "key is incorrect"
 
         try:
-            room = RoomModel.add_player(player_id)
-            self._rooms_join_keys[room_id].remove(player_connection[0])
+            from .event_handlers import send_to_room
+            
+            RoomModel.add_player(player_connection)
+            self._rooms_join_keys[room_id].remove(player_connection["player_id"])
+            send_to_room(room_id, {
+                "event": "player_connected",
+                "player_id": player_connection["player_id"],
+            })
             return True, "successfully connected"
 
         except Exceptions.Room.NotFound:

@@ -26,7 +26,6 @@ def handle_room(payload: dict, socket: WebSocket):
     logger.info(f"{id(socket)} {payload=} send event to room")
     socket_id = id(socket)
     room_id = payload['req']["room_id"]
-    user_id = socket_identity[socket_id]
 
     current_rooms = room_list.get_rooms()
 
@@ -42,7 +41,7 @@ def handle_room(payload: dict, socket: WebSocket):
                 room_id = payload["req"]["room_id"]
                 key = payload["req"]["key"]
 
-                status, message = room_list.connect_to_room(room_id, user_id, key)
+                status, message = room_list.connect_to_room(room_id, key)
                 
                 logger.info(f"{status=} {message=}")
 
@@ -50,11 +49,6 @@ def handle_room(payload: dict, socket: WebSocket):
                     send_to_socket(socket, {"status": "error", "message": message})
                     socket.close()
                 else:
-                    event_for_room = {
-                        "event": "player_joined",
-                        "user_id": user_id
-                    }
-                    send_to_room(room_id, event_for_room)
                     response = {
                         "status": "success",
                         "message": "you successfully joined to room %d" % room_id
@@ -77,9 +71,8 @@ async def handle_list(socket: WebSocket, payload: dict):
 
                 room_id = payload.get("room_id")
                 passsword = payload.get("password")  # nullable
-                player_id = socket_identity[id(socket)]
 
-                status, message = room_list.join_to_room(room_id, player_id, passsword)
+                status, message = room_list.join_to_room(room_id, passsword)
 
                 if status:
                     await send_to_socket(socket, {"status": "success", "key": message})
@@ -88,3 +81,4 @@ async def handle_list(socket: WebSocket, payload: dict):
 
             case _:
                 await send_to_socket(socket, {"status": "error", "message": f"{event=} not found"})
+    return 0
