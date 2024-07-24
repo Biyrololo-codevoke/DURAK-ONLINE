@@ -3,8 +3,12 @@ import 'components/Game/Game.css'
 import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
+import { GameStateContext } from "contexts/game";
+import { GameStateType } from "types/GameTypes";
 
 export default function GamePage(){
+
+    const [gameState, setGameState] = useState<GameStateType>(0); 
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
@@ -25,10 +29,11 @@ export default function GamePage(){
             }
 
             new_socket.onopen = () => {
-                const _data = JSON.stringify({
-                    access_token: Cookies.get('access_token'),
-                })
-                new_socket.send(_data)
+                // send token 
+                // const _data = JSON.stringify({
+                //     access_token: Cookies.get('access_token'),
+                // })
+                // new_socket.send(_data)
             }
 
             new_socket.onerror = () => {
@@ -47,8 +52,12 @@ export default function GamePage(){
 
     return (
         <main id="game-page">
-            <GameScreen />
-            <GameFooter />
+            <GameStateContext.Provider
+            value={gameState}
+            >
+                <GameScreen />
+                <GameFooter />
+            </GameStateContext.Provider>
         </main>
     )
 }
