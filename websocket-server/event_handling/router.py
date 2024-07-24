@@ -5,6 +5,8 @@ from websocket_logger import logger
 from .utils import serialize, handle_path
 from .event_handlers import handle_list, handle_room
 
+from event_handling import key_identity
+
 
 async def router(path: str, payload: dict, socket: WebSocket):
     endpoint, data = handle_path(path)
@@ -24,6 +26,7 @@ async def router(path: str, payload: dict, socket: WebSocket):
                 )
                 await socket.close()
 
+            key_identity[data['key']] = socket
             payload["req"] = data  # add request params to payload
             payload["event"] = "join_room"
             handle_room(payload, socket)

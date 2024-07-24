@@ -14,6 +14,8 @@ JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 socket_identity = dict()
 user_socket = dict()
 
+key_identity = dict()
+
 
 class RoomListObserver:
     def __init__(self, rooms: dict[int, int] = None, followers: list = None):
@@ -56,7 +58,7 @@ class RoomListObserver:
                 return False, "Player already joined to room"
 
             players_in_room = len(room.user_ids)
-            players_in_connection = len(self._rooms_join_keys[room_id])
+            players_in_connection = len(self._rooms_join_keys.get(room_id))
 
             if not room.check_available():
                 return False, "Room is full"
@@ -103,10 +105,12 @@ class RoomListObserver:
             
             RoomModel.add_player(player_connection)
             self._rooms_join_keys[room_id].remove(player_connection["player_id"])
+            self._rooms[room_id].append(key_identity[key])
             send_to_room(room_id, {
                 "event": "player_connected",
                 "player_id": player_connection["player_id"],
             })
+            self.update_room(room_id, len(self._rooms[room_id])+1)
             return True, "successfully connected"
 
         except Exceptions.Room.NotFound:
