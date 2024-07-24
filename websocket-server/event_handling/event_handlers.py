@@ -22,15 +22,14 @@ async def send_to_room(room_id: int, payload: dict):
             await send_to_socket(socket, payload)
 
 
-def handle_room(payload: dict, socket: WebSocket):
+async def handle_room(payload: dict, socket: WebSocket):
     logger.info(f"{id(socket)} {payload=} send event to room")
-    socket_id = id(socket)
     room_id = payload['req']["room_id"]
 
     current_rooms = room_list.get_rooms()
 
     if room_id not in current_rooms:
-        send_to_socket(socket, {"status": "error", "message": "room doesn't exist"})
+        await send_to_socket(socket, {"status": "error", "message": "room doesn't exist"})
 
     else:
         event = payload["event"]

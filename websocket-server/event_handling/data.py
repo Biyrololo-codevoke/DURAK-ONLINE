@@ -58,23 +58,25 @@ class RoomListObserver:
                 return False, "Player already joined to room"
 
             players_in_room = len(room.user_ids)
-            players_in_connection = len(self._rooms_join_keys.get(room_id))
+            players_in_connection = self._rooms_join_keys.get(room_id)
+            player_conn_len = 0 if players_in_connection is None else len(players_in_connection)
 
             if not room.check_available():
                 return False, "Room is full"
 
-            if players_in_room + players_in_connection >= room.players_count:
-                self._rooms_join_keys = sorted(self._rooms_join_keys[room_id], key=lambda x: x["time"])
+            if players_in_room + player_conn_len > room.players_count:
+                the_oldest_conn = sorted(self._rooms_join_keys[room_id], key=lambda x: x["time"], reverse=True)[0]
                 current_time = int(round(time.time() * 1000))
 
-                if current_time - self._rooms_join_keys[-1]["time"] > 15 * 1000:
-                    self.expired_join_keys.append(self._rooms_join_keys[-1]["key"])
-                    del self._rooms_join_keys[room_id][-1]
-
+                if current_time - the_oldest_conn["time"] > 15 * 1000:
+                    self.expired_join_keys.append(the_oldest_conn["key"])
                 else:
                     return False, "Room is full"
 
             key = uuid4().hex
+
+            if self._rooms_join_keys.get(room_id) is None:
+                self._rooms_join_keys[room_id] = []
 
             self._rooms_join_keys[room_id].append({
                 "key": key,

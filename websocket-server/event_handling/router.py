@@ -1,11 +1,11 @@
-from websockets import WebSocketServerProtocol as WebSocket
+import asyncio
 
+from websockets import WebSocketServerProtocol as WebSocket
 from websocket_logger import logger
 
 from .utils import serialize, handle_path
-from .event_handlers import handle_list, handle_room, send_to_socket
-
-from event_handling import key_identity
+from .event_handlers import handle_list, handle_room
+from .data import key_identity
 
 
 async def router(path: str, payload: dict, socket: WebSocket):
@@ -31,12 +31,7 @@ async def router(path: str, payload: dict, socket: WebSocket):
             # add request params to payload
             payload["req"] = data 
             payload["event"] = "join_room"
-            status, message = await handle_room(payload, socket)
-
-            send_to_socket(socket, {
-                "status": status,
-                "message": message
-            })
+            asyncio.create_task(handle_room(payload, socket))
 
         case _:
             await socket.send(serialize({"status": "error", "message": f"{endpoint=} not found"}))
