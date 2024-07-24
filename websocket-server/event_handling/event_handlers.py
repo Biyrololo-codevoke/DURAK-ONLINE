@@ -2,7 +2,7 @@ from websockets import WebSocketServerProtocol as WebSocket
 
 from websocket_logger import logger
 
-from .data import room_list, socket_identity, user_socket
+from .data import room_list, user_socket
 from .utils import serialize
 
 

@@ -101,16 +101,22 @@ class RoomListObserver:
                 return False, "key is incorrect"
 
         try:
-            from .event_handlers import send_to_room
+            from .event_handlers import send_to_room, send_to_socket
             
-            RoomModel.add_player(player_connection)
-            self._rooms_join_keys[room_id].remove(player_connection["player_id"])
-            self._rooms[room_id].append(key_identity[key])
-            send_to_room(room_id, {
+            RoomModel.add_player(player_connection)         # add to db
+            self._rooms_join_keys[room_id].remove(          # clear from join keys
+                player_connection["player_id"]
+            )  
+
+            user_socket = key_identity[key]
+            
+            self._rooms[room_id].append(user_socket)        # add socket to room socket group
+            send_to_room(room_id, {                         # and send event to room
                 "event": "player_connected",
                 "player_id": player_connection["player_id"],
             })
-            self.update_room(room_id, len(self._rooms[room_id])+1)
+            
+            self.update_room(room_id, len(self._rooms[room_id])+1)  # update player_count in room_list
             return True, "successfully connected"
 
         except Exceptions.Room.NotFound:
