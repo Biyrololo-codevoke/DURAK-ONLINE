@@ -8,7 +8,7 @@ type Props = {
     onSubmit: (password: string) => void;
 }
 
-export default function PasswordDialog({room_id, setRoomId}: Props) {
+export default function PasswordDialog({room_id, setRoomId, onSubmit}: Props) {
 
     const navigate = useNavigate();
 
@@ -82,7 +82,7 @@ export default function PasswordDialog({room_id, setRoomId}: Props) {
                 variant="outlined"
                 color="error"
                 style={{width: '100%', marginTop: '20px'}}
-                onClick={submit}
+                onClick={()=>{onSubmit(password)}}
                 >
                     Войти
                 </Button>
