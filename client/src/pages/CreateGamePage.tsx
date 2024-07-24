@@ -57,7 +57,12 @@ export default function CreateGamePage() {
                 const data : ApiTypes.CreateRoomResponseType = res.data;
                 localStorage.setItem('_room_id', String(data.room.id));
                 localStorage.setItem('__game_key', data.key);
-                navigate(`/game`);
+                setTimeout(
+                    ()=>{
+                        navigate(`/game`);
+                    },
+                    1000
+                )
             }
         )
         .catch(
