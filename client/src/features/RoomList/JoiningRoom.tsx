@@ -1,7 +1,9 @@
 export default function joinRoom(ws: WebSocket | null, room_id : number, password?: string){
     if(!ws) return
 
-    if(ws.readyState !== 1) {
+    console.log(ws)
+
+    if(ws.readyState === 0) {
         throw new Error(`ws isn't ready`)
     }
 

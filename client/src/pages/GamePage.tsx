@@ -13,6 +13,7 @@ export default function GamePage(){
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
     function handle_message(data: any){
+        console.log(`recieved message`)
         console.log(data);
     }
 
