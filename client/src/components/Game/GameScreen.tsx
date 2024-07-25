@@ -1,4 +1,4 @@
-import {useEffect, useMemo, useState} from "react";
+import React, {useEffect, useMemo, useState} from "react";
 import UserAvatar, {EmptyUserAvatar} from "./UserAvatar";
 import { Typography } from "@mui/material";
 import { CardType, GameBoardCard } from "types/GameTypes";
@@ -9,6 +9,10 @@ import {GameBoardContext} from "contexts/game";
 import GameBoard from "./Board";
 import { GameStateContext } from "contexts/game";
 import { useContext } from "react";
+import axios from "axios";
+import { getRoomInfo } from "constants/ApiUrls";
+import { RoomResponseType } from "types/ApiTypes";
+import RoomContext from "contexts/game/RoomContext";
 
 type UserIdType = number | 'me'
 
@@ -21,16 +25,27 @@ type EnemyCardDelta = {
     [key : number]: number
 }
 
-export default function GameScreen(){
+type Props = {
+    players_in_room: number;
+    users_ids: UserIdType[];
+    setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>
+}
+
+export default function GameScreen(props: Props){
+
+    const {players_in_room, users_ids, setUsersIds} = props;
 
     const game_state = useContext(GameStateContext);
 
-    const is_transfering = true;
+    const room = useContext(RoomContext);
 
-    const [users_ids, setUsersIds] = useState<UserIdType[]>(
-        //[3, 5, 'me', 4, 6]
-        [-1, -2, 'me', -4, -5]
-    );
+    const is_transfering = room.game_type === 'translate';
+
+    // const [users_ids, setUsersIds] = useState<UserIdType[]>(
+    //     //[3, 5, 'me', 4, 6]
+    //     // [-1, -2, 'me', -4, -5]
+    //     ['me']
+    // );
 
     const [trump_card, setTrumpCard] = useState<CardType>(
         {
@@ -57,9 +72,11 @@ export default function GameScreen(){
     })
 
 
-    const players_in_room = 5;
+    // const [players_in_room, set_players_in_room] = useState(0); //5
 
     const start_num = users_ids.indexOf('me')! % players_in_room + 1;
+
+    const _room_id = parseInt(localStorage.getItem('_room_id') || '-1');
 
     function changeSeat(newSeat : number){
         // replace me with new seat
@@ -276,12 +293,10 @@ export default function GameScreen(){
                         })
                     }
                 </section>
+                <CardDeck trump_card={trump_card}/>
                 {
-                    game_state === 2 && 
-                    <>
-                        <CardDeck trump_card={trump_card}/>
-                        <GameBoard is_transfering={is_transfering}/>
-                    </>
+                    game_state === 2 &&
+                    <GameBoard is_transfering={is_transfering}/>
                 }
                 <PlayerCards 
                 cards={sorted_player_cards} 
