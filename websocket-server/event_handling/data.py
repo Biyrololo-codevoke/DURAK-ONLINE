@@ -90,10 +90,9 @@ class RoomListObserver:
             return False, "Room not found"
 
     def connect_to_room(self, room_id: int, key: str) -> tuple[bool, str]:
-        if room_id not in self._rooms_join_keys:
-            return False, "Room not found"
-
-        player_connection = list(filter(lambda x: x["key"] == key, self._rooms_join_keys[room_id]))[0]
+        room_connections = self._rooms_join_keys.get(room_id)
+        logger.info("room connections: %s" % str(room_connections))
+        player_connection = list(filter(lambda x: x["key"] == key, room_connections))[0]
         
         if not player_connection:
             if key in self.expired_join_keys:

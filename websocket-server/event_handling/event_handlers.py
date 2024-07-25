@@ -1,3 +1,5 @@
+import asyncio
+
 from websockets import WebSocketServerProtocol as WebSocket
 
 from websocket_logger import logger
@@ -27,8 +29,10 @@ async def handle_room(payload: dict, socket: WebSocket):
     room_id = payload['req']["room_id"]
 
     current_rooms = room_list.get_rooms()
+    logger.info(f"{current_rooms=}")
 
-    if room_id not in current_rooms:
+    if int(room_id) not in current_rooms.keys():
+        logger.info(f"{room_id=} doesn't exist in {current_rooms.keys()=}")
         await send_to_socket(socket, {"status": "error", "message": "room doesn't exist"})
 
     else:
@@ -37,7 +41,7 @@ async def handle_room(payload: dict, socket: WebSocket):
         match event:
             case "join_room":
                 logger.info("try to join room")
-                room_id = payload["req"]["room_id"]
+                room_id = int(payload["req"]["room_id"])
                 key = payload["req"]["key"]
 
                 status, message = room_list.connect_to_room(room_id, key)
@@ -45,14 +49,18 @@ async def handle_room(payload: dict, socket: WebSocket):
                 logger.info(f"{status=} {message=}")
 
                 if not status:
-                    send_to_socket(socket, {"status": "error", "message": message})
-                    socket.close()
+                    asyncio.gather(*[
+                        send_to_socket(socket, {"status": "error", "message": message}),
+                        socket.close()
+                    ])
                 else:
                     response = {
                         "status": "success",
                         "message": "you successfully joined to room %d" % room_id
                     }
-                    send_to_socket(socket, response)
+                    asyncio.create_task(
+                        send_to_socket(socket, response)
+                    )
 
 
 async def handle_list(socket: WebSocket, payload: dict):
