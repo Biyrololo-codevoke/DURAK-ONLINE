@@ -33,6 +33,7 @@ export default function EnemyCards(props: Props) {
     useEffect(
         ()=>{
             const el : HTMLDivElement = document.querySelectorAll('.enemy-cards')[index] as HTMLDivElement;
+            if(!el) return
             const rect = el.getBoundingClientRect();
 
             el.style.setProperty('--box-x', `${rect.x}px`);

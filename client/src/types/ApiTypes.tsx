@@ -71,6 +71,23 @@ type UploadUserPhotoRequestType = {
 
 export type {UploadUserPhotoRequestType};
 
+// Get Room Info
+
+type RoomResponseType = {
+    reward: number,
+    players_count: number,
+    cards_count: number,
+    speed: 1 | 2,
+    name: string;
+    game_type: 'throw' | 'translate',
+    throw_type: 'all' | 'neighborhood',
+    win_type: 'classic' | 'draw',
+    private: boolean,
+    user_ids: number[]
+}
+
+export type {RoomResponseType}
+
 // Create Room
 
 type CreateRoomRequestType = {

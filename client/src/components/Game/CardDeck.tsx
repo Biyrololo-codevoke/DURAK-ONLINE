@@ -1,7 +1,9 @@
 import { Typography } from "@mui/material"
 import { CARD_COVER } from "constants/GameImages"
+import { GameStateContext } from "contexts/game"
+import RoomContext from "contexts/game/RoomContext"
 import { getCardImage } from "features/GameFeatures"
-import { useEffect } from "react"
+import { useContext, useEffect } from "react"
 import { CardType } from "types/GameTypes"
 
 type Props = {
@@ -11,6 +13,10 @@ type Props = {
 export default function CardDeck(props: Props){
 
     const {trump_card} = props;
+
+    const {cards_count} = useContext(RoomContext);
+
+    const game_state = useContext(GameStateContext);
 
     useEffect(
         ()=>{
@@ -34,7 +40,7 @@ export default function CardDeck(props: Props){
 
     return (
         <section id="card-deck">
-            <Typography variant="h5" component="span" id="card-deck-rest">18</Typography>
+            <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
             <div id="card-deck-container">
                 <img
                 src={CARD_COVER} 
@@ -43,13 +49,16 @@ export default function CardDeck(props: Props){
                 onDragStart={(e) => e.preventDefault()}
                 onContextMenu={(e) => e.preventDefault()}
                 />
-                <img
-                src={getCardImage(trump_card)}
-                alt="trump back" 
-                id="card-deck-trump"
-                onDragStart={(e) => e.preventDefault()}
-                onContextMenu={(e) => e.preventDefault()}
-                />
+                {
+                    game_state == 2 &&
+                    <img
+                    src={getCardImage(trump_card)}
+                    alt="trump back" 
+                    id="card-deck-trump"
+                    onDragStart={(e) => e.preventDefault()}
+                    onContextMenu={(e) => e.preventDefault()}
+                    />
+                }
             </div>
         </section>
     )
