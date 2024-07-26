@@ -56,7 +56,8 @@ class RoomModel(Base):
         if not self.check_available():
             raise RoomExceptions.IsFull
 
-        self.user_ids.append(user_id)
+        new_user_ids = self.user_ids + [user_id]
+        self.user_ids = new_user_ids
         self.save()
 
     def check_password(self, password: str) -> bool:

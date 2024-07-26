@@ -111,9 +111,10 @@ class RoomListObserver:
             
             room = RoomModel.get_by_id(room_id)             # add to db
             room.add_player(player_id)
-            
+
             user_socket = key_identity[key]
             self._room_connections[room_id].append(user_socket)        # add socket to room socket group
+
             asyncio.create_task(
                 send_to_room(room_id, {                         # and send event to room
                     "event": "player_connected",
@@ -121,7 +122,7 @@ class RoomListObserver:
                 })
             )
             # update player_count in room_list
-            self.update_room(room_id, len(room._player_ids)+1, id(user_socket))  
+            self.update_room(room_id, len(room._user_ids)+1, id(user_socket))
             
             self._rooms_join_keys[room_id].remove(          # clear from join keys
                 player_connection
