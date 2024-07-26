@@ -53,13 +53,20 @@ export default function GamePage(){
 
                 let i;
 
+                let flag = false;
+
                 for(i = 0; i < data.user_ids.length; ++i){
                     new_arr[i] = data.user_ids[i];
+                    if(String(data.user_ids[i]) === localStorage.getItem('user_id')){
+                        new_arr[i] = 'me'
+                        flag = true;
+                    }
                 }
 
-                new_arr[i] = 'me';
-
-                i++;
+                if(!flag){
+                    new_arr[i] = 'me';
+                    i++;
+                }
 
                 for(; i < data.players_count; ++i){
                     new_arr[i] = -i - 1;
