@@ -53,13 +53,20 @@ export default function GamePage(){
 
                 let i;
 
+                let flag = false;
+
                 for(i = 0; i < data.user_ids.length; ++i){
                     new_arr[i] = data.user_ids[i];
+                    if(String(data.user_ids[i]) === localStorage.getItem('user_id')){
+                        new_arr[i] = 'me'
+                        flag = true;
+                    }
                 }
 
-                new_arr[i] = 'me';
-
-                i++;
+                if(!flag){
+                    new_arr[i] = 'me';
+                    i++;
+                }
 
                 for(; i < data.players_count; ++i){
                     new_arr[i] = -i - 1;
@@ -86,10 +93,14 @@ export default function GamePage(){
             if(data.event === 
                 'player_connected'
             ) {
+                console.log('new player')
                 let new_id : number = data.player_id;
 
+                if(String(new_id) === localStorage.getItem('user_id')) return
+
                 setUsersIds(prev=>{
-                    const n_ids = prev;
+                    console.log('updating ids')
+                    const n_ids = [...prev];
                     for(let i = 0; i < prev.length; ++i){
                         if(typeof(n_ids[i]) === 'number' && n_ids[i] < 0){
                             n_ids[i] = new_id;
