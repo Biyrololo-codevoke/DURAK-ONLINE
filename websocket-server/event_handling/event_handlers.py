@@ -17,10 +17,12 @@ async def send_to_user(user_id: int, payload: dict):
     await send_to_socket(socket, payload)
 
 
-async def send_to_room(room_id: int, payload: dict):
+async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = None):
     room_sockets = room_list.get_room_connections(room_id)
     if room_sockets:
         for socket in room_sockets:
+            if broadcast_socket_id == id(socket):
+                continue
             await send_to_socket(socket, payload)
 
 

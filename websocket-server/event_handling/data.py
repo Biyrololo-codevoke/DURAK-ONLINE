@@ -9,9 +9,6 @@ from models import RoomModel, Exceptions
 from websocket_logger import logger
 
 
-
-logger.info("start init data")
-
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 socket_identity = dict()
 user_socket = dict()
@@ -123,12 +120,13 @@ class RoomListObserver:
                     "player_id": player_id,
                 })
             )
+            # update player_count in room_list
+            self.update_room(room_id, len(room._player_ids)+1, id(user_socket))  
             
             self._rooms_join_keys[room_id].remove(          # clear from join keys
                 player_connection
             )
             
-            self.update_room(room_id, len(room.player_ids)+1)  # update player_count in room_list
             return True, "successfully connected"
 
         except Exceptions.Room.NotFound:
