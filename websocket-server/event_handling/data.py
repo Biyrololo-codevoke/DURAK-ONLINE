@@ -68,7 +68,11 @@ class RoomListObserver:
                 return False, "Room is full"
 
             if players_in_room + player_conn_len > room.players_count:
-                the_oldest_conn = sorted(self._rooms_join_keys[room_id], key=lambda x: x["time"], reverse=True)[0]
+                the_oldest_conn = sorted(
+                    self._rooms_join_keys[room_id],
+                    key=lambda x: x["time"],
+                    reverse=True
+                )[0]
                 current_time = int(round(time.time() * 1000))
 
                 if current_time - the_oldest_conn["time"] > 15 * 1000:
@@ -116,13 +120,17 @@ class RoomListObserver:
             self._room_connections[room_id].append(user_socket)        # add socket to room socket group
 
             asyncio.create_task(
-                send_to_room(room_id, {                         # and send event to room
-                    "event": "player_connected",
-                    "player_id": player_id,
-                })
+                send_to_room(
+                    room_id, 
+                    {                         # and send event to room
+                        "event": "player_connected",
+                        "player_id": player_id,
+                    },
+                    id(user_socket)
+                )
             )
             # update player_count in room_list
-            self.update_room(room_id, len(room._user_ids)+1, id(user_socket))
+            self.update_room(room_id, len(room._user_ids)+1)
             
             self._rooms_join_keys[room_id].remove(          # clear from join keys
                 player_connection
