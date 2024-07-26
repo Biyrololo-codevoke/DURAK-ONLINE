@@ -86,10 +86,14 @@ export default function GamePage(){
             if(data.event === 
                 'player_connected'
             ) {
+                console.log('new player')
                 let new_id : number = data.player_id;
 
+                if(String(new_id) === localStorage.getItem('user_id')) return
+
                 setUsersIds(prev=>{
-                    const n_ids = prev;
+                    console.log('updating ids')
+                    const n_ids = [...prev];
                     for(let i = 0; i < prev.length; ++i){
                         if(typeof(n_ids[i]) === 'number' && n_ids[i] < 0){
                             n_ids[i] = new_id;
