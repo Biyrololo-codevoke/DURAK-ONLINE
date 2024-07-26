@@ -4,7 +4,7 @@ from websockets import WebSocketServerProtocol as WebSocket
 
 from websocket_logger import logger
 
-from .data import room_list, user_socket
+from .data import room_list, user_socket, socket_identity
 from .utils import serialize
 
 
@@ -18,7 +18,7 @@ async def send_to_user(user_id: int, payload: dict):
 
 
 async def send_to_room(room_id: int, payload: dict):
-    room_sockets = room_list.get(room_id)
+    room_sockets = room_list.get_room_connections(room_id)
     if room_sockets:
         for socket in room_sockets:
             await send_to_socket(socket, payload)
@@ -78,8 +78,9 @@ async def handle_list(socket: WebSocket, payload: dict):
 
                 room_id = payload.get("room_id")
                 passsword = payload.get("password")  # nullable
+                player_id = socket_identity[id(socket)]
 
-                status, message = room_list.join_to_room(room_id, passsword)
+                status, message = room_list.join_to_room(room_id, player_id, passsword)
 
                 if status:
                     await send_to_socket(socket, {"status": "success", "key": message})
