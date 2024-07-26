@@ -11,12 +11,12 @@ export default function Protected({ children }: Props) {
     const access_token = Cookies.get('access_token');
     
     useEffect(() => {
-        if (!access_token) {
+        if (!access_token && 0) {
             navigate('/login')
         }
     }, [access_token, navigate])
 
-    if (!access_token) {
+    if (!access_token && 0) {
         return null
     }
 
