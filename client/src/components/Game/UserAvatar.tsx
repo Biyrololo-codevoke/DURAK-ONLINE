@@ -1,6 +1,10 @@
 import { Typography } from "@mui/material";
 import HourglassEmptyIcon from '@mui/icons-material/HourglassEmpty';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import { EMPTY_USER_PHOTO_URL } from "constants/StatisPhoto";
+import axios from "axios";
+import { getUser } from "constants/ApiUrls";
+import { GetUserResponseType } from "types/ApiTypes";
 
 type Props = {
     user_id: string | number | undefined
@@ -9,6 +13,35 @@ type Props = {
 export default function UserAvatar(props: Props) {
 
     const {user_id} = props
+
+    const [username, setUsername] = useState('');
+
+    const [photo, setPhoto] = useState(EMPTY_USER_PHOTO_URL);
+    useEffect(
+        ()=>{
+            if(user_id === undefined) return
+            if(String(user_id) === localStorage.getItem('user_id')){
+                setUsername(prev => localStorage.getItem('username') || prev);
+
+                setPhoto(prev => localStorage.getItem('user_photo') || prev)
+
+                return;
+            }
+
+            axios.get(getUser(user_id))
+            .then(
+                res=>{
+                    const data : GetUserResponseType = res.data;
+
+                    setUsername(prev => data.user.username || prev);
+
+                    setPhoto(prev => data.user.image_id || prev)
+                }
+            )
+
+        },
+        [user_id]
+    )
 
     useEffect(
         ()=>{
@@ -27,7 +60,7 @@ export default function UserAvatar(props: Props) {
     return (
         <div className="game-user-avatar-container" data-user-id={user_id}>
             <img 
-            src="https://sun9-21.userapi.com/impg/NNnZ7AyblPR_Gr5guTUMShZQ5BFXpe1r7hGV9Q/R_YyktJNuws.jpg?size=100x100&quality=96&sign=d26729b966df36b5b0ae86617f35f52e&type=album" 
+            src={photo} 
             alt="user avatar" 
             className="game-user-avatar"
             onDragStart={(e) => e.preventDefault()}
@@ -42,7 +75,7 @@ export default function UserAvatar(props: Props) {
             />
             <Typography variant="subtitle2" component="span" style={{color: '#DDDDDD'}} className="game-user-level">11</Typography>
             <span className="game-user-level-line" style={{width: 'calc(1ch + 4px)'}}></span>
-            <span className="game-user-name">SEGEZHA</span>
+            <span className="game-user-name">{username}</span>
         </div>
     )
 }

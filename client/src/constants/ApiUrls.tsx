@@ -6,8 +6,9 @@ function registerUser(){
     return `/register`
 }
 
-function getUser(){
-    return `/user`
+function getUser(user_id: number | string | undefined = undefined){
+    if(user_id === undefined) return `/user`
+    return `/user?id=${user_id}`
 }
 
 function createRoom(){
