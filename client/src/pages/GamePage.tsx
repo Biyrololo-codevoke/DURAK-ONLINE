@@ -4,12 +4,13 @@ import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
 import { GameStateContext } from "contexts/game";
-import { GameStateType } from "types/GameTypes";
+import { GameEvent, GameStateType } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import GameInfo from "components/Game/GameInfo";
+import {handle_event} from 'components/Game/handleEvents'
 
 type UserIdType = number | 'me'
 
@@ -86,32 +87,13 @@ export default function GamePage(){
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
-    function handle_message(data: any){
-        console.log(`recieved message`)
-        console.log(data);
-        if('event' in data){
-            if(data.event === 
-                'player_connected'
-            ) {
-                console.log('new player')
-                let new_id : number = data.player_id;
-
-                if(String(new_id) === localStorage.getItem('user_id')) return
-
-                setUsersIds(prev=>{
-                    console.log('updating ids')
-                    const n_ids = [...prev];
-                    for(let i = 0; i < prev.length; ++i){
-                        if(typeof(n_ids[i]) === 'number' && n_ids[i] < 0){
-                            n_ids[i] = new_id;
-                            break;
-                        }
-                    }
-
-                    return n_ids
-                })
+    function handle_message(data: GameEvent){
+        handle_event(
+            {
+                data,
+                setUsersIds
             }
-        }
+        )
     }
 
     useEffect(
@@ -124,14 +106,6 @@ export default function GamePage(){
             new_socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 handle_message(data);
-            }
-
-            new_socket.onopen = () => {
-                // send token 
-                // const _data = JSON.stringify({
-                //     access_token: Cookies.get('access_token'),
-                // })
-                // new_socket.send(_data)
             }
 
             new_socket.onerror = () => {
@@ -148,6 +122,10 @@ export default function GamePage(){
         }, []
     )
 
+    function handle_start_game(){
+        // TODO
+    }
+
     return (
         <main id="game-page">
             <GameStateContext.Provider
@@ -162,7 +140,7 @@ export default function GamePage(){
                     users_ids={users_ids}
                     setUsersIds={setUsersIds}
                     />
-                    <GameFooter />
+                    <GameFooter handle_start_game={handle_start_game} />
                 </RoomContext.Provider>
             </GameStateContext.Provider>
         </main>
