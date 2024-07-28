@@ -116,22 +116,20 @@ class RoomListObserver:
                 return False, "key is incorrect"
 
         try:
-            player_id = key.split('_')[-1]
+            player_id = int(key.split('_')[-1])
             
             room = RoomModel.get_by_id(room_id)             # add to db
             room.add_player(player_id)
 
             user_socket = key_identity[key]
             self._room_connections[room_id].append(user_socket)        # add socket to room socket group
-
-            send_to_room(                     # and send event to room
-                room_id,
-                {                                   
-                    "event": "player_connected",
-                    "player_id": player_id,
-                },
-                id(user_socket)
-            )
+            
+            room_event = {                                   
+                "event": "player_connected",
+                "player_id": player_id
+            }
+            logger.info("send accept")
+            send_to_room(room_id, room_event, id(user_socket))
 
             # update player_count in room_list
             self.update_room(room_id, len(room._user_ids)+1)
@@ -141,6 +139,7 @@ class RoomListObserver:
             )
             
             if not room.check_available():
+                self._room_accepts[room_id]["accepts"] = room.players_count
                 self.make_start(room_id)
             
             return True, "successfully connected"
@@ -158,24 +157,26 @@ class RoomListObserver:
         })
         
     def accept_start(self, room_id: int, key: int):
-        player_id = key_identity[key]
-        
+        player_id = int(key.split('_')[-1])
+        player_socket = key_identity[key]
+
         if not self._room_accepts.get(room_id):
             status, message =  False, "room not found"
         
         elif player_id in self._room_accepts[room_id]["player_ids"]:
             status, message =  False, "already accepted"
+            
+        elif self._room_accepts[room_id]["value"] == -1:
+            status, message = False, "room isn't full"
         
-        elif self._room_accepts[room_id]["value"] != 1:
+        else:
             self._room_accepts[room_id]["value"] += 1
             self._room_accepts[room_id]["player_ids"].append(player_id)
             send_to_room(room_id, {
                 "event": "accept",
                 "player_id": player_id
-            })
+            }, id(player_socket))
             status, message = True, "wrong answer | time limit error | memory error | accepted"
-        else:
-            status, message = False, "room is not full for accepting game start"
 
         if self._room_accepts[room_id]["value"] == self._room_accepts[room_id]["accepts"]:
             send_to_room(room_id, {
@@ -183,6 +184,8 @@ class RoomListObserver:
                 "message": "huy!"*99999
             })
             self.start_game(room_id)
+        else:
+            logger.info(f'{self._room_accepts[room_id]["value"]}/{self._room_accepts[room_id]["accepts"]}')
 
         return status, message
     
