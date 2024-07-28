@@ -30,7 +30,6 @@ export default function GamePage(){
             private: false,
             user_ids: [],
             cards_count: 24
-            
         }
     )
 
@@ -114,6 +113,7 @@ export default function GamePage(){
     // on player accept start
 
     function on_player_accept(player_id: number){
+        console.log(`set accepted ${player_id}.`)  // TODO:remove
         set_accepted_start(prev => [...prev, player_id]);
         setTimers(prev => prev.filter((t) => t.id !== player_id))
     }
