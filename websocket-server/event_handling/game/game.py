@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from typing import Literal, TYPE_CHECKING
 
-from game_board import GameBoard
-from card import Card
+from .game_board import GameBoard
+from .card import Card
 
 if TYPE_CHECKING:
     from player import Player
@@ -34,6 +34,7 @@ class Game:
         self.game_mode = game_mode
         self.win_type = win_type
         self.throw_mode = throw_mode
+        self.deck = None
 
     def make_game(self):
         self.beaten_cards = []
@@ -93,7 +94,7 @@ class Game:
             },
             "game": {
                 "last_card": self.last_card.__str__(),
-                "deck": self.deck.serialize,
+                "deck": [card.serialize() for card in self.deck],
                 "beaten_cards": [card.serialize() for card in self.beaten_cards],
                 "board": self.board.serialize(),
                 "trump_suit": self.trump_suit

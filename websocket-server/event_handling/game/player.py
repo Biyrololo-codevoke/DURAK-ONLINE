@@ -3,8 +3,8 @@ from __future__ import annotations
 import json
 from typing import TYPE_CHECKING
 
-from deck import PlayerDeck
-from card import Card
+from .deck import PlayerDeck
+from .card import Card
 
 if TYPE_CHECKING:
     from game import Game

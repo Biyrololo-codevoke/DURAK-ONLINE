@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import List, Dict, Literal
 import json
 
-from card import Card
+from .card import Card
 
 
 class GameBoard:
