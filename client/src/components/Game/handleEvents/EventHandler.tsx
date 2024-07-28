@@ -5,7 +5,8 @@ type UserIdType = number | 'me'
 type Props = {
     data: GameEvent;
     setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>;
-    make_start: () => void
+    make_start: () => void;
+    on_player_accept: (player_id: number) =>;
 }
 
 export default function handle_event(props: Props){
@@ -40,7 +41,16 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'make_start'
         ) {
-            props.make_start();
+            setTimeout(
+                props.make_start,
+                1000
+            )
+        }
+
+        else if(
+            data.event === 'accept'
+        ) {
+
         }
     }
 }
