@@ -126,7 +126,7 @@ export default function UserAvatar(props: Props) {
 
             document.body.style.setProperty(`--user-avatar-${user_id}-x`, `${rect.x}px`);
             document.body.style.setProperty(`--user-avatar-${user_id}-y`, `${rect.y}px`);
-        },ц
+        },
         []
     )
 
