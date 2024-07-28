@@ -27,7 +27,7 @@ class Player:
 
     def serialize(self) -> str:
         return json.dumps({
-            "user_id": self.user_id
+            "user_id": self.id
         })
     
     @staticmethod

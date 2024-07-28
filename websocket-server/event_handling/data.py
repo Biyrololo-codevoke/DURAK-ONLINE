@@ -213,7 +213,7 @@ class RoomListObserver:
         logger.info("add players")
         
         payload = game.serialize()
-        room.game_obj = payload
+        room.game_obj = str(payload)
         room.save()
         
         payload["game"]["deck"]  # TODO: del payload["game"]["deck"]

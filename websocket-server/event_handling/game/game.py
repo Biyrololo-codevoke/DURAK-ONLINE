@@ -82,7 +82,7 @@ class Game:
         return s
 
     def serialize(self) -> str:
-        return json.dumps({
+        return {
             "config": {
                 "reward": self.reward,
                 "speed": self.speed,
@@ -102,7 +102,7 @@ class Game:
             "payload": {
                 "players": [player.serialize() for player in self.players]
             }
-        })
+        }
         
     @staticmethod
     def deserialize(raw_data: str) -> Game:
