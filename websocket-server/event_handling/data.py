@@ -213,7 +213,10 @@ class RoomListObserver:
         room.save()
         
         del payload["game"]["deck"]
-        send_to_room(room_id, payload)
+        send_to_room(room_id, {
+            "event": "game_init",
+            **payload
+        })
 
     def update_room(self, room_id: int, room_count: int):
         self._rooms[room_id] = room_count
