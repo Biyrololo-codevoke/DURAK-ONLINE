@@ -6,7 +6,7 @@ type Props = {
     data: GameEvent;
     setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>;
     make_start: () => void;
-    on_player_accept: (player_id: number) =>;
+    on_player_accept: (player_id: number) => void;
 }
 
 export default function handle_event(props: Props){
