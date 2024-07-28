@@ -64,6 +64,27 @@ async def handle_room(payload: dict, socket: WebSocket):
                     asyncio.create_task(
                         send_to_socket(socket, response)
                     )
+            case "accept":
+                logger.info("try to accept room")
+                room_id = int(payload["req"]["room_id"])
+                key = payload["req"]["key"]
+                
+                status, message = room_list.accept_room(room_id, key)
+                logger.info(f"{status=} {message=}")
+                
+                if not status:
+                    response = {
+                        "status": "error",
+                        "message": message
+                    }
+                else:
+                    response = {
+                        "status": "success",
+                        "message": "you successfully accept game start"
+                    }
+                asyncio.create_task(
+                    send_to_socket(socket, response)
+                )
 
 
 async def handle_list(socket: WebSocket, payload: dict):

@@ -125,10 +125,9 @@ class RoomListObserver:
             user_socket = key_identity[key]
             self._room_connections[room_id].append(user_socket)        # add socket to room socket group
 
-            
-            self.get_roomssend_to_room(
+            send_to_room(                     # and send event to room
                 room_id,
-                {                                   # and send event to room
+                {                                   
                     "event": "player_connected",
                     "player_id": player_id,
                 },
@@ -143,7 +142,7 @@ class RoomListObserver:
             )
             
             if not room.check_available():
-                self.make_start()
+                self.make_start(room_id)
             
             return True, "successfully connected"
 

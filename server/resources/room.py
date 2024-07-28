@@ -56,7 +56,6 @@ class Room(BaseResource):
 
         try:
             room = RoomModel(**args)
-            room.add_player(author_id)
             room.save()
 
             key = "athr" + uuid4().hex
