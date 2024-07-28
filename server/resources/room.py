@@ -58,7 +58,7 @@ class Room(BaseResource):
             room = RoomModel(**args)
             room.save()
 
-            key = "athr" + uuid4().hex
+            key = "athr" + uuid4().hex + "_" + str(author_id)
 
             send_new_room(room.id, author_id, key)
 

@@ -10,7 +10,7 @@ from .data import key_identity
 
 async def router(path: str, payload: dict, socket: WebSocket):
     endpoint, data = handle_path(path)
-    logger.info(f"endpoint: {endpoint} data: {data}")
+    logger.info(f"router({path=}, {payload=})")
 
     match endpoint:
         case "/room-list":
@@ -29,8 +29,7 @@ async def router(path: str, payload: dict, socket: WebSocket):
             key_identity[data['key']] = socket
             
             # add request params to payload
-            payload["req"] = data 
-            payload["event"] = "join_room"
+            payload["req"] = data
             asyncio.create_task(handle_room(payload, socket))
 
         case _:

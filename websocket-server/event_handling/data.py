@@ -88,7 +88,7 @@ class RoomListObserver:
                 else:
                     return False, "Room is full"
 
-            key = uuid4().hex
+            key = uuid4().hex + f"_{player_id}"
 
             if self._rooms_join_keys.get(room_id) is None:
                 self._rooms_join_keys[room_id] = []
@@ -116,8 +116,7 @@ class RoomListObserver:
                 return False, "key is incorrect"
 
         try:
-            
-            player_id = player_connection["player_id"]
+            player_id = key.split('_')[-1]
             
             room = RoomModel.get_by_id(room_id)             # add to db
             room.add_player(player_id)
@@ -178,14 +177,17 @@ class RoomListObserver:
         else:
             status, message = False, "room is not full for accepting game start"
 
-        if self._room_accepts[room_id]["value"] == self._room_accepts["room_id"]["accepts"]:
+        if self._room_accepts[room_id]["value"] == self._room_accepts[room_id]["accepts"]:
             send_to_room(room_id, {
                 "event": "start_game",
                 "message": "huy!"*99999
             })
             self.start_game(room_id)
-        
+
         return status, message
+    
+    def start_game(self, room_id):
+        ...
 
     def update_room(self, room_id: int, room_count: int):
         self._rooms[room_id] = room_count

@@ -20,7 +20,7 @@ async def send_to_user(user_id: int, payload: dict):
 async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = None):
     room_sockets = room_list.get_room_connections(room_id)
     if room_sockets:
-        logger.info(f"{room_sockets=}; {broadcast_socket_id=}")
+        logger.info(f"{room_sockets=}; {broadcast_socket_id=}\n {payload=}")
         for socket in room_sockets:
             if broadcast_socket_id == id(socket):
                 continue
@@ -28,63 +28,55 @@ async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = N
 
 
 async def handle_room(payload: dict, socket: WebSocket):
-    logger.info(f"{id(socket)} {payload=} send event to room")
-    room_id = payload['req']["room_id"]
+    logger.info(f"handle_room: {payload=}")
 
-    current_rooms = room_list.get_rooms()
-    logger.info(f"{current_rooms=}")
+    event = payload["event"]
+    logger.info("received event %s" % event)
 
-    if int(room_id) not in current_rooms.keys():
-        logger.info(f"{room_id=} doesn't exist in {current_rooms.keys()=}")
-        await send_to_socket(socket, {"status": "error", "message": "room doesn't exist"})
+    match event:
+        case "join_room":
+            logger.info("try to join room")
+            room_id = int(payload["req"]["room_id"])
+            key = payload["req"]["key"]
 
-    else:
-        event = payload["event"]
+            status, message = room_list.connect_to_room(room_id, key)
+            logger.info(f"join result: {status=} {message=}")
 
-        match event:
-            case "join_room":
-                logger.info("try to join room")
-                room_id = int(payload["req"]["room_id"])
-                key = payload["req"]["key"]
-
-                status, message = room_list.connect_to_room(room_id, key)
-                
-                logger.info(f"{status=} {message=}")
-
-                if not status:
-                    asyncio.gather(*[
-                        send_to_socket(socket, {"status": "error", "message": message}),
-                        socket.close()
-                    ])
-                else:
-                    response = {
-                        "status": "success",
-                        "message": "you successfully joined to room %d" % room_id
-                    }
-                    asyncio.create_task(
-                        send_to_socket(socket, response)
-                    )
-            case "accept":
-                logger.info("try to accept room")
-                room_id = int(payload["req"]["room_id"])
-                key = payload["req"]["key"]
-                
-                status, message = room_list.accept_room(room_id, key)
-                logger.info(f"{status=} {message=}")
-                
-                if not status:
-                    response = {
-                        "status": "error",
-                        "message": message
-                    }
-                else:
-                    response = {
-                        "status": "success",
-                        "message": "you successfully accept game start"
-                    }
+            if not status:
+                asyncio.gather(*[
+                    send_to_socket(socket, {"status": "error", "message": message}),
+                    socket.close()
+                ])
+            else:
+                response = {
+                    "status": "success",
+                    "message": "you successfully joined to room %d" % room_id
+                }
                 asyncio.create_task(
                     send_to_socket(socket, response)
                 )
+
+        case "accept":
+            logger.info("try to accept room")
+            room_id = int(payload["req"]["room_id"])
+            key = payload["req"]["key"]
+            
+            status, message = room_list.accept_start(room_id, key)
+            logger.info(f"accept result: {status=} {message=}")
+            
+            if not status:
+                response = {
+                    "status": "error",
+                    "message": message
+                }
+            else:
+                response = {
+                    "status": "success",
+                    "message": "you successfully accept game start"
+                }
+            asyncio.create_task(
+                send_to_socket(socket, response)
+            )
 
 
 async def handle_list(socket: WebSocket, payload: dict):

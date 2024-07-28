@@ -14,7 +14,12 @@ async def socket_listener(socket: WebSocket, path: str):
     auth = False
     
     if path.startswith("/ws/room?"):
-        await router(path, {}, socket)
+        logger.info("first request for /ws/room")
+        await router(path, {"event": "join_room"}, socket)
+
+        async for message in socket:
+            logger.info("server has new message in /ws/room: " + message)
+            await router(path, deserialize(message), socket)
 
     async for message in socket:
         payload = deserialize(message)
