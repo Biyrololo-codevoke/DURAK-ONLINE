@@ -8,6 +8,8 @@ from websockets import WebSocketServerProtocol as WS
 from models import RoomModel, Exceptions
 from websocket_logger import logger
 
+from game import Game, Player
+
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 socket_identity = dict()
@@ -181,7 +183,7 @@ class RoomListObserver:
         if self._room_accepts[room_id]["value"] == self._room_accepts[room_id]["accepts"]:
             send_to_room(room_id, {
                 "event": "start_game",
-                "message": "huy!"*99999
+                "message": "huy!"*9
             })
             self.start_game(room_id)
         else:
@@ -189,8 +191,29 @@ class RoomListObserver:
 
         return status, message
     
-    def start_game(self, room_id):
-        ...
+    def start_game(self, room_id: int):
+        room = RoomModel.get_by_id(room_id)
+        game = Game(
+            id            = room.id,
+            reward        = room.reward,
+            speed         = room.speed,
+            players_count = room.player_count,
+            deck_size     = room.cards_count,
+            game_mode     = room.game_type,
+            win_type      = room.win_type,
+            throw_mode    = room.throw_mode
+        )
+
+        for player_id in room.players_ids:
+            player = Player(player_id)
+            game.join_player(player)
+        
+        payload = game.serialize
+        room.game_obj = payload
+        room.save()
+        
+        del payload["game"]["deck"]
+        send_to_room(room_id, payload)
 
     def update_room(self, room_id: int, room_count: int):
         self._rooms[room_id] = room_count

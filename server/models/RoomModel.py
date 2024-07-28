@@ -26,7 +26,7 @@ class RoomModel(BaseModel):  # type: ignore
     _win_type = db.Column(db.Enum(Room.WinType), default=Room.WinType.CLASSIC)
     private = db.Column(db.Boolean, default=False)
     password = db.Column(db.String, nullable=True)
-
+    game_obj = db.Column(db.String, nullable=True)
     _user_ids = db.Column(db.ARRAY(db.Integer), default=[])  # user ids
 
     def json(self) -> dict[str, int | bool | str]:
