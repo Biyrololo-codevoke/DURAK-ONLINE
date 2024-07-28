@@ -1,0 +1,1 @@
+export {default as handle_event} from './EventHandler'

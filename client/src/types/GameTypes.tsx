@@ -33,3 +33,23 @@ export type {GameBoardCard, GameBoardType}
 type GameStateType = 0 | 1 | 2;
 
 export type {GameStateType}
+
+type Timer = {
+    id: number;
+    color: 'green' | 'red'
+}
+
+export type {Timer}
+
+type PlayerConnected = {
+    event: 'player_connected';
+    player_id: number;
+}
+
+type MakeStart = {
+    event: 'make_start'
+}
+
+type GameEvent = PlayerConnected | MakeStart
+
+export type {GameEvent}
