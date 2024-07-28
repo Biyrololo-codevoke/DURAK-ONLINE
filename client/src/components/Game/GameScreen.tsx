@@ -79,6 +79,12 @@ export default function GameScreen(props: Props){
     const _room_id = parseInt(localStorage.getItem('_room_id') || '-1');
 
     function changeSeat(newSeat : number){
+
+        // пока нельзя
+        
+        return
+
+
         // replace me with new seat
 
         console.log('change seat', newSeat, users_ids)
