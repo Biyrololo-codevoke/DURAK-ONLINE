@@ -5,7 +5,7 @@ import { EMPTY_USER_PHOTO_URL } from "constants/StatisPhoto";
 import axios from "axios";
 import { getUser } from "constants/ApiUrls";
 import { GetUserResponseType } from "types/ApiTypes";
-import { GameStateContext } from "contexts/game";
+import { GameStateContext, TimerContext } from "contexts/game";
 
 type Props = {
     user_id: string | number | undefined;
@@ -24,9 +24,11 @@ export default function UserAvatar(props: Props) {
 
     const {user_id} = props
 
-    const color = props.progress_color || 'red';
+    const [color, setColor] = useState<'red' | 'green'>('green');
 
     const gameState = useContext(GameStateContext);
+
+    const timers = useContext(TimerContext);
 
     const [username, setUsername] = useState('');
 
@@ -34,7 +36,7 @@ export default function UserAvatar(props: Props) {
 
     const MAX_TIMER = 30;
 
-    const [timer, setTimer] = useState(MAX_TIMER);
+    const [timer, setTimer] = useState(0);
 
     function on_time_out(){
         // TODO
@@ -43,6 +45,24 @@ export default function UserAvatar(props: Props) {
 
     useEffect(
         ()=>{
+
+            if(gameState === 0) return
+
+            let flag = -1;
+
+            for(let i = 0; i < timers.timers.length; ++i){
+                if(timers.timers[i].id === props.user_id){
+                    flag = i;
+                    break;
+                }
+            }
+
+            if(flag === -1) return
+
+            setTimer(MAX_TIMER);
+
+            setColor(timers.timers[flag].color);
+
             const interval = setInterval(() => {
                 setTimer((prevTimer) => {
                   if (prevTimer > 0) {
@@ -58,7 +78,7 @@ export default function UserAvatar(props: Props) {
                 clearInterval(interval);
             }
         },
-        [props.update_progress]
+        [timers.timer_update]
     )
 
     useEffect(
@@ -104,7 +124,7 @@ export default function UserAvatar(props: Props) {
     return (
         <div className="game-user-avatar-container" data-user-id={user_id}>
             {
-                gameState !== 0 && show_progress &&
+                gameState !== 0 && timer > 0 &&
                 <div 
                 className={`game-user-avatar__progress-bar ${PROGRESS_COLOR_CLASS[color]}`}
                 style={{'--progress_val': `${100 * timer / MAX_TIMER}%`} as CSSProperties}

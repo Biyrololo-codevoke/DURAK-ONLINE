@@ -3,13 +3,14 @@ import 'components/Game/Game.css'
 import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
-import { GameStateContext } from "contexts/game";
-import { GameStateType } from "types/GameTypes";
+import { GameStateContext, TimerContext } from "contexts/game";
+import { GameEvent, GameStateType, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import GameInfo from "components/Game/GameInfo";
+import {handle_event} from 'components/Game/handleEvents'
 
 type UserIdType = number | 'me'
 
@@ -86,32 +87,33 @@ export default function GamePage(){
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
-    function handle_message(data: any){
-        console.log(`recieved message`)
-        console.log(data);
-        if('event' in data){
-            if(data.event === 
-                'player_connected'
-            ) {
-                console.log('new player')
-                let new_id : number = data.player_id;
+    const [timers, setTimers] = useState<Timer[]>([]);
 
-                if(String(new_id) === localStorage.getItem('user_id')) return
+    const [timers_update, set_timers_update] = useState<number>(0);
 
-                setUsersIds(prev=>{
-                    console.log('updating ids')
-                    const n_ids = [...prev];
-                    for(let i = 0; i < prev.length; ++i){
-                        if(typeof(n_ids[i]) === 'number' && n_ids[i] < 0){
-                            n_ids[i] = new_id;
-                            break;
-                        }
-                    }
-
-                    return n_ids
-                })
+    function handle_message(data: GameEvent){
+        handle_event(
+            {
+                data,
+                setUsersIds,
+                make_start
             }
-        }
+        )
+    }
+
+    function make_start(){
+        setTimers(
+            users_ids.map((_id) => (
+                {
+                    id: (_id === 'me' ? parseInt(localStorage.getItem('user_id') || '-1') : _id),
+                    color: 'red'
+                }
+            ))
+        )
+
+        set_timers_update(prev => prev + 1);
+
+        setGameState(1);
     }
 
     useEffect(
@@ -124,14 +126,6 @@ export default function GamePage(){
             new_socket.onmessage = (event) => {
                 const data = JSON.parse(event.data);
                 handle_message(data);
-            }
-
-            new_socket.onopen = () => {
-                // send token 
-                // const _data = JSON.stringify({
-                //     access_token: Cookies.get('access_token'),
-                // })
-                // new_socket.send(_data)
             }
 
             new_socket.onerror = () => {
@@ -148,23 +142,43 @@ export default function GamePage(){
         }, []
     )
 
+    function handle_start_game(){
+        if(!socket) return
+
+        const data = {event: 'accept'}
+
+        socket.send(
+            JSON.stringify(data)
+        )
+
+        console.log('начал игру')
+
+        setTimers(prev => prev.filter((e) => String(e.id) !== localStorage.getItem('user_id')));
+
+        set_timers_update(prev => prev + 1);
+    }
+
     return (
         <main id="game-page">
-            <GameStateContext.Provider
-            value={gameState}
+            <TimerContext.Provider
+            value={{timer_update: timers_update, timers}}
             >
-                <RoomContext.Provider
-                value={room}
+                <GameStateContext.Provider
+                value={gameState}
                 >
-                    <GameInfo />
-                    <GameScreen 
-                    players_in_room={room.players_count}
-                    users_ids={users_ids}
-                    setUsersIds={setUsersIds}
-                    />
-                    <GameFooter />
-                </RoomContext.Provider>
-            </GameStateContext.Provider>
+                    <RoomContext.Provider
+                    value={room}
+                    >
+                        <GameInfo />
+                        <GameScreen 
+                        players_in_room={room.players_count}
+                        users_ids={users_ids}
+                        setUsersIds={setUsersIds}
+                        />
+                        <GameFooter handle_start_game={handle_start_game} />
+                    </RoomContext.Provider>
+                </GameStateContext.Provider>               
+            </TimerContext.Provider>
         </main>
     )
 }
