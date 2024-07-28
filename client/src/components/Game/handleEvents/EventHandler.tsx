@@ -50,7 +50,7 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'accept'
         ) {
-
+            props.on_player_accept(data.player_id)
         }
     }
 }

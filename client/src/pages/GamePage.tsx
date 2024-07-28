@@ -117,7 +117,8 @@ export default function GamePage(){
     // game state = 1
 
     function make_start(){
-
+        console.log('Жмите асепт')
+        console.log(users_ids)
         console.log(users_ids.map((__id) => {
             let _id = __id;
             if(_id === 'me') _id = parseInt(localStorage.getItem('user_id') || '-1');
