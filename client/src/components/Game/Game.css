@@ -692,9 +692,47 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     position: absolute;
     top: 0;
     right: 0;
+    gap: 10px;
 }
 
 #game-info,
 #__game-reward{
     scale: 0.7;
+}
+
+.game__user_message{
+    position: absolute;
+    width: 100%;
+    height: 23px;
+    top: -20px;
+    left: 0;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.game__user_message__shadow{
+    background: var(--game_msg_bg, white);
+    box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
+}
+
+.game__user_message__shadow::after{
+    content: '';
+    position: absolute;
+    background: var(--game_msg_bg, white);
+    width: 15px;
+    height: 10px;
+    bottom: -10px;
+    left: 50%;
+    clip-path: polygon(20% 0, 100% 0, 0 100%);
+}
+
+.game__message_white {
+    --game_msg_bg: white;
+}
+
+.game__message_yellow {
+    --game_msg_bg: rgb(250, 228, 34);
 }

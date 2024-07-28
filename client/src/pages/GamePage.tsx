@@ -3,7 +3,7 @@ import 'components/Game/Game.css'
 import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
-import { GameStateContext, TimerContext } from "contexts/game";
+import { AcceptedContext, GameStateContext, TimerContext } from "contexts/game";
 import { GameEvent, GameStateType, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
@@ -87,9 +87,19 @@ export default function GamePage(){
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
+    // timer
+
     const [timers, setTimers] = useState<Timer[]>([]);
 
     const [timers_update, set_timers_update] = useState<number>(0);
+
+    // accept game start
+
+    const [accepted_start, set_accepted_start] = useState<number[]>([]);
+
+    function handle_accept_start(player_id: number){
+        set_accepted_start(prev => [...prev, player_id])
+    }
 
     function handle_message(data: GameEvent){
         handle_event(
@@ -102,13 +112,27 @@ export default function GamePage(){
     }
 
     function make_start(){
+
+        console.log(users_ids.map((__id) => {
+            let _id = __id;
+            if(_id === 'me') _id = parseInt(localStorage.getItem('user_id') || '-1');
+            
+            return {
+                id: _id,
+                color: 'red'
+            }
+        }))
+
         setTimers(
-            users_ids.map((_id) => (
-                {
-                    id: (_id === 'me' ? parseInt(localStorage.getItem('user_id') || '-1') : _id),
+            users_ids.map((__id) => {
+                let _id = __id;
+                if(_id === 'me') _id = parseInt(localStorage.getItem('user_id') || '-1');
+                
+                return {
+                    id: _id,
                     color: 'red'
                 }
-            ))
+            })
         )
 
         set_timers_update(prev => prev + 1);
@@ -163,21 +187,25 @@ export default function GamePage(){
             <TimerContext.Provider
             value={{timer_update: timers_update, timers}}
             >
-                <GameStateContext.Provider
-                value={gameState}
+                <AcceptedContext.Provider
+                value={accepted_start}
                 >
-                    <RoomContext.Provider
-                    value={room}
+                    <GameStateContext.Provider
+                    value={gameState}
                     >
-                        <GameInfo />
-                        <GameScreen 
-                        players_in_room={room.players_count}
-                        users_ids={users_ids}
-                        setUsersIds={setUsersIds}
-                        />
-                        <GameFooter handle_start_game={handle_start_game} />
-                    </RoomContext.Provider>
-                </GameStateContext.Provider>               
+                        <RoomContext.Provider
+                        value={room}
+                        >
+                            <GameInfo />
+                            <GameScreen 
+                            players_in_room={room.players_count}
+                            users_ids={users_ids}
+                            setUsersIds={setUsersIds}
+                            />
+                            <GameFooter handle_start_game={handle_start_game} />
+                        </RoomContext.Provider>
+                    </GameStateContext.Provider>               
+                </AcceptedContext.Provider>
             </TimerContext.Provider>
         </main>
     )
