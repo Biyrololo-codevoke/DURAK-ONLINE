@@ -40,6 +40,11 @@ export default function CreateGamePage() {
             return;
         }
 
+        if(typeof(password) === 'string' && password.length < 4){
+            toast.error('Длина пароля должна быть от 4 до 6');
+            return
+        }
+
         const body : ApiTypes.CreateRoomRequestType = {
             reward: game_price,
             players_count,

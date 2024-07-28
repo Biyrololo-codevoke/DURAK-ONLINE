@@ -25,6 +25,8 @@ export default function UserAvatar(props: Props) {
 
     const accepted = useContext(AcceptedContext);
 
+    console.log(accepted)
+
     const is_accepted = accepted.find(_id => _id === user_id) !== undefined;
 
     const [color, setColor] = useState<'red' | 'green'>('green');
@@ -124,7 +126,7 @@ export default function UserAvatar(props: Props) {
 
             document.body.style.setProperty(`--user-avatar-${user_id}-x`, `${rect.x}px`);
             document.body.style.setProperty(`--user-avatar-${user_id}-y`, `${rect.y}px`);
-        },
+        },ц
         []
     )
 

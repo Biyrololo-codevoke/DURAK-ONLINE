@@ -50,6 +50,11 @@ type MakeStart = {
     event: 'make_start'
 }
 
-type GameEvent = PlayerConnected | MakeStart
+type Accept = {
+    event: 'accept',
+    player_id: number;
+}
+
+type GameEvent = PlayerConnected | MakeStart | Accept
 
 export type {GameEvent}

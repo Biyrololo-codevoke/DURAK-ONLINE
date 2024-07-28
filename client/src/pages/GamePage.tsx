@@ -97,19 +97,24 @@ export default function GamePage(){
 
     const [accepted_start, set_accepted_start] = useState<number[]>([]);
 
-    function handle_accept_start(player_id: number){
-        set_accepted_start(prev => [...prev, player_id])
-    }
-
     function handle_message(data: GameEvent){
         handle_event(
             {
                 data,
                 setUsersIds,
-                make_start
+                make_start,
+                on_player_accept
             }
         )
     }
+
+    // on player accept start
+
+    function on_player_accept(player_id: number){
+        set_accepted_start(prev => [...prev, player_id]);
+    }
+
+    // game state = 1
 
     function make_start(){
 
@@ -180,6 +185,10 @@ export default function GamePage(){
         setTimers(prev => prev.filter((e) => String(e.id) !== localStorage.getItem('user_id')));
 
         set_timers_update(prev => prev + 1);
+
+        let p_id = parseInt(localStorage.getItem('user_id') || '-1');
+
+        on_player_accept(p_id);
     }
 
     return (
