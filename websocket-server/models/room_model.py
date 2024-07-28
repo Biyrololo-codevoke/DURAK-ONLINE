@@ -30,7 +30,7 @@ class RoomModel(Base):
     _win_type = Column(Enum(Room.WinType), default=Room.WinType.CLASSIC)
     private = Column(Boolean, default=False)
     password = Column(String, nullable=True)
-
+    game_obj = Column(String, nullable=True)
     _user_ids = Column(ARRAY(Integer), default=[])
     
     @classmethod
