@@ -5,7 +5,8 @@ import { EMPTY_USER_PHOTO_URL } from "constants/StatisPhoto";
 import axios from "axios";
 import { getUser } from "constants/ApiUrls";
 import { GetUserResponseType } from "types/ApiTypes";
-import { GameStateContext, TimerContext } from "contexts/game";
+import { AcceptedContext, GameStateContext, TimerContext } from "contexts/game";
+import { Message } from "./Message";
 
 type Props = {
     user_id: string | number | undefined;
@@ -20,15 +21,19 @@ const PROGRESS_COLOR_CLASS = {
 
 export default function UserAvatar(props: Props) {
 
-    const show_progress = true;
-
     const {user_id} = props
+
+    const accepted = useContext(AcceptedContext);
+
+    const is_accepted = accepted.find(_id => _id === user_id) !== undefined;
 
     const [color, setColor] = useState<'red' | 'green'>('green');
 
     const gameState = useContext(GameStateContext);
 
     const timers = useContext(TimerContext);
+    
+    const show_action = timers.timers.find((e) => e.id === user_id);
 
     const [username, setUsername] = useState('');
 
@@ -50,8 +55,10 @@ export default function UserAvatar(props: Props) {
 
             let flag = -1;
 
+            console.log(timers)
+
             for(let i = 0; i < timers.timers.length; ++i){
-                if(timers.timers[i].id === props.user_id){
+                if(timers.timers[i].id === user_id){
                     flag = i;
                     break;
                 }
@@ -124,11 +131,17 @@ export default function UserAvatar(props: Props) {
     return (
         <div className="game-user-avatar-container" data-user-id={user_id}>
             {
-                gameState !== 0 && timer > 0 &&
+                gameState !== 0 && show_action &&
                 <div 
                 className={`game-user-avatar__progress-bar ${PROGRESS_COLOR_CLASS[color]}`}
                 style={{'--progress_val': `${100 * timer / MAX_TIMER}%`} as CSSProperties}
                 ></div>
+            }
+            {
+                gameState === 1 && is_accepted &&
+                <Message 
+                type="accept" 
+                />
             }
             <img 
             src={photo} 
