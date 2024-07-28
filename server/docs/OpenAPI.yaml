@@ -1,0 +1,261 @@
+
+openapi: 3.0.3
+info:
+  title: Durak Online - OpenAPI 3.0
+  description: simple game server API
+  contact:
+    email: durak2.online@yandex.ru
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+  
+servers:
+  - url: /api
+  
+components:
+  securitySchemes:
+    jwt_auth:
+      type: http
+      scheme: bearer
+
+paths:
+  /login:
+    post:
+      summary: User login
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                email:
+                  type: string
+                  maxLength: 120
+                password:
+                  type: string
+                  minLength: 4
+                  maxLength: 16
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      verified:
+                        type: boolean
+                        default: false
+                  access_token:
+                    type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      security: []
+  /register:
+    post:
+      summary: Register a new user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 4
+                  maxLength: 16
+                password:
+                  type: string
+                  minLength: 8
+                  maxLength: 16
+                email:
+                  type: string
+                  maxLength: 120
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: integer
+                  username:
+                    type: string
+                  verified:
+                    type: boolean
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+      security: []
+  /room:
+    post:
+      summary: Create a new room
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reward:
+                  type: integer
+                players_count:
+                  type: integer
+                  minimum: 2
+                  maximum: 6
+                cards_count:
+                  type: integer
+                  enum: [24, 36, 52]
+                speed:
+                  type: integer
+                  enum: [1, 2]
+                game_type:
+                  type: string
+                  enum: ["throw", "translate"]
+                throw_type:
+                  type: string
+                  enum: ["all", "neighborhood"]
+                win_type:
+                  type: string
+                  enum: ["classic", "draw"]
+                private:
+                  type: boolean
+                _password:
+                  type: string
+                  minLength: 4
+                  maxLength: 8
+      responses:
+        '201':
+          description: Room created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  room:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      name:
+                        type: string
+                      reward:
+                        type: integer
+                      cards_count:
+                        type: integer
+                      speed:
+                        type: integer
+                      game_type:
+                        type: string
+                      throw_type:
+                        type: string
+                      win_type:
+                        type: string
+                      private:
+                        type: boolean
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  warning:
+                    type: string
+      security:
+        - jwt_auth: []
+  /user:
+    get:
+      summary: Get user
+      parameters:
+        - name: id
+          in: query
+          description: id of user
+          schema:
+            type: integer
+          required: true
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      verified:
+                        type: boolean
+        '404':
+          description: User not found
+    patch:
+      summary: Update user
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  minLength: 4
+                  maxLength: 16
+              required:
+                - username
+      responses:
+        '200':
+          description: User updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      username:
+                        type: string
+                      verified:
+                        type: boolean
+        '404':
+          description: User not found

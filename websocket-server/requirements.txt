@@ -1,0 +1,6 @@
+websockets
+pyjwt
+confluent_kafka
+aiokafka
+sqlalchemy
+psycopg2-binary

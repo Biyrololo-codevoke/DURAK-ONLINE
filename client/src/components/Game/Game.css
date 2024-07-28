@@ -56,8 +56,7 @@
     --progress-color: green;
 }
 
-#mobile-view .game-user-avatar-container,
-#mobile-view .user-avatar-container{
+#mobile-view .game-user-avatar-container{
     width: 65px;
     height: 65px;
 }
@@ -593,11 +592,6 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 
 @media (max-height: 800px) and (min-height: 561px){
     .game-user-avatar-container{
-        width: 65px;
-        height: 65px;
-    }
-
-    .user-avatar-container{
         width: 65px;
         height: 65px;
     }

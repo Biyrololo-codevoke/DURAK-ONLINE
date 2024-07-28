@@ -1,0 +1,13 @@
+Flask
+Flask-CORS
+
+Flask-SQLAlchemy
+psycopg2-binary
+
+Flask-RESTful
+Flask-JWT-extended
+passlib
+
+confluent_kafka
+
+gunicorn
