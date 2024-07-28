@@ -4,7 +4,8 @@ type UserIdType = number | 'me'
 
 type Props = {
     data: GameEvent;
-    setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>
+    setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>;
+    make_start: () => void
 }
 
 export default function handle_event(props: Props){
@@ -34,6 +35,12 @@ export default function handle_event(props: Props){
 
                 return n_ids
             })
+        }
+
+        else if(
+            data.event === 'make_start'
+        ) {
+            props.make_start();
         }
     }
 }
