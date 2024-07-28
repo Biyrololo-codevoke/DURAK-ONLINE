@@ -27,6 +27,8 @@ class RoomListObserver:
         self.expired_join_keys = []
         self._rooms_join_keys = dict()
         
+        self._room_accepts = dict()
+        
         self._followers = followers or list()
         self.notify()
 
@@ -37,6 +39,11 @@ class RoomListObserver:
         self._rooms[room_id] = room_count
         self._room_connections[room_id] = []
         self._rooms_join_keys[room_id] = []
+        self._room_accepts[room_id] = {
+            "accepts": 0,
+            "player_ids": [],
+            "value": -1
+        }
 
         if author_id and key and key.startswith("athr"):
             self._rooms_join_keys[room_id].append({
@@ -65,6 +72,7 @@ class RoomListObserver:
             player_conn_len = 0 if players_in_connection is None else len(players_in_connection)
 
             if not room.check_available():
+                self._accepts_need = room.players_count
                 return False, "Room is full"
 
             if players_in_room + player_conn_len > room.players_count:
@@ -98,9 +106,8 @@ class RoomListObserver:
 
     def connect_to_room(self, room_id: int, key: str) -> tuple[bool, str]:
         room_connections = self._rooms_join_keys.get(room_id)
-        logger.info("room connections: %s" % str(room_connections))
         player_connection = list(filter(lambda x: x["key"] == key, room_connections))[0]
-        
+
         if not player_connection:
             if key in self.expired_join_keys:
                 self.expired_join_keys.remove(key)
@@ -109,7 +116,6 @@ class RoomListObserver:
                 return False, "key is incorrect"
 
         try:
-            from .event_handlers import send_to_room
             
             player_id = player_connection["player_id"]
             
@@ -119,22 +125,25 @@ class RoomListObserver:
             user_socket = key_identity[key]
             self._room_connections[room_id].append(user_socket)        # add socket to room socket group
 
-            asyncio.create_task(
-                send_to_room(
-                    room_id, 
-                    {                         # and send event to room
-                        "event": "player_connected",
-                        "player_id": player_id,
-                    },
-                    id(user_socket)
-                )
+            
+            self.get_roomssend_to_room(
+                room_id,
+                {                                   # and send event to room
+                    "event": "player_connected",
+                    "player_id": player_id,
+                },
+                id(user_socket)
             )
+
             # update player_count in room_list
             self.update_room(room_id, len(room._user_ids)+1)
             
             self._rooms_join_keys[room_id].remove(          # clear from join keys
                 player_connection
             )
+            
+            if not room.check_available():
+                self.make_start()
             
             return True, "successfully connected"
 
@@ -143,6 +152,41 @@ class RoomListObserver:
         
         except Exceptions.Room.IsFull:
             return False, "Room is full"
+        
+    def make_start(self, room_id: int):
+        self._room_accepts[room_id]['value'] = 0
+        send_to_room(room_id, {
+            "event": "make_start"
+        })
+        
+    def accept_start(self, room_id: int, key: int):
+        player_id = key_identity[key]
+        
+        if not self._room_accepts.get(room_id):
+            status, message =  False, "room not found"
+        
+        elif player_id in self._room_accepts[room_id]["player_ids"]:
+            status, message =  False, "already accepted"
+        
+        elif self._room_accepts[room_id]["value"] != 1:
+            self._room_accepts[room_id]["value"] += 1
+            self._room_accepts[room_id]["player_ids"].append(player_id)
+            send_to_room(room_id, {
+                "event": "accept",
+                "player_id": player_id
+            })
+            status, message = True, "wrong answer | time limit error | memory error | accepted"
+        else:
+            status, message = False, "room is not full for accepting game start"
+
+        if self._room_accepts[room_id]["value"] == self._room_accepts["room_id"]["accepts"]:
+            send_to_room(room_id, {
+                "event": "start_game",
+                "message": "huy!"*99999
+            })
+            self.start_game(room_id)
+        
+        return status, message
 
     def update_room(self, room_id: int, room_count: int):
         self._rooms[room_id] = room_count
@@ -178,6 +222,13 @@ class RoomListObserver:
 async def send_data(socket, payload):
     serialized = json.dumps(payload)
     await socket.send(serialized)
+
+
+def send_to_room(room_id: int, payload: dict, socket_id: int = None):
+    from .event_handlers import send_to_room as _send
+    asyncio.create_task(
+        _send(room_id, payload, socket_id)
+    )
 
 
 room_list = RoomListObserver()
