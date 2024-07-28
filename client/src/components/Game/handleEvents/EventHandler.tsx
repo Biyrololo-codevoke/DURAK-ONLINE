@@ -7,6 +7,7 @@ type Props = {
     setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>;
     make_start: () => void;
     on_player_accept: (player_id: number) => void;
+    on_start_game: () => void;
 }
 
 export default function handle_event(props: Props){
@@ -34,6 +35,8 @@ export default function handle_event(props: Props){
                     }
                 }
 
+                localStorage.setItem('_users_ids', JSON.stringify(n_ids));
+
                 return n_ids
             })
         }
@@ -41,16 +44,19 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'make_start'
         ) {
-            setTimeout(
-                props.make_start,
-                1000
-            )
+            props.make_start()
         }
 
         else if(
             data.event === 'accept'
         ) {
             props.on_player_accept(data.player_id)
+        } 
+
+        else if(
+            data.event === 'start_game'
+        ) {
+            props.on_start_game();
         }
     }
 }

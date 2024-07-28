@@ -72,6 +72,8 @@ export default function GamePage(){
                 for(; i < data.players_count; ++i){
                     new_arr[i] = -i - 1;
                 }
+                
+                localStorage.setItem('_users_ids', JSON.stringify(new_arr));
 
                 setUsersIds(new_arr);
 
@@ -103,7 +105,8 @@ export default function GamePage(){
                 data,
                 setUsersIds,
                 make_start,
-                on_player_accept
+                on_player_accept,
+                on_start_game
             }
         )
     }
@@ -112,25 +115,19 @@ export default function GamePage(){
 
     function on_player_accept(player_id: number){
         set_accepted_start(prev => [...prev, player_id]);
+        setTimers(prev => prev.filter((t) => t.id !== player_id))
     }
 
     // game state = 1
 
     function make_start(){
         console.log('Жмите асепт')
-        console.log(users_ids)
-        console.log(users_ids.map((__id) => {
-            let _id = __id;
-            if(_id === 'me') _id = parseInt(localStorage.getItem('user_id') || '-1');
-            
-            return {
-                id: _id,
-                color: 'red'
-            }
-        }))
+        const _users_ids : UserIdType[] = JSON.parse(localStorage.getItem('_users_ids')!)
+
+        console.log(_users_ids, users_ids)
 
         setTimers(
-            users_ids.map((__id) => {
+            _users_ids.map((__id) => {
                 let _id = __id;
                 if(_id === 'me') _id = parseInt(localStorage.getItem('user_id') || '-1');
                 
@@ -144,6 +141,13 @@ export default function GamePage(){
         set_timers_update(prev => prev + 1);
 
         setGameState(1);
+    }
+
+    // START GAME !!!
+    function on_start_game(){
+        setGameState(2);
+        setTimers([]);
+        set_timers_update(prev => prev + 1);
     }
 
     useEffect(
