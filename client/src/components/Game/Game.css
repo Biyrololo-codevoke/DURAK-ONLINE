@@ -643,6 +643,11 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     #player-cards{
         height: 130px;
     }
+
+    #game-info,
+    #__game-reward{
+        scale: 0.55;
+    }
 }
 
 @media (max-height: 560px){
@@ -673,6 +678,11 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 
     #player-cards{
         height: 75px !important;
+    }
+
+    #game-info,
+    #__game-reward{
+        scale: 0.4 !important;
     }
 }
 

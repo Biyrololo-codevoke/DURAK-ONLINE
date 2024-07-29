@@ -1,5 +1,5 @@
 import React from "react";
-import { GameEvent } from "types/GameTypes";
+import { GameCard, GameEvent } from "types/GameTypes";
 type UserIdType = number | 'me'
 
 type Props = {
@@ -8,6 +8,8 @@ type Props = {
     make_start: () => void;
     on_player_accept: (player_id: number) => void;
     on_start_game: () => void;
+    init_trump_card: (card: GameCard) => void;
+    init_deck: (cards: GameCard[]) => void;
 }
 
 export default function handle_event(props: Props){
@@ -57,6 +59,29 @@ export default function handle_event(props: Props){
             data.event === 'start_game'
         ) {
             props.on_start_game();
+        }
+
+        else if(
+            data.event === 'game_init'
+        ) {
+            const trump_card : GameCard = JSON.parse(data.last_card) as GameCard;
+            props.init_trump_card(trump_card);
+        }
+
+        else if(
+            data.event === 'init_deck'
+        ) {
+            const deck = JSON.parse(data.deck).cards as string;
+
+            const converted_deck : GameCard[] = [];
+
+            for(let card of deck){
+                converted_deck.push(
+                    JSON.parse(card) as GameCard
+                )
+            }
+
+            props.init_deck(converted_deck);
         }
     }
 }
