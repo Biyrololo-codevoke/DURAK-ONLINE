@@ -3,8 +3,8 @@ import 'components/Game/Game.css'
 import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
-import { AcceptedContext, GameStateContext, TimerContext } from "contexts/game";
-import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GameStateType, Timer } from "types/GameTypes";
+import { AcceptedContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
+import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GamePlayers, GameStateType, PlaceCard, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
@@ -51,6 +51,15 @@ export default function GamePage(){
         // [-1, -2, 'me', -4, -5]
         ['me']
     );
+
+    // moving/walking && defender/victim
+
+    const [game_players, set_game_players] = useState<GamePlayers>(
+        {
+            walking: -1,
+            victim: -1
+        }
+    )
 
     // users cards
 
@@ -207,7 +216,8 @@ export default function GamePage(){
                 on_player_accept,
                 on_start_game,
                 init_trump_card,
-                init_deck
+                init_deck,
+                on_next_move
             }
         )
     }
@@ -235,7 +245,8 @@ export default function GamePage(){
                 return {
                     id: _id,
                     color: 'red',
-                    from_start: true
+                    from_start: true,
+                    is_active: true
                 }
             })
         )
@@ -294,6 +305,49 @@ export default function GamePage(){
         set_enemy_cards_delta(_e_delta);
 
         console.log('сюда')
+    }
+
+    // on next move
+
+    function on_next_move(victim: number, walking: number){
+        setTimers(
+            [
+                {
+                    id: walking,
+                    color: 'red',
+                    from_start: true,
+                    is_active: true
+                },
+                {
+                    id: victim,
+                    color: 'green',
+                    from_start: true,
+                    is_active: false
+                }
+            ]
+        )
+
+        set_game_players(
+            {
+                walking: 4,
+                victim: 1
+            }
+        )
+
+        set_timers_update(prev => prev + 1);
+    }
+
+    // player throw card
+
+    function player_throw(event: PlaceCard){
+        
+        console.log(`player throw`)
+
+        console.log(event)
+        
+        socket?.send(
+            JSON.stringify(event)
+        )
     }
 
     useEffect(
@@ -365,23 +419,29 @@ export default function GamePage(){
                         <RoomContext.Provider
                         value={room}
                         >
-                            <GameInfo />
-                            <GameScreen
-                            game_board={game_board}
-                            setGameBoard={setGameBoard}
-                            new_cards={new_cards} 
-                            players_in_room={room.players_count}
-                            users_ids={users_ids}
-                            setUsersIds={setUsersIds}
-                            trump_card={trump_card}
+                            <GamePlayersContext.Provider
+                            value={game_players}
+                            >
+                                <GameInfo />
+                                <GameScreen
+                                game_board={game_board}
+                                setGameBoard={setGameBoard}
+                                new_cards={new_cards} 
+                                players_in_room={room.players_count}
+                                users_ids={users_ids}
+                                setUsersIds={setUsersIds}
+                                trump_card={trump_card}
 
-                            enemy_cards_delta={enemy_cards_delta}
-                            set_enemy_cards_delta={set_enemy_cards_delta}
+                                enemy_cards_delta={enemy_cards_delta}
+                                set_enemy_cards_delta={set_enemy_cards_delta}
 
-                            users_cards={users_cards}
-                            setUsersCards={setUsersCards}
-                            />
-                            <GameFooter handle_start_game={handle_start_game} />
+                                users_cards={users_cards}
+                                setUsersCards={setUsersCards}
+                                
+                                player_throw={player_throw}
+                                />
+                                <GameFooter handle_start_game={handle_start_game} />
+                            </GamePlayersContext.Provider>
                         </RoomContext.Provider>
                     </GameStateContext.Provider>               
                 </AcceptedContext.Provider>

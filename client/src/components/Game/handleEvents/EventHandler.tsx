@@ -10,6 +10,7 @@ type Props = {
     on_start_game: () => void;
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
+    on_next_move: (victim: number, walking: number) => void
 }
 
 export default function handle_event(props: Props){
@@ -82,6 +83,12 @@ export default function handle_event(props: Props){
             }
 
             props.init_deck(converted_deck);
+        }
+
+        else if(
+            data.event === 'next'
+        ) {
+            props.on_next_move(data.victim_player, data.walking_player);
         }
     }
 }

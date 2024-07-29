@@ -40,6 +40,7 @@ type Timer = {
     id: number;
     color: 'green' | 'red';
     from_start: boolean;
+    is_active: boolean;
 }
 
 export type {Timer}
@@ -72,6 +73,18 @@ type InitDeck = {
     deck: string
 }
 
+type NextMove = {
+    event: 'next';
+    victim_player: number;
+    walking_player: number;
+    throwing_players: number[]
+}
+
+type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
+    InitGame | InitDeck | NextMove
+
+export type {GameEvent}
+
 type GameCard = {
     suit: keyof typeof CARDS_SUITS_BY_SYMBOL;
     value: number;
@@ -80,7 +93,16 @@ type GameCard = {
 
 export type {GameCard}
 
-type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
-    InitGame | InitDeck
+type PlaceCard = {
+    slot: number;
+    card: GameCard
+}
 
-export type {GameEvent}
+export type {PlaceCard}
+
+type GamePlayers = {
+    walking: number;
+    victim: number;
+}
+
+export type {GamePlayers}

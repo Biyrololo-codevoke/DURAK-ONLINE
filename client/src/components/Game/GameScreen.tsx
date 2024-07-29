@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import UserAvatar, {EmptyUserAvatar} from "./UserAvatar";
 import { Typography } from "@mui/material";
-import { CardType, GameBoardCard } from "types/GameTypes";
+import { CardType, GameBoardCard, PlaceCard } from "types/GameTypes";
 import PlayerCards from "./PlayerCards";
 import CardDeck from "./CardDeck";
 import EnemyCards from "./EnemyCards";
@@ -13,6 +13,7 @@ import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
+import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS } from "constants/GameParams";
 
 type UserIdType = number | 'me'
 
@@ -37,6 +38,8 @@ type Props = {
     set_enemy_cards_delta: React.Dispatch<React.SetStateAction<EnemyCardDelta>>;
     users_cards: UserCards;
     setUsersCards: React.Dispatch<React.SetStateAction<UserCards>>
+
+    player_throw: (event: PlaceCard) => void;
 }
 
 export default function GameScreen(props: Props){
@@ -98,10 +101,14 @@ export default function GameScreen(props: Props){
     const {game_board, setGameBoard} = props;
 
     function handleThrowCard(lower_card: CardType, upper_card: CardType){
+        
+        let index = -1;
+
         setGameBoard((prev) => {
             return prev.map(
-                (c) => {
+                (c, i) => {
                     if(c.lower.value === lower_card.value && c.lower.suit === lower_card.suit){
+                        index = i;
                         return {
                             ...c,
                             upper: upper_card
@@ -118,6 +125,54 @@ export default function GameScreen(props: Props){
                 'me': [...prev['me'].filter((card, index) => !(card.suit === upper_card.suit && card.value === upper_card.value))]
             }
         })
+
+        props.player_throw(
+            {
+                slot: index,
+                card: {
+                    suit: CARDS_SYMBOBS_BY_SUITS[upper_card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+                    value: upper_card.value,
+                    is_trump: trump_card.suit === upper_card.suit
+                }
+            }
+        )
+    }
+
+    function throw_new_card(card: CardType){
+
+        console.log(`add new card to board`)
+
+        let index = game_board.length + 1;
+
+        if(index === 6) {
+            console.log(`куда кидаешь, фул уже`)
+            return
+        }
+
+        setGameBoard(prev=>(
+            [...prev, {
+                lower: card
+            }]
+        ))
+
+        setUsersCards((prev) => {
+            return {
+                ...prev,
+                'me': [...prev['me'].filter((card, index) => !(card.suit === card.suit && card.value === card.value))]
+            }
+        })
+
+        props.player_throw(
+            {
+                slot: index,
+                card: {
+                    suit: CARDS_SYMBOBS_BY_SUITS[card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+                    value: card.value,
+                    is_trump: trump_card.suit === card.suit
+                }
+            }
+        )
+
     }
 
     function handleTransfer(card: CardType){
@@ -248,6 +303,7 @@ export default function GameScreen(props: Props){
                 throwCard={handleThrowCard}
                 transferCard={handleTransfer}
                 new_cards={new_cards}
+                throw_new_card={throw_new_card}
                 />
             </div>
         </GameBoardContext.Provider>
