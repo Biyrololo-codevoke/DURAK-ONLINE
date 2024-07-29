@@ -1,14 +1,16 @@
 import { CardType } from "types/GameTypes";
 import { getCardImage } from "features/GameFeatures";
-import { CSSProperties, useEffect, useRef } from "react";
+import { CSSProperties, useContext, useEffect, useRef } from "react";
 import { useState } from "react";
 import {isMobile} from "react-device-detect";
+import { GamePlayersContext } from "contexts/game";
 
 type Props = {
     cards: CardType[] | undefined;
     throwCard: (lower_card: CardType, upper_card: CardType) => void;
     transferCard: (card: CardType) => void;
-    new_cards: CardType[]
+    new_cards: CardType[];
+    throw_new_card: (card: CardType) => void;
 }
 
 const MAX_ROTATE = 10;
@@ -41,6 +43,26 @@ export default function PlayerCards(props: Props) {
         },
         []
     )
+
+    const game_players = useContext(GamePlayersContext);
+
+    const _users_id = parseInt(localStorage.getItem('user_id') || '-1');
+
+    const [can_throw_card, set_can_throw_card] = useState(true);
+
+    // useEffect(
+    //     ()=>{
+    //         // хрень не работает
+    //         console.log(game_players, _users_id)
+    //         if( _users_id === game_players.victim || _users_id === game_players.walking){
+    //             set_can_throw_card(true);
+    //             return
+    //         }
+
+    //         set_can_throw_card(false);
+    //     },
+    //     [game_players]
+    // )
 
     const {new_cards} = props;
 
@@ -75,7 +97,7 @@ export default function PlayerCards(props: Props) {
 
         const card : CardType | null | -1 = JSON.parse(localStorage.getItem('card') || '-1');
         
-        if(card === -1) return
+        if(!can_throw_card) return
 
         if(!props.cards) return;
 
@@ -100,8 +122,19 @@ export default function PlayerCards(props: Props) {
         document.body.style.setProperty('--drag-x', `${drag_x - (card_rect_x - left)}px`)
         document.body.style.setProperty('--drag-y', `${drag_y - (card_rect_y - top)}px`)
 
+        
+        if(card === -1) {
+            props.throw_new_card(drag_card);
+            localStorage.removeItem('card');
+            localStorage.removeItem('drag_index');
+            localStorage.removeItem('drag_card');
+        }
+
         if(card === null) {
             props.transferCard(drag_card);
+            localStorage.removeItem('card');
+            localStorage.removeItem('drag_index');
+            localStorage.removeItem('drag_card');
             return;
         }
 
@@ -118,6 +151,12 @@ export default function PlayerCards(props: Props) {
 
     function handleMouseMove(e: {clientX: number, clientY: number, target: any}) {
         if(!draggin_card_ref.current) return;
+
+        // хрень не работает
+        if(!can_throw_card) {
+            handleMouseUp();
+            return
+        }
 
         const gameScreen = document.getElementById('game-screen');
 
@@ -161,6 +200,10 @@ export default function PlayerCards(props: Props) {
     }
 
     function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
+    
+        // хрень не работает
+        if(!can_throw_card) return
+        
         setDraggin_card(index);
         localStorage.setItem('drag_index', `${index}`);
         localStorage.setItem('drag_card', JSON.stringify(props.cards![index]));
@@ -196,6 +239,9 @@ export default function PlayerCards(props: Props) {
     }
 
     function handleTouchStart(e: React.TouchEvent<HTMLDivElement>, index: number) {
+
+        // хрень не работает
+        if(!can_throw_card) return
 
         const player_cards_rect = document.getElementById('player-cards')!.getBoundingClientRect();
 
@@ -338,7 +384,8 @@ export default function PlayerCards(props: Props) {
             onContextMenu={(e) => e.preventDefault()}
             >
                 {
-                    draggin_card !== -1 &&
+                    draggin_card !== -1 && 
+                    can_throw_card &&
                     <img src={getCardImage(props.cards[draggin_card])} alt="card"
                     style={{width: '100%', height: '100%'}} 
                     onContextMenu={(e) => e.preventDefault()}
