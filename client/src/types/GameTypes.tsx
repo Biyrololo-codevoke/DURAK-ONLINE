@@ -1,3 +1,5 @@
+import { CARDS_SUITS_BY_SYMBOL } from "constants/GameParams";
+
 type UserShort = {
     id: number | undefined;
 }
@@ -36,7 +38,8 @@ export type {GameStateType}
 
 type Timer = {
     id: number;
-    color: 'green' | 'red'
+    color: 'green' | 'red';
+    from_start: boolean;
 }
 
 export type {Timer}
@@ -59,6 +62,25 @@ type StartGame = {
     event: 'start_game'
 }
 
-type GameEvent = PlayerConnected | MakeStart | Accept | StartGame
+type InitGame = {
+    event: 'game_init';
+    last_card: string;
+}
+
+type InitDeck = {
+    event: 'init_deck';
+    deck: string
+}
+
+type GameCard = {
+    suit: keyof typeof CARDS_SUITS_BY_SYMBOL;
+    value: number;
+    is_trump: boolean
+}
+
+export type {GameCard}
+
+type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
+    InitGame | InitDeck
 
 export type {GameEvent}

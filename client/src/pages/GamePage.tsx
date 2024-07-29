@@ -4,15 +4,27 @@ import { useState, useEffect } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
 import { AcceptedContext, GameStateContext, TimerContext } from "contexts/game";
-import { GameEvent, GameStateType, Timer } from "types/GameTypes";
+import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GameStateType, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import GameInfo from "components/Game/GameInfo";
 import {handle_event} from 'components/Game/handleEvents'
+import { CARDS_SUITS_BY_SYMBOL } from "constants/GameParams";
+import { convert_card } from "features/GameFeatures";
 
 type UserIdType = number | 'me'
+
+type UserCards = {
+    'me' : CardType[],
+    [key : number]: number
+}
+
+type EnemyCardDelta = {
+    [key : number]: number
+}
+
 
 export default function GamePage(){
 
@@ -39,6 +51,84 @@ export default function GamePage(){
         // [-1, -2, 'me', -4, -5]
         ['me']
     );
+
+    // users cards
+
+    const [users_cards, setUsersCards] = useState<UserCards>({
+        // 3 : 4,
+        // 5 : 7,
+        // 'me' : [
+        //     {suit: 3, value: 10},
+        //     {suit: 3, value: 9},
+        //     {suit: 3, value: 8},
+        //     {suit: 2, value: 7},
+        //     {suit: 2, value: 14},
+        //     {suit: 1, value: 14},
+        //     {suit: 4, value: 13},
+        // ],
+        // 4 : 4,
+        // 6 : 8
+        'me': []
+    })
+
+    // enemis cards delta for anim
+
+    const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>(
+        {
+            3 : 10,
+            5 : 20,
+            4 : 40,
+            6 : 60,
+        }
+    )
+
+    // new_cards
+
+    const [new_cards, set_new_cards] = useState<CardType[]>([
+        {suit: 3, value: 10},
+        {suit: 3, value: 9},
+        {suit: 3, value: 8},
+        {suit: 2, value: 7},
+        {suit: 2, value: 14},
+        {suit: 1, value: 14},
+        {suit: 4, value: 13},
+    ]);
+
+    const [game_board, setGameBoard] = useState<GameBoardCard[]>([
+            // {
+            //     lower: {
+            //         suit: 4,
+            //         value: 1
+            //     },
+            //     upper: {
+            //         suit: 3,
+            //         value: 13
+            //     }
+            // },
+            // {
+            //     lower: {
+            //         suit: 2,
+            //         value: 5
+            //     },
+            // },
+            // {
+            //     lower: {
+            //         suit: 1,
+            //         value: 2
+            //     },
+            // },
+            // {
+            //     lower: {
+            //         suit: 4,
+            //         value: 5
+            //     },
+            //     upper: {
+            //         suit: 3,
+            //         value: 7
+            //     }
+            // },
+        ],
+    )
 
     const _room_id = parseInt(localStorage.getItem('_room_id') || '-1');
 
@@ -89,6 +179,15 @@ export default function GamePage(){
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
 
+    // trump game
+
+    const [trump_card, setTrumpCard] = useState<CardType>(
+        {
+            suit: 2,
+            value: 11
+        }
+    )
+
     // timer
 
     const [timers, setTimers] = useState<Timer[]>([]);
@@ -106,7 +205,9 @@ export default function GamePage(){
                 setUsersIds,
                 make_start,
                 on_player_accept,
-                on_start_game
+                on_start_game,
+                init_trump_card,
+                init_deck
             }
         )
     }
@@ -133,7 +234,8 @@ export default function GamePage(){
                 
                 return {
                     id: _id,
-                    color: 'red'
+                    color: 'red',
+                    from_start: true
                 }
             })
         )
@@ -148,6 +250,50 @@ export default function GamePage(){
         setGameState(2);
         setTimers([]);
         set_timers_update(prev => prev + 1);
+    }
+
+    // Init trump card
+
+    function init_trump_card(card_: GameCard){
+        const suit = CARDS_SUITS_BY_SYMBOL[card_.suit];
+
+        setTrumpCard(
+            {
+                suit: suit as CardSuitType,
+                value: card_.value as CardValueType
+            }
+        )
+    }
+
+    // init player deck
+
+    function init_deck(cards: GameCard[]){
+        const conv_cards : CardType[] = [];
+        for(let c of cards){
+            conv_cards.push(convert_card(c))
+        }
+
+        set_new_cards(conv_cards);
+        
+        const __users_cards : UserCards = {
+            'me': conv_cards
+        };
+
+        const _users_ids : UserIdType[] = JSON.parse(localStorage.getItem('_users_ids')!)
+
+        const _e_delta : EnemyCardDelta = {};
+
+        for(let _id of _users_ids){
+            if(_id === 'me') continue;
+            __users_cards[_id] = 6;
+            _e_delta[_id] = 60;
+        }
+
+        setUsersCards(__users_cards);
+
+        set_enemy_cards_delta(_e_delta);
+
+        console.log('сюда')
     }
 
     useEffect(
@@ -187,7 +333,16 @@ export default function GamePage(){
 
         console.log('начал игру')
 
-        setTimers(prev => prev.filter((e) => String(e.id) !== localStorage.getItem('user_id')));
+        setTimers(prev => 
+            prev.filter(
+                (e) => String(e.id) !== localStorage.getItem('user_id')
+            ).map((t) => (
+                {
+                    ...t,
+                    from_start: false
+                }
+            ))
+        );
 
         set_timers_update(prev => prev + 1);
 
@@ -211,10 +366,20 @@ export default function GamePage(){
                         value={room}
                         >
                             <GameInfo />
-                            <GameScreen 
+                            <GameScreen
+                            game_board={game_board}
+                            setGameBoard={setGameBoard}
+                            new_cards={new_cards} 
                             players_in_room={room.players_count}
                             users_ids={users_ids}
                             setUsersIds={setUsersIds}
+                            trump_card={trump_card}
+
+                            enemy_cards_delta={enemy_cards_delta}
+                            set_enemy_cards_delta={set_enemy_cards_delta}
+
+                            users_cards={users_cards}
+                            setUsersCards={setUsersCards}
                             />
                             <GameFooter handle_start_game={handle_start_game} />
                         </RoomContext.Provider>
