@@ -14,7 +14,6 @@ from .game import Game, Player
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 socket_identity = dict()
 user_socket = dict()
-
 key_identity = dict()
 
 
@@ -161,6 +160,7 @@ class RoomListObserver:
     def accept_start(self, room_id: int, key: int):
         player_id = int(key.split('_')[-1])
         player_socket = key_identity[key]
+        user_socket[player_id] = player_socket
 
         if not self._room_accepts.get(room_id):
             status, message =  False, "room not found"
@@ -212,17 +212,30 @@ class RoomListObserver:
             
         logger.info("add players")
         
-        payload = game.serialize()
-        room.game_obj = str(payload)
+        game_dict = game.serialize()
+        room.game_obj = json.dumps(game_dict)
         room.save()
         
-        payload["game"]["deck"]  # TODO: del payload["game"]["deck"]
-        
-        logger.info("send_payload: %s" % str(payload))
         send_to_room(room_id, {
             "event": "game_init",
-            **payload
+            "last_card": game.last_card.serialize()
         })
+        
+        for player in game.players:
+            payload = {
+                "event": "init_deck",
+                "deck": player.deck.serialize()
+            }
+            logger.info("send to player[%d]: %s" % (player.id, json.dumps(payload, indent=2)))
+            send_to_player(player.id, payload)
+            
+        send_to_room(room_id, {
+            "event": "next",
+            "walking_player": game.attacker_player.id,
+            "victim_player": game.victim_player.id,
+            "throwing_players": [player.id for player in game.throwing_players]
+        })
+
 
     def update_room(self, room_id: int, room_count: int):
         self._rooms[room_id] = room_count
@@ -264,6 +277,13 @@ def send_to_room(room_id: int, payload: dict, socket_id: int = None):
     from .event_handlers import send_to_room as _send
     asyncio.create_task(
         _send(room_id, payload, socket_id)
+    )
+
+
+def send_to_player(player_id: int, payload: dict):
+    from .event_handlers import send_to_user as _send_y
+    asyncio.create_task(
+        _send_y(player_id, payload)
     )
 
 

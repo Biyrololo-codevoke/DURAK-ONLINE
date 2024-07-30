@@ -14,6 +14,7 @@ async def send_to_socket(socket: WebSocket, payload: dict):
 
 async def send_to_user(user_id: int, payload: dict):
     socket = user_socket[user_id]
+    logger.info(f"send_to_user[{user_id}]: {payload=}\n{socket=}")
     await send_to_socket(socket, payload)
 
 
@@ -80,6 +81,11 @@ async def handle_room(payload: dict, socket: WebSocket):
 
 
 async def handle_list(socket: WebSocket, payload: dict):
+    key = payload.get("key")
+    if key:
+        player_id = key.split('_')[-1]
+        user_socket[player_id] = socket
+    
     if "event" not in payload.keys():
         current_room_list = room_list.get_rooms()
         await send_to_socket(socket, current_room_list)

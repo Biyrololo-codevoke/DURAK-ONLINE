@@ -1,3 +1,5 @@
+import json
+
 from .card import Card
 
 
@@ -32,6 +34,11 @@ class PlayerDeck:
             if not self.find_card(card):
                 raise ValueError("Player has no card: " + str(card))
             self._cards.remove(card)
+            
+    def serialize(self) -> str:
+        return json.dumps({
+            "cards": [card.serialize() for card in self._cards]
+        })
             
     def __str__(self):
         return ", ".join([str(card) for card in self._cards])

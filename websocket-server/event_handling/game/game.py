@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import json
+import random
 from typing import Literal, TYPE_CHECKING
+from collections import deque
 
 from .game_board import GameBoard
 from .card import Card
@@ -25,7 +27,7 @@ class Game:
             throw_mode: Literal["all", "neighborhood"] = "all"):
         self.players = [None] * players_count
         self.last_card = None
-        
+
         self.id = id
         self.reward = reward
         self.speed = speed
@@ -35,6 +37,10 @@ class Game:
         self.win_type = win_type
         self.throw_mode = throw_mode
         self.deck = None
+        self.players_deque = None
+        self.victim_player = None
+        self.attacker_player = None
+        self.throwing_players = None
 
     def make_game(self):
         self.beaten_cards = []
@@ -49,6 +55,32 @@ class Game:
             card.is_trump = True
 
         self.deal_cards()
+        self.choose_first_player()
+        
+    def choose_first_player(self):
+        self.players_deque = deque(self.players)
+        self.players_deque.rotate(
+            random.randint(0, 999)
+        )
+        
+        self.victim_player = self.players_deque[-1]
+        self.attacker_player = self.players_deque[0]
+
+        if self.throw_mode == "all":
+            self.throwing_players = self.players
+        else:
+            self.throwing_players = [self.players_deque[1], self.players_deque[-2]]
+        
+    def next(self):
+        self.players_deque.rotate(1)
+        
+        self.victim_player = self.players_deque[-1]
+        self.attacker_player = self.players_deque[0]
+        
+        if self.throw_mode == "all":
+            self.throwing_players = self.players
+        else:
+            self.throwing_players = [self.players_deque[1], self.players_deque[-2]]
 
     def deal_cards(self):
         for _ in range(6):
