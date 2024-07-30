@@ -1,4 +1,4 @@
-import { CardType } from "types/GameTypes";
+import { CardType, GamePlayers } from "types/GameTypes";
 import { getCardImage } from "features/GameFeatures";
 import { CSSProperties, useContext, useEffect, useRef } from "react";
 import { useState } from "react";
@@ -44,25 +44,7 @@ export default function PlayerCards(props: Props) {
         []
     )
 
-    const game_players = useContext(GamePlayersContext);
-
-    const _users_id = parseInt(localStorage.getItem('user_id') || '-1');
-
-    const [can_throw_card, set_can_throw_card] = useState(true);
-
-    // useEffect(
-    //     ()=>{
-    //         // хрень не работает
-    //         console.log(game_players, _users_id)
-    //         if( _users_id === game_players.victim || _users_id === game_players.walking){
-    //             set_can_throw_card(true);
-    //             return
-    //         }
-
-    //         set_can_throw_card(false);
-    //     },
-    //     [game_players]
-    // )
+    const _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
     const {new_cards} = props;
 
@@ -91,13 +73,22 @@ export default function PlayerCards(props: Props) {
 
         draggin_card_ref.current.style.display = 'none';
 
-        const board = document.getElementById('game-desk')!;
+        const board = document.getElementById('game-desk');
+ 
+        if(!board) return
 
         board.className = '';
 
         const card : CardType | null | -1 = JSON.parse(localStorage.getItem('card') || '-1');
-        
-        if(!can_throw_card) return
+
+        let can_throw_card = localStorage.getItem('can_throw') === 'true';
+
+        if(!can_throw_card) {
+            console.log('ошибка ошбика tryThrow')
+            return
+        }
+
+        console.log('trying throw')
 
         if(!props.cards) return;
 
@@ -129,6 +120,7 @@ export default function PlayerCards(props: Props) {
             localStorage.removeItem('card');
             localStorage.removeItem('drag_index');
             localStorage.removeItem('drag_card');
+            return
         }
 
         if(card === null) {
@@ -154,11 +146,6 @@ export default function PlayerCards(props: Props) {
         if(!draggin_card_ref.current) return;
 
         // хрень не работает
-        if(!can_throw_card) {
-            handleMouseUp();
-            return
-        }
-
         const gameScreen = document.getElementById('game-screen');
 
         if(!gameScreen) return
@@ -203,7 +190,11 @@ export default function PlayerCards(props: Props) {
     function handleMouseDown(e: React.MouseEvent<HTMLDivElement, MouseEvent>, index: number) {
     
         // хрень не работает
-        if(!can_throw_card) return
+        
+        let can_throw_card = localStorage.getItem('can_throw') === 'true';
+        if(!can_throw_card) {
+            return
+        }
         
         setDraggin_card(index);
         localStorage.setItem('drag_index', `${index}`);
@@ -242,6 +233,8 @@ export default function PlayerCards(props: Props) {
     function handleTouchStart(e: React.TouchEvent<HTMLDivElement>, index: number) {
 
         // хрень не работает
+        let can_throw_card = localStorage.getItem('can_throw') === 'true';
+
         if(!can_throw_card) return
 
         const player_cards_rect = document.getElementById('player-cards')!.getBoundingClientRect();
@@ -386,7 +379,6 @@ export default function PlayerCards(props: Props) {
             >
                 {
                     draggin_card !== -1 && 
-                    can_throw_card &&
                     <img src={getCardImage(props.cards[draggin_card])} alt="card"
                     style={{width: '100%', height: '100%'}} 
                     onContextMenu={(e) => e.preventDefault()}

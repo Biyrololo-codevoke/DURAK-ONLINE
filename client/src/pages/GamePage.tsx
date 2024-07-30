@@ -222,7 +222,8 @@ export default function GamePage(){
                 on_start_game,
                 init_trump_card,
                 init_deck,
-                on_next_move
+                on_next_move,
+                on_place_card
             }
         )
     }
@@ -279,6 +280,8 @@ export default function GamePage(){
                 value: card_.value as CardValueType
             }
         )
+
+        localStorage.setItem('trump_suit', String(suit))
     }
 
     // init player deck
@@ -339,7 +342,55 @@ export default function GamePage(){
             }
         )
 
+        let _user_id = parseInt(localStorage.getItem('user_id') || '-1');
+
+        if(walking === _user_id || victim === _user_id){
+            localStorage.setItem('can_throw', 'true')
+        } else {
+            localStorage.setItem('can_throw', 'false')
+        }
+
+        if(_user_id === victim){
+            localStorage.setItem('_role', 'victim');
+        } else if(_user_id === walking){
+            localStorage.setItem('_role', 'walking')
+        }
+
         set_timers_update(prev => prev + 1);
+    }
+
+    // on_place_card
+
+    function on_place_card(event: PlaceCard){
+
+        console.log('положил карту', {event})
+
+        const slot = event.slot - 1;
+
+        const _card = convert_card(event.card);
+
+        if(slot >= game_board.length){
+            setGameBoard(prev => [...prev, {
+                lower: _card,
+            }])
+
+            return
+        }
+
+        if(game_board[slot]){
+            if(game_board[slot].upper){
+                console.log('куда ложишь?')
+                return
+            }
+
+            setGameBoard(prev=>{
+                const new_board = [...prev];
+
+                new_board[slot].upper = _card;
+
+                return new_board
+            })
+        }
     }
 
     // player throw card
@@ -351,7 +402,7 @@ export default function GamePage(){
         console.log(event)
         
         socket?.send(
-            JSON.stringify({...event, "event": "place_card"})
+            JSON.stringify(event)
         )
     }
 

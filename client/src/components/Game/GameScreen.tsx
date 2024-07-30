@@ -133,7 +133,8 @@ export default function GameScreen(props: Props){
                     suit: CARDS_SYMBOBS_BY_SUITS[upper_card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
                     value: upper_card.value,
                     is_trump: trump_card.suit === upper_card.suit
-                }
+                },
+                event: 'place_card'
             }
         )
     }
@@ -148,6 +149,25 @@ export default function GameScreen(props: Props){
             console.log(`куда кидаешь, фул уже`)
             return
         }
+
+        let flag = false;
+
+        if(game_board.length === 0) flag = true;
+
+        for(let c of game_board){
+            if(c.lower.value === add_card.value){
+                flag = true;
+                break
+            }
+            if(c.upper){
+                if(c.upper.value === add_card.value){
+                    flag = true;
+                    break
+                }
+            }
+        }
+
+        if(!flag) return
 
         setGameBoard(prev=>(
             [...prev, {
@@ -164,6 +184,7 @@ export default function GameScreen(props: Props){
 
         props.player_throw(
             {
+                event: 'place_card',
                 slot: index,
                 card: {
                     suit: CARDS_SYMBOBS_BY_SUITS[add_card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,

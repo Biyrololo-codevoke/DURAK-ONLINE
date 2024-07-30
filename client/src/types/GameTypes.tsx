@@ -80,8 +80,14 @@ type NextMove = {
     throwing_players: number[]
 }
 
+type PlaceCard = {
+    event: 'place_card';
+    slot: number;
+    card: GameCard
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
-    InitGame | InitDeck | NextMove
+    InitGame | InitDeck | NextMove | PlaceCard
 
 export type {GameEvent}
 
@@ -92,11 +98,6 @@ type GameCard = {
 }
 
 export type {GameCard}
-
-type PlaceCard = {
-    slot: number;
-    card: GameCard
-}
 
 export type {PlaceCard}
 
