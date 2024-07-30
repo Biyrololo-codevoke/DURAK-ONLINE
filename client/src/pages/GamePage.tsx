@@ -79,6 +79,11 @@ export default function GamePage(){
         'me': []
     })
 
+    // useEffect(()=>{
+    //     console.log(`cards changed`);
+    //     console.log(users_cards)
+    // }, [users_cards])
+
     // enemis cards delta for anim
 
     const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>(
@@ -329,8 +334,8 @@ export default function GamePage(){
 
         set_game_players(
             {
-                walking: 4,
-                victim: 1
+                walking,
+                victim
             }
         )
 
@@ -346,7 +351,7 @@ export default function GamePage(){
         console.log(event)
         
         socket?.send(
-            JSON.stringify(event)
+            JSON.stringify({...event, "event": "place_card"})
         )
     }
 
