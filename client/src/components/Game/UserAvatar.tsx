@@ -68,9 +68,10 @@ export default function UserAvatar(props: Props) {
 
             setColor(timers.timers[flag].color);
             
-            if(!timers.timers[flag].from_start) return;
+            if(timers.timers[flag].from_start) {
+                setTimer(MAX_TIMER);
+            }
 
-            setTimer(MAX_TIMER);
 
             if(timers.timers[flag].is_active === false) return
 
