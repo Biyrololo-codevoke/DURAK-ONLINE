@@ -124,6 +124,7 @@ export default function PlayerCards(props: Props) {
 
         
         if(card === -1) {
+            console.log(drag_card)
             props.throw_new_card(drag_card);
             localStorage.removeItem('card');
             localStorage.removeItem('drag_index');

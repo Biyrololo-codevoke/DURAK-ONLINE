@@ -138,7 +138,7 @@ export default function GameScreen(props: Props){
         )
     }
 
-    function throw_new_card(card: CardType){
+    function throw_new_card(add_card: CardType){
 
         console.log(`add new card to board`)
 
@@ -151,14 +151,14 @@ export default function GameScreen(props: Props){
 
         setGameBoard(prev=>(
             [...prev, {
-                lower: card
+                lower: add_card
             }]
         ))
 
         setUsersCards((prev) => {
             return {
                 ...prev,
-                'me': [...prev['me'].filter((card, index) => !(card.suit === card.suit && card.value === card.value))]
+                'me': [...prev['me'].filter((card, index) => !(card.suit === add_card.suit && card.value === add_card.value))]
             }
         })
 
@@ -166,9 +166,9 @@ export default function GameScreen(props: Props){
             {
                 slot: index,
                 card: {
-                    suit: CARDS_SYMBOBS_BY_SUITS[card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
-                    value: card.value,
-                    is_trump: trump_card.suit === card.suit
+                    suit: CARDS_SYMBOBS_BY_SUITS[add_card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+                    value: add_card.value,
+                    is_trump: trump_card.suit === add_card.suit
                 }
             }
         )
