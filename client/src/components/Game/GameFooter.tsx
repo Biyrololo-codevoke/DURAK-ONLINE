@@ -20,7 +20,7 @@ export default function GameFooter({handle_start_game}: Props) {
     return (
         <div id="game-footer">
             {
-                gameState !== 0 && show_action &&
+                gameState === 1 && show_action &&
                 <ActionButton onClick={handle_start_game} label="Старт"/>
             }
             <UserAvatar user_id={user_id ? parseInt(user_id) : undefined}/>

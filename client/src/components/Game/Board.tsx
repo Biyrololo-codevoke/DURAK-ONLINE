@@ -1,4 +1,4 @@
-import { GameBoardContext } from "contexts/game"
+import { GameBoardContext, GamePlayersContext } from "contexts/game"
 import { getCardImage } from "features/GameFeatures";
 import { CSSProperties, useContext, useEffect } from "react"
 import { CardType } from "types/GameTypes";
@@ -12,7 +12,16 @@ export default function GameBoard({is_transfering}: Props) {
 
     const board = useContext(GameBoardContext);
 
+    const game_players = useContext(GamePlayersContext);
+
+    const _users_id = parseInt(localStorage.getItem('user_id') || '-1');
+
     const {cards, setCards} = board;
+    
+    const show_transfer = is_transfering &&
+        game_players.victim === _users_id &&
+        cards.length > 1 && cards.length < 6 &&
+        cards.find((c) => c.upper !== undefined) === undefined;
 
     function focusCard(card: CardType, index: number) {
         localStorage.setItem('card', JSON.stringify(card));
@@ -118,7 +127,7 @@ export default function GameBoard({is_transfering}: Props) {
                     ))
                 }
                 {
-                    is_transfering && board.cards.length < 6 && 
+                    show_transfer && 
                     <div className="game-desk-card game-desk-card-transfering"
                     style={
                         {

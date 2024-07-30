@@ -1,7 +1,7 @@
 import React, {useEffect, useMemo, useState} from "react";
 import UserAvatar, {EmptyUserAvatar} from "./UserAvatar";
 import { Typography } from "@mui/material";
-import { CardType, GameBoardCard } from "types/GameTypes";
+import { CardType, GameBoardCard, PlaceCard } from "types/GameTypes";
 import PlayerCards from "./PlayerCards";
 import CardDeck from "./CardDeck";
 import EnemyCards from "./EnemyCards";
@@ -13,6 +13,7 @@ import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
+import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS } from "constants/GameParams";
 
 type UserIdType = number | 'me'
 
@@ -28,12 +29,24 @@ type EnemyCardDelta = {
 type Props = {
     players_in_room: number;
     users_ids: UserIdType[];
-    setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>
+    setUsersIds: React.Dispatch<React.SetStateAction<UserIdType[]>>;
+    trump_card: CardType;
+    new_cards: CardType[];
+    game_board: GameBoardCard[];
+    setGameBoard: React.Dispatch<React.SetStateAction<GameBoardCard[]>>;
+    enemy_cards_delta: EnemyCardDelta;
+    set_enemy_cards_delta: React.Dispatch<React.SetStateAction<EnemyCardDelta>>;
+    users_cards: UserCards;
+    setUsersCards: React.Dispatch<React.SetStateAction<UserCards>>
+
+    player_throw: (event: PlaceCard) => void;
 }
 
 export default function GameScreen(props: Props){
 
     const {players_in_room, users_ids, setUsersIds} = props;
+
+    const {trump_card} = props;
 
     const game_state = useContext(GameStateContext);
 
@@ -47,30 +60,7 @@ export default function GameScreen(props: Props){
     //     ['me']
     // );
 
-    const [trump_card, setTrumpCard] = useState<CardType>(
-        {
-            suit: 2,
-            value: 11
-        }
-    )
-
-    const [users_cards, setUsersCards] = useState<UserCards>({
-        // 3 : 4,
-        // 5 : 7,
-        // 'me' : [
-        //     {suit: 3, value: 10},
-        //     {suit: 3, value: 9},
-        //     {suit: 3, value: 8},
-        //     {suit: 2, value: 7},
-        //     {suit: 2, value: 14},
-        //     {suit: 1, value: 14},
-        //     {suit: 4, value: 13},
-        // ],
-        // 4 : 4,
-        // 6 : 8
-        'me': []
-    })
-
+    const {users_cards, setUsersCards} = props;
 
     // const [players_in_room, set_players_in_room] = useState(0); //5
 
@@ -108,47 +98,17 @@ export default function GameScreen(props: Props){
 
     const prev_users = users_ids.slice(0, users_ids.indexOf('me'));
 
-    const [game_board, setGameBoard] = useState<GameBoardCard[]>([
-            // {
-            //     lower: {
-            //         suit: 4,
-            //         value: 1
-            //     },
-            //     upper: {
-            //         suit: 3,
-            //         value: 13
-            //     }
-            // },
-            // {
-            //     lower: {
-            //         suit: 2,
-            //         value: 5
-            //     },
-            // },
-            // {
-            //     lower: {
-            //         suit: 1,
-            //         value: 2
-            //     },
-            // },
-            // {
-            //     lower: {
-            //         suit: 4,
-            //         value: 5
-            //     },
-            //     upper: {
-            //         suit: 3,
-            //         value: 7
-            //     }
-            // },
-        ],
-    )
+    const {game_board, setGameBoard} = props;
 
     function handleThrowCard(lower_card: CardType, upper_card: CardType){
+        
+        let index = -1;
+
         setGameBoard((prev) => {
             return prev.map(
-                (c) => {
+                (c, i) => {
                     if(c.lower.value === lower_card.value && c.lower.suit === lower_card.suit){
+                        index = i;
                         return {
                             ...c,
                             upper: upper_card
@@ -165,6 +125,54 @@ export default function GameScreen(props: Props){
                 'me': [...prev['me'].filter((card, index) => !(card.suit === upper_card.suit && card.value === upper_card.value))]
             }
         })
+
+        props.player_throw(
+            {
+                slot: index,
+                card: {
+                    suit: CARDS_SYMBOBS_BY_SUITS[upper_card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+                    value: upper_card.value,
+                    is_trump: trump_card.suit === upper_card.suit
+                }
+            }
+        )
+    }
+
+    function throw_new_card(card: CardType){
+
+        console.log(`add new card to board`)
+
+        let index = game_board.length + 1;
+
+        if(index === 6) {
+            console.log(`куда кидаешь, фул уже`)
+            return
+        }
+
+        setGameBoard(prev=>(
+            [...prev, {
+                lower: card
+            }]
+        ))
+
+        setUsersCards((prev) => {
+            return {
+                ...prev,
+                'me': [...prev['me'].filter((card, index) => !(card.suit === card.suit && card.value === card.value))]
+            }
+        })
+
+        props.player_throw(
+            {
+                slot: index,
+                card: {
+                    suit: CARDS_SYMBOBS_BY_SUITS[card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+                    value: card.value,
+                    is_trump: trump_card.suit === card.suit
+                }
+            }
+        )
+
     }
 
     function handleTransfer(card: CardType){
@@ -188,24 +196,10 @@ export default function GameScreen(props: Props){
         // console.log('мои новые карты', [...users_cards['me'].filter((card, index) => index !== card_index)])
     }
 
-    const [new_cards, set_new_cards] = useState<CardType[]>([
-        {suit: 3, value: 10},
-        {suit: 3, value: 9},
-        {suit: 3, value: 8},
-        {suit: 2, value: 7},
-        {suit: 2, value: 14},
-        {suit: 1, value: 14},
-        {suit: 4, value: 13},
-    ]);
+    const {new_cards} = props;
 
-    const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>(
-        {
-            3 : 10,
-            5 : 20,
-            4 : 40,
-            6 : 60,
-        }
-    )
+    const {enemy_cards_delta, set_enemy_cards_delta} = props;
+
 
     // useEffect(
     //     ()=>{
@@ -309,6 +303,7 @@ export default function GameScreen(props: Props){
                 throwCard={handleThrowCard}
                 transferCard={handleTransfer}
                 new_cards={new_cards}
+                throw_new_card={throw_new_card}
                 />
             </div>
         </GameBoardContext.Provider>
