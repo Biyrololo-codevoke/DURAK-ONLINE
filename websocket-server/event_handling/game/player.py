@@ -29,6 +29,9 @@ class Player:
         return json.dumps({
             "user_id": self.id
         })
+        
+    def has_card(self, card: Card) -> bool:
+        return self.deck.has_card(card)
     
     @staticmethod
     def deserialize(raw_data) -> Player:

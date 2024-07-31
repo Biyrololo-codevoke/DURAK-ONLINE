@@ -26,6 +26,9 @@ class PlayerDeck:
             return None
         else:
             return eligible_cards[0]
+        
+    def has_card(self, card: Card) -> bool:
+        return bool(self.find_card(card))
 
     def add_card(self, card: Card) -> None:
         self._cards.append(card)
@@ -39,6 +42,11 @@ class PlayerDeck:
         return json.dumps({
             "cards": [card.serialize() for card in self._cards]
         })
+        
+    def json(self) -> dict:
+        return {
+            "cards": [card.json() for card in self._cards]
+        }        
             
     def __str__(self):
         return ", ".join([str(card) for card in self._cards])

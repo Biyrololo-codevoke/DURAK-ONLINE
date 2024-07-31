@@ -212,20 +212,19 @@ class RoomListObserver:
             game.join_player(player)
             
         logger.info("add players")
-        
-        game_dict = game.serialize()
-        room.game_obj = json.dumps(game_dict)
+
+        room.game_obj = game.serialize()
         room.save()
         
         send_to_room(room_id, {
             "event": "game_init",
-            "last_card": game.last_card.serialize()
+            "last_card": game.last_card.json()
         })
         
         for player in game.players:
             payload = {
                 "event": "init_deck",
-                "deck": player.deck.serialize()
+                "deck": player.deck.json()
             }
             logger.info("send to player[%d]: %s" % (player.id, json.dumps(payload, indent=2)))
             send_to_player(player.id, payload)
@@ -291,6 +290,7 @@ def send_to_player(player_id: int, payload: dict):
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
     player_id = int(key.split('_')[-1])
+    socket_id = id(key_identity[key])
     room = RoomModel.get_by_id(room_id)
     
     if not room:
@@ -328,11 +328,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     })
                     send_to_room(room_id, {
                         "event": "card_beat",
-                        "card": card.serialize(),
-                        "slot": slot
-                    })
+                        "card": card,
+                        "slot": slot,
+                        "player_id": player_id
+                    }, socket_id)
             else:
-                send_to_room(room_id, payload)
+                payload["player_id"] = player_id
+                send_to_room(room_id, payload, socket_id)
 
             room.game_obj = game.serialize()
             room.save()

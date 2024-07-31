@@ -39,25 +39,16 @@ class Card:
         return str_value + self.suit
 
     def __gt__(self, other: Card) -> bool:
-        if (not self.is_trump) \
-                and (not other.is_trump) \
-                and (self.suit != other.suit):
-            raise ValueError(
-                "Cant compare not trump cards with different suites"
-            )
-
-        if self.suit == other.suit:
-            if self.value == other.value:
-                raise ValueError("Cant compare two identical cards")
-
-            return self.value > other.value
-
         if self.is_trump:
-            return True
-
-        if other.is_trump:
-            return False
-        return True
+            if other.is_trump:
+                return self.value > other.value
+            else:
+                return True
+        else:
+            if other.is_trump:
+                return False
+            else:
+                return self.value > other.value
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Card):
@@ -95,11 +86,14 @@ class Card:
             raise ValueError("value must be Int[2, 14] type")
 
     def serialize(self) -> str:
-        return json.dumps({
+        return json.dumps(self.json())
+        
+    def json(self) -> str:
+        return {
             "suit": self.suit,
             "value": self.value,
             "is_trump": self.is_trump
-        })
+        }
 
     @staticmethod
     def deserialize(raw_data) -> Card:

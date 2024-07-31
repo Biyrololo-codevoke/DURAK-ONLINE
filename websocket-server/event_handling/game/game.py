@@ -104,6 +104,11 @@ class Game:
         if all(self.players):
             self.make_game()
 
+    def get_player(self, id: int):
+        for player in self.players:
+            if player and player.id == id:
+                return player
+
     def __str__(self) -> str:
         s = "<GameObject\n"
         s += "   players: " + "; ".join([str(player) for player in self.players]) + "\n"
@@ -112,7 +117,7 @@ class Game:
         return s
 
     def serialize(self) -> str:
-        return {
+        return json.dumps({
             "config": {
                 "id": self.id,
                 "reward": self.reward,
@@ -133,7 +138,7 @@ class Game:
             "payload": {
                 "players": [player.serialize() for player in self.players]
             }
-        }
+        })
         
     @staticmethod
     def deserialize(raw_data: str) -> Game:

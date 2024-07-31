@@ -19,7 +19,8 @@ class GameBoard:
         """
         Initializes the game board with an empty list of slots.
         """
-        self.slots: Dict[int, Dict[Literal["down", "up"], Card]] = {}
+        self.slots_down: list[int | None] = [None] * self.SLOTS_COUNT
+        self.slots_up: list[int | None] = [None] * self.SLOTS_COUNT
 
     def add_card(self, card: Card, slot_id: int) -> bool:
         """
@@ -32,11 +33,11 @@ class GameBoard:
         Returns:
             bool: True if the card was added successfully, False otherwise.
         """
-        if slot_id in list(range(0, self.SLOTS_COUNT)) \
-                and self.slots.get(slot_id) is None:
-            self.slots[slot_id]["down"] = card
+        if self.slots_down[slot_id] is not None:
+            return False
+        else:
+            self.slots_down[slot_id] = card
             return True
-        return False
 
     def beat_card(self, beat_card: Card, slot_id: int) -> bool:
         """
@@ -49,13 +50,14 @@ class GameBoard:
         Returns:
             bool: True if the card was beaten successfully, False otherwise.
         """
-        if self.slots.get(slot_id) is None:
+        if self.slots_up[slot_id] is not None:
             return False
-
-        if beat_card > self.slots[slot_id]["down"]:
-            self.slots[slot_id]["up"] = beat_card
-            return True
-        return False
+        else:
+            if self.slots_down[slot_id] is None:
+                return False
+            else:
+                self.slots_down[slot_id] = beat_card
+                return True
 
     def take_all(self) -> List[Card]:
         """
@@ -64,9 +66,7 @@ class GameBoard:
         Returns:
             List[Card]: A list of all the cards on the game board.
         """
-        card_list: List[Card] = [self.slots.values()]
-        self.slots = {}
-        return card_list
+        return [x for x in [*self.slots_down, *self.slots_up] if x is not None]
 
     def __str__(self) -> str:
         """
@@ -75,10 +75,9 @@ class GameBoard:
         Returns:
             str: The string representation of the game board.
         """
-        s = f"<GameBoard {id(self)}:"
-        for slot_cards in self.slots:
-            s.append(f"[{slot_cards.get('up')} -> {slot_cards.get('down')}]")
-
+        s = f"<GameBoard {id(self)}:\n"
+        for i in range(6):
+            s += f"[{self.slots_up[i]} -> {self.slots_down[i]}];"
         return s
 
     def serialize(self) -> str:
@@ -88,15 +87,26 @@ class GameBoard:
         Returns:
             str: The serialized game board.
         """
-        return json.dumps(
-            [
-                {
-                    "down": slot["down"].serialize() if slot.get("down") else None,  # noqa E501
-                    "up": slot["up"].serialize() if slot.get("up") else None
-                }
-                for slot in self.slots.values()
-            ]
-        )
+        up_arr = []
+        dw_arr = []
+        
+        for down_card in self.slots_down:
+            if down_card is None:
+                dw_arr.append(None)
+            else:
+                dw_arr.append(down_card.serialize())
+        
+        for up_card in self.slots_up:
+            if up_card is None:
+                up_arr.append(None)
+            else:
+                up_arr.append(up_card.serialize())
+        
+        return json.dumps({
+            "down": dw_arr,
+            "up": up_arr
+        })
+        
 
     @staticmethod
     def deserialize(raw_data: str) -> GameBoard:
@@ -111,12 +121,20 @@ class GameBoard:
         """
         slots = json.loads(raw_data)
         new_game_board = GameBoard()
-        new_game_board.slots = [
-            {
-                "down": Card.deserialize(card["down"])
-                for card in slot
-                if "down" in card
-            }
-            for slot in slots
-        ]
+
+        new_game_board.slots_down = [None] * GameBoard.SLOTS_COUNT
+        new_game_board.slots_up = [None] * GameBoard.SLOTS_COUNT
+        
+        for i in range(len(slots["down"])):
+            if slots["down"][i]:
+                new_game_board.slots_down[i] = Card.deserialize(slots["down"][i])
+            else:
+                new_game_board.slots_down[i] = None
+        
+        for i in range(len(slots["up"])):
+            if slots["up"][i]:
+                new_game_board.slots_up[i] = Card.deserialize(slots["up"][i])
+            else:
+                new_game_board.slots_up[i] = None
+        
         return new_game_board
