@@ -45,6 +45,14 @@ type Timer = {
 
 export type {Timer}
 
+type GameMessage = {
+    user_id: number;
+    color: 'white' | 'yellow';
+    text: string
+}
+
+export type {GameMessage}
+
 type PlayerConnected = {
     event: 'player_connected';
     player_id: number;
@@ -95,10 +103,29 @@ type CardBeat = {
     player_id: number;
 }
 
+type Bito = {
+    event: 'bito';
+}
+
+type Take = {
+    event: 'take';
+}
+
+type Pass = {
+    event: 'pass'
+}
+
+type PlayerId = {
+    player_id: number;
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
-    InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat
+    InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
+    (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId)
 
 export type {GameEvent}
+
+export type {Bito, Take, Pass}
 
 type GameCard = {
     suit: keyof typeof CARDS_SUITS_BY_SYMBOL;

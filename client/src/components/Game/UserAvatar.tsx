@@ -5,7 +5,7 @@ import { EMPTY_USER_PHOTO_URL } from "constants/StatisPhoto";
 import axios from "axios";
 import { getUser } from "constants/ApiUrls";
 import { GetUserResponseType } from "types/ApiTypes";
-import { AcceptedContext, GameStateContext, TimerContext } from "contexts/game";
+import { AcceptedContext, GameMessagesContext, GameStateContext, TimerContext } from "contexts/game";
 import { Message } from "./Message";
 
 type Props = {
@@ -24,6 +24,10 @@ export default function UserAvatar(props: Props) {
     const {user_id} = props
 
     const accepted = useContext(AcceptedContext);
+
+    const messages = useContext(GameMessagesContext);
+
+    const message = messages.find(m=>m.user_id === user_id);
 
     const is_accepted = accepted.find(_id => _id === user_id) !== undefined;
 
@@ -147,6 +151,14 @@ export default function UserAvatar(props: Props) {
                 gameState === 1 && is_accepted &&
                 <Message 
                 type="accept" 
+                />
+            }
+            {
+                message &&
+                <Message
+                type="text"
+                color={message.color}
+                message={message.text}
                 />
             }
             <img 

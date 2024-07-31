@@ -3,15 +3,15 @@ import 'components/Game/Game.css'
 import { useState, useEffect, useCallback, useRef } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
-import { AcceptedContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
-import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GamePlayers, GameStateType, PlaceCard, Timer } from "types/GameTypes";
+import { AcceptedContext, GameMessagesContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
+import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GameMessage, GamePlayers, GameStateType, PlaceCard, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import GameInfo from "components/Game/GameInfo";
 import {handle_event} from 'components/Game/handleEvents'
-import { CARDS_SUITS_BY_SYMBOL } from "constants/GameParams";
+import { CARDS_SUITS_BY_SYMBOL, MESSAGES_CONFIGS } from "constants/GameParams";
 import { convert_card } from "features/GameFeatures";
 
 type UserIdType = number | 'me'
@@ -213,6 +213,8 @@ export default function GamePage(){
     const [timers, setTimers] = useState<Timer[]>([]);
 
     const [timers_update, set_timers_update] = useState<number>(0);
+
+    const [messages, set_messages] = useState<GameMessage[]>([]);
 
     // accept game start
 
@@ -505,46 +507,69 @@ export default function GamePage(){
         on_player_accept(p_id);
     }
 
+    function handle_action_button(text: 'take' | 'bito' | 'pass'){
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return;
+
+        const cgf = MESSAGES_CONFIGS[text]; 
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: text
+                }
+            )
+        )
+
+        set_messages(prev => [...prev, {...cfg, user_id: parseInt(localStorage.getItem('user_id') || '-1')}]);
+    }
+
     return (
         <main id="game-page">
             <TimerContext.Provider
             value={{timer_update: timers_update, timers}}
             >
-                <AcceptedContext.Provider
-                value={accepted_start}
-                >
-                    <GameStateContext.Provider
-                    value={gameState}
+                <GameMessagesContext.Provider value={messages}>
+                    <AcceptedContext.Provider
+                    value={accepted_start}
                     >
-                        <RoomContext.Provider
-                        value={room}
+                        <GameStateContext.Provider
+                        value={gameState}
                         >
-                            <GamePlayersContext.Provider
-                            value={game_players}
+                            <RoomContext.Provider
+                            value={room}
                             >
-                                <GameInfo />
-                                <GameScreen
-                                game_board={game_board}
-                                setGameBoard={setGameBoard}
-                                new_cards={new_cards} 
-                                players_in_room={room.players_count}
-                                users_ids={users_ids}
-                                setUsersIds={setUsersIds}
-                                trump_card={trump_card}
+                                <GamePlayersContext.Provider
+                                value={game_players}
+                                >
+                                    <GameInfo />
+                                    <GameScreen
+                                    game_board={game_board}
+                                    setGameBoard={setGameBoard}
+                                    new_cards={new_cards} 
+                                    players_in_room={room.players_count}
+                                    users_ids={users_ids}
+                                    setUsersIds={setUsersIds}
+                                    trump_card={trump_card}
 
-                                enemy_cards_delta={enemy_cards_delta}
-                                set_enemy_cards_delta={set_enemy_cards_delta}
+                                    enemy_cards_delta={enemy_cards_delta}
+                                    set_enemy_cards_delta={set_enemy_cards_delta}
 
-                                users_cards={users_cards}
-                                setUsersCards={setUsersCards}
-                                
-                                player_throw={player_throw}
-                                />
-                                <GameFooter handle_start_game={handle_start_game} />
-                            </GamePlayersContext.Provider>
-                        </RoomContext.Provider>
-                    </GameStateContext.Provider>               
-                </AcceptedContext.Provider>
+                                    users_cards={users_cards}
+                                    setUsersCards={setUsersCards}
+                                    
+                                    player_throw={player_throw}
+                                    />
+                                    <GameFooter 
+                                    handle_start_game={handle_start_game} 
+                                    handle_action_button={handle_action_button}
+                                    />
+                                </GamePlayersContext.Provider>
+                            </RoomContext.Provider>
+                        </GameStateContext.Provider>               
+                    </AcceptedContext.Provider>
+                </GameMessagesContext.Provider>
             </TimerContext.Provider>
         </main>
     )
