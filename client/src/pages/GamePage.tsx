@@ -397,11 +397,13 @@ export default function GamePage(){
 
     function player_throw(event: PlaceCard){
         
+        if(!socket) return
+
         console.log(`player throw`)
 
         console.log(event)
         
-        socket?.send(
+        socket.send(
             JSON.stringify(event)
         )
     }
