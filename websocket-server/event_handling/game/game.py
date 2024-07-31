@@ -36,9 +36,16 @@ class Game:
         self.throw_mode = throw_mode
         self.deck = None
         self.players_deque = None
+        
+        # for game lite data
+        self.passed_players = []
+        self.player_taked = False
+        self.is_bitten = False
+        
         self.victim_player = None
         self.attacker_player = None
         self.throwing_players = None
+
 
     def make_game(self):
         self.beaten_cards = []
@@ -79,6 +86,10 @@ class Game:
             self.throwing_players = self.players_deque[1:-1]
         else:
             self.throwing_players = [self.players_deque[1], self.players_deque[-2]]
+        
+        self.passed_players = []
+        self.player_taked = False
+        self.is_bitten = False
 
     def deal_cards(self):
         for _ in range(6):

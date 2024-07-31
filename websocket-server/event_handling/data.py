@@ -328,7 +328,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     })
                     send_to_room(room_id, {
                         "event": "card_beat",
-                        "card": card,
+                        "card": card.json(),
                         "slot": slot,
                         "player_id": player_id
                     }, socket_id)
@@ -339,8 +339,16 @@ def route_game_events(payload: dict, room_id: int, key: str):
             room.game_obj = game.serialize()
             room.save()
 
-        case "":
-            ...
+        case "pass":
+            if player_id in game.throwing_players:
+                send_to_player(player_id, {
+                    "status": "success"
+                })
+                send_to_room(room_id, {
+                    "event": "pass",
+                    "player_id": player_id
+                })
+                return
             
         case _:
             logger.info("unknown event: %s" % event)
