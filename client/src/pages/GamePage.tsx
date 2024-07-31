@@ -368,11 +368,19 @@ export default function GamePage(){
         set_timers_update(prev => prev + 1);
     }
 
+    useEffect(()=>{
+        localStorage.setItem('game_players', JSON.stringify(game_players))
+    }, [game_players])
+
     // on_place_card
 
     function on_place_card(event: {slot: number; card: GameCard}, player_id: number){
 
         console.log('положил карту', {event})
+
+        const _game_players : GamePlayers | null = JSON.parse(localStorage.getItem('game_players') || 'null');
+
+        if(!_game_players) return;
 
         const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
 
@@ -390,6 +398,8 @@ export default function GamePage(){
 
         if(_game_board === null) return
 
+        set_timers_update(prev => prev + 1);
+
         if(slot >= _game_board.length){
             _card.new = {
                 x: _rect.x - (deck_rect.x + deck_rect.width / 2),
@@ -398,6 +408,23 @@ export default function GamePage(){
             setGameBoard(prev => [...prev, {
                 lower: _card,
             }])
+
+            setTimers(prev=>{
+                const ts = [...prev];
+                for(let i = 0; i < ts.length; ++i){
+                    ts[i].from_start = true;
+                    if(ts[i].id === _game_players.victim){
+                        ts[i].is_active = true;
+                        ts[i].color = 'green';
+                    }
+                    else{
+                        ts[i].is_active = false;
+                        ts[i].color = 'red';
+                    }
+                }
+
+                return ts;
+            })
 
             return
         }
@@ -417,12 +444,53 @@ export default function GamePage(){
                 }
             }
 
+            let beaten_all = true;
+
             setGameBoard(prev=>{
                 const new_board = [...prev];
 
                 new_board[slot].upper = _card;
 
+                for(let i of new_board){
+                    if(!i.upper){
+                        beaten_all = false;
+                    }
+                }
+
                 return new_board
+            })
+
+            setTimers(prev=>{
+                const ts = [...prev];
+                for(let i = 0; i < ts.length; ++i){
+                    ts[i].from_start = true;
+                    if(beaten_all){
+                        if(ts[i].id === _game_players.walking){
+                            ts[i].is_active = true;
+                            ts[i].color = 'red';
+                        }
+                        else if(ts[i].id === _game_players.victim){
+                            ts[i].is_active = false;
+                            ts[i].color = 'green';
+                        }
+                        else{
+                            ts[i].is_active = false;
+                            ts[i].color = 'red';
+                        }
+                    }
+                    else{
+                        if(ts[i].id === _game_players.victim){
+                            ts[i].is_active = true;
+                            ts[i].color = 'green';
+                        }
+                        else{
+                            ts[i].is_active = false;
+                            ts[i].color = 'red';
+                        }
+                    }
+                }
+
+                return ts;
             })
         }
     }
