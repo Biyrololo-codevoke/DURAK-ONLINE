@@ -33,7 +33,7 @@ export default function Footer(){
     const location = useLocation();
     const navigate = useNavigate();
 
-    const [value, setValue] = useState(0);
+    const [value, setValue] = useState(URLS.indexOf(window.location.pathname));
 
     if(HIDE_FOOTER_URLS.includes(location.pathname)){
         return null;
@@ -111,10 +111,10 @@ function RubyIcon(){
 
     return (
         <div
-        className='footer-img-container'
+        className='footer-img-container ruby-container'
         >
-            <img src="/static/ruby.png" alt="ruby" className='footer-img' style={{width: '50px', top: '-13px', left: '-13px'}}/>
-            <AddIcon className='footer-icon' style={{color: 'white'}}/>
+            <img src="/static/ruby.png" alt="ruby" className='footer-img ruby-icon' style={{width: '50px', top: '-13px', left: '-13px'}}/>
+            <AddIcon className='footer-icon ruby-text-icon' style={{color: 'white'}}/>
         </div>
     )
 }

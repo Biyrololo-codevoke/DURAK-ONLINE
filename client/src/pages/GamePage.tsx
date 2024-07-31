@@ -373,20 +373,25 @@ export default function GamePage(){
 
         const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
 
+        const deck_rect = document.getElementById('game-desk')!.getBoundingClientRect();
+
         const slot = event.slot - 1;
         
         const _card = convert_card(event.card);
 
-        if(player_box){
-            const _rect = player_box.getBoundingClientRect();
+        let _rect = player_box?.getBoundingClientRect();
 
+        if(!_rect) return
+        
+        const _game_board : GameBoardCard[] | null = JSON.parse(localStorage.getItem('_game_board') || 'null');
+
+        if(_game_board === null) return
+
+        if(slot >= _game_board.length){
             _card.new = {
-                x: _rect.x,
-                y: _rect.y
+                x: _rect.x - (deck_rect.x + deck_rect.width / 2),
+                y: _rect.y - (deck_rect.y + deck_rect.height / 2)
             }
-        }
-
-        if(slot >= game_board.length){
             setGameBoard(prev => [...prev, {
                 lower: _card,
             }])
@@ -394,10 +399,19 @@ export default function GamePage(){
             return
         }
 
-        if(game_board[slot]){
-            if(game_board[slot].upper){
+        if(_game_board[slot]){
+            if(_game_board[slot].upper){
                 console.log('куда ложишь?')
                 return
+            }
+
+            const card_rect = document.querySelectorAll('.game-desk-card-lower')[slot]?.getBoundingClientRect();
+
+            if(card_rect){
+                _card.new = {
+                    x: _rect.x - card_rect.x,
+                    y: _rect.y - card_rect.y
+                }
             }
 
             setGameBoard(prev=>{
