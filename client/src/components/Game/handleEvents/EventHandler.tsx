@@ -83,7 +83,7 @@ export default function handle_event(props: Props){
         }
 
         else if(
-            data.event === 'place_card' || data.event === 'card_beat'
+            data.event === 'place_card' || data.event === 'card_beat' || data.event === 'throw_card'
         ) {
             props.on_place_card(data, data.player_id);
         }

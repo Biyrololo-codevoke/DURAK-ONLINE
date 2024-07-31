@@ -119,9 +119,16 @@ type PlayerId = {
     player_id: number;
 }
 
+type ThrowCard = {
+    event: 'throw_card',
+    slot: number;
+    card: GameCard;
+    player_id: number;
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
-    (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId)
+    (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard
 
 export type {GameEvent}
 
