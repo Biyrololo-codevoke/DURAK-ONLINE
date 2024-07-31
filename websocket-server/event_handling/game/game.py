@@ -7,9 +7,7 @@ from collections import deque
 
 from .game_board import GameBoard
 from .card import Card
-
-if TYPE_CHECKING:
-    from player import Player
+from .player import Player
 
 
 class Game:
@@ -78,7 +76,7 @@ class Game:
         self.attacker_player = self.players_deque[0]
         
         if self.throw_mode == "all":
-            self.throwing_players = self.players
+            self.throwing_players = self.players_deque[1:-1]
         else:
             self.throwing_players = [self.players_deque[1], self.players_deque[-2]]
 
@@ -116,16 +114,17 @@ class Game:
     def serialize(self) -> str:
         return {
             "config": {
+                "id": self.id,
                 "reward": self.reward,
                 "speed": self.speed,
                 "players_count": self.players_count,
-                "desk_size": self.deck_size,
+                "deck_size": self.deck_size,
                 "game_mode": self.game_mode,
                 "win_type": self.win_type,
                 "throw_mode": self.throw_mode
             },
             "game": {
-                "last_card": self.last_card.__str__(),
+                "last_card": self.last_card.serialize(),
                 "deck": [card.serialize() for card in self.deck],
                 "beaten_cards": [card.serialize() for card in self.beaten_cards],
                 "board": self.board.serialize(),

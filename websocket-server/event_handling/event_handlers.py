@@ -4,7 +4,7 @@ from websockets import WebSocketServerProtocol as WebSocket
 
 from websocket_logger import logger
 
-from .data import room_list, user_socket, socket_identity
+from .data import room_list, user_socket, socket_identity, route_game_events
 from .utils import serialize
 
 
@@ -33,12 +33,12 @@ async def handle_room(payload: dict, socket: WebSocket):
 
     event = payload["event"]
     logger.info("received event %s" % event)
+    room_id = int(payload["req"]["room_id"])
+    key = payload["req"]["key"]
 
     match event:
         case "join_room":
             logger.info("try to join room")
-            room_id = int(payload["req"]["room_id"])
-            key = payload["req"]["key"]
 
             status, message = room_list.connect_to_room(room_id, key)
             logger.info(f"join result: {status=} {message=}")
@@ -78,6 +78,12 @@ async def handle_room(payload: dict, socket: WebSocket):
             asyncio.create_task(
                 send_to_socket(socket, response)
             )
+            
+        case "place_card":
+            route_game_events(payload, room_id, key)
+            
+        case _:
+            await send_to_socket(socket, {"status": "error", "message": f"{event=} not found"})
 
 
 async def handle_list(socket: WebSocket, payload: dict):

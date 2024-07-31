@@ -14,7 +14,7 @@ class Player:
     def __init__(self, user_id: int):
         self.id = user_id
         self.deck = PlayerDeck()
-        
+
     def set_game(self, game: 'Game'):
         self.game = game
         

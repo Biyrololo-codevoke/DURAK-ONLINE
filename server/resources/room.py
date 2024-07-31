@@ -4,7 +4,7 @@ from uuid import uuid4
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from flask import request
 
-from ..models import RoomModel, UserModel, Exceptions as exc
+from ..models import RoomModel, UserModel, Exceptions as exc, Room as RoomType
 
 from .api_logger import logger
 from .api import BaseResource
@@ -56,6 +56,7 @@ class Room(BaseResource):
 
         try:
             room = RoomModel(**args)
+            room.game_state = RoomType.RoomState.OPEN
             room.save()
 
             key = "athr" + uuid4().hex + "_" + str(author_id)

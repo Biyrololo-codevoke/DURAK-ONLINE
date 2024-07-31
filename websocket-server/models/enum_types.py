@@ -22,3 +22,7 @@ class Room:
     class WinType(Enum):
         CLASSIC = "classic"  # классический
         DRAW = "draw"  # ничья
+        
+    class RoomState(Enum):
+        OPEN = "open"
+        IN_GAME = "in_game"

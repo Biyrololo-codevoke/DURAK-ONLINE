@@ -28,6 +28,7 @@ class RoomModel(Base):
     _game_type = Column(Enum(Room.GameType), default=Room.GameType.THROW)
     _throw_type = Column(Enum(Room.ThrowType), default=Room.ThrowType.ALL)
     _win_type = Column(Enum(Room.WinType), default=Room.WinType.CLASSIC)
+    game_state = Column(Enum(Room.RoomState), default=Room.RoomState, nullable=True)
     private = Column(Boolean, default=False)
     password = Column(String, nullable=True)
     game_obj = Column(String, nullable=True)
@@ -37,7 +38,7 @@ class RoomModel(Base):
     def current_list(cls) -> dict[int, list[int]]:
         data = dict()
 
-        for room in session.query(cls).all():
+        for room in session.query(cls).filter_by(game_state=Room.RoomState.OPEN).all():
             data[room.id] = room.user_ids
 
         return data
@@ -128,7 +129,7 @@ class RoomModel(Base):
     @win_type.setter
     def win_type(self, value: Room.WinType) -> None:
         self._win_type = Room.WinType(value)
-
+    
     def save(self) -> None:
         session.add(self)
         session.commit()

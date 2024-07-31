@@ -8,7 +8,7 @@ from websockets import WebSocketServerProtocol as WS
 from models import RoomModel, Exceptions
 from websocket_logger import logger
 
-from .game import Game, Player
+from .game import Game, Player, Card
 
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
@@ -156,6 +156,7 @@ class RoomListObserver:
         send_to_room(room_id, {
             "event": "make_start"
         })
+        self.remove_room(room_id)
         
     def accept_start(self, room_id: int, key: int):
         player_id = int(key.split('_')[-1])
@@ -286,5 +287,64 @@ def send_to_player(player_id: int, payload: dict):
         _send_y(player_id, payload)
     )
 
+
+def route_game_events(payload: dict, room_id: int, key: str):
+    event = payload["event"]
+    player_id = int(key.split('_')[-1])
+    room = RoomModel.get_by_id(room_id)
+    
+    if not room:
+        send_to_player(player_id, {
+            "status": "error",
+            "message": "Room not found"
+        })
+    
+    serialized_game = room.game_obj
+    game = Game.deserialize(serialized_game)
+    
+    match event:
+        case "place_card":
+            logger.info("place card")
+            slot = payload["slot"]
+            card = Card(
+                suit = payload["card"]["suit"],
+                value = payload["card"]["value"],
+                is_trump = payload["card"]["suit"] == game.trump_suit
+            )
+            status = game.board.add_card(card, slot)
+            logger.info("status: %s" % status)
+            if not status:
+                status2 = game.board.beat_card(card, slot)
+                logger.info("status2: %s" % status2)
+                if not status2:
+                    send_to_player(player_id, {
+                        "status": "error",
+                        "message": "Invalid move"
+                    })
+                    return
+                else:
+                    send_to_player(player_id, {
+                        "status": "success"
+                    })
+                    send_to_room(room_id, {
+                        "event": "card_beat",
+                        "card": card.serialize(),
+                        "slot": slot
+                    })
+            else:
+                send_to_room(room_id, payload)
+
+            room.game_obj = game.serialize()
+            room.save()
+
+        case "":
+            ...
+            
+        case _:
+            logger.info("unknown event: %s" % event)
+            send_to_player(player_id, {
+                "status": "error",
+                "message": "Unknown event"
+            })
 
 room_list = RoomListObserver()

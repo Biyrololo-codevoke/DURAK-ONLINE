@@ -24,6 +24,7 @@ class RoomModel(BaseModel):  # type: ignore
     _game_type = db.Column(db.Enum(Room.GameType), default=Room.GameType.THROW)
     _throw_type = db.Column(db.Enum(Room.ThrowType), default=Room.ThrowType.ALL)
     _win_type = db.Column(db.Enum(Room.WinType), default=Room.WinType.CLASSIC)
+    game_state = db.Column(db.Enum(Room.RoomState), default=Room.RoomState.OPEN, nullable=True)
     private = db.Column(db.Boolean, default=False)
     password = db.Column(db.String, nullable=True)
     game_obj = db.Column(db.String, nullable=True)
@@ -39,6 +40,7 @@ class RoomModel(BaseModel):  # type: ignore
             "speed": self.speed,
             "game_type": self.game_type,
             "throw_type": self.throw_type,
+            "game_state": self.game_state.value,
             "win_type": self.win_type,
             "private": self.private,
             "user_ids": self.user_ids,
@@ -66,6 +68,9 @@ class RoomModel(BaseModel):  # type: ignore
     @property
     def name(self) -> str:
         names = []
+        if not self.user_ids:
+            return None
+
         for user_id in self.user_ids:
             user_by_id = UserModel.get_by_id(user_id)
             names.append(user_by_id.username)
