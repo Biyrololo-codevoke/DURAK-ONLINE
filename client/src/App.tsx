@@ -36,6 +36,7 @@ function App() {
         Cookies.remove('access_token');
         const clearing_keys = ['username', 'verified', 'user_id', 'image_id', 'player_money', 'user_photo'];
         clearing_keys.forEach(key => localStorage.removeItem(key));
+        window.location.pathname = '/login'
         return;
       }
 
@@ -66,6 +67,7 @@ function App() {
           localStorage.removeItem('player_money');
           localStorage.removeItem('user_photo');
           Cookies.remove('access_token');
+          window.location.pathname = '/login'
         }
       )
     },

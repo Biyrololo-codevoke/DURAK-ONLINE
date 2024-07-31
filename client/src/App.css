@@ -3,10 +3,14 @@ body{
     margin: 0 auto 0 auto;
     padding: 0;
     height: 100dvh;
-    overflow: auto;
+    overflow: scroll;
     /* width: 600px; */
     width: 100%;
     /* border: 1px solid white; */
+}
+
+body::-webkit-scrollbar { 
+    display: none;  /* Safari and Chrome */
 }
 
 main{
