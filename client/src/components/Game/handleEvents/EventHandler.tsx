@@ -1,5 +1,5 @@
 import React from "react";
-import { GameCard, GameEvent } from "types/GameTypes";
+import { GameCard, GameEvent, PlaceCard } from "types/GameTypes";
 type UserIdType = number | 'me'
 
 type Props = {
@@ -10,7 +10,8 @@ type Props = {
     on_start_game: () => void;
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
-    on_next_move: (victim: number, walking: number) => void
+    on_next_move: (victim: number, walking: number) => void;
+    on_place_card: (event: PlaceCard) => void;
 }
 
 export default function handle_event(props: Props){
@@ -89,6 +90,12 @@ export default function handle_event(props: Props){
             data.event === 'next'
         ) {
             props.on_next_move(data.victim_player, data.walking_player);
+        }
+
+        else if(
+            data.event === 'place_card'
+        ) {
+            props.on_place_card(data);
         }
     }
 }

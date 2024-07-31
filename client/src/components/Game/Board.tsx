@@ -3,6 +3,7 @@ import { getCardImage } from "features/GameFeatures";
 import { CSSProperties, useContext, useEffect } from "react"
 import { CardType } from "types/GameTypes";
 import RefreshIcon from '@mui/icons-material/Refresh';
+import can_i_beat from "features/GameFeatures/CardsInteraction/CanIBeat";
 
 type Props = {
     is_transfering: boolean
@@ -18,7 +19,23 @@ export default function GameBoard({is_transfering}: Props) {
 
     const {cards, setCards} = board;
     
-    const show_transfer = is_transfering &&
+    let transfer_flag = true;
+
+    for(let card of cards){
+        if(card.upper){
+            transfer_flag = false;
+            break;
+        }
+    }
+
+    for(let i = 1; i < cards.length; ++i){
+        if(cards[i].lower.value !== cards[i - 1].lower.value){
+            transfer_flag = false;
+            break
+        }
+    }
+
+    const show_transfer = is_transfering && transfer_flag &&
         game_players.victim === _users_id &&
         cards.length > 1 && cards.length < 6 &&
         cards.find((c) => c.upper !== undefined) === undefined;
@@ -71,9 +88,23 @@ export default function GameBoard({is_transfering}: Props) {
                 localStorage.setItem('card', 'null');
             }
             else{
+                let _role = localStorage.getItem('_role');
+
+                if(_role !== 'victim') return;
+                
+
                 const index = Number(cardIndex);
                 const card = cards[index];
-                focusCard(card.lower, index);
+
+                if(card.upper) return
+
+                const drag_card : CardType | null = JSON.parse(localStorage.getItem('drag_card') || 'null');
+
+                if(drag_card === null) return
+
+                if(can_i_beat(card.lower, drag_card)){
+                    focusCard(card.lower, index);
+                }
             }
         }   
 
@@ -104,7 +135,16 @@ export default function GameBoard({is_transfering}: Props) {
                                 `}
                             onMouseEnter={() => {
                                 if(card.upper) return;
-                                focusCard(card.lower, index)
+                                let _role = localStorage.getItem('_role');
+                                if(_role !== 'victim') return;
+
+                                const drag_card : CardType | null = JSON.parse(localStorage.getItem('drag_card') || 'null');
+                                if(drag_card === null) return
+
+                                if(can_i_beat(card.lower, drag_card)){
+                                    focusCard(card.lower, index)
+                                }
+
                             }}
                             onMouseLeave={() => blurCard()}
 
