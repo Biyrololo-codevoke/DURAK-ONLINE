@@ -231,7 +231,8 @@ export default function GamePage(){
                 init_trump_card,
                 init_deck,
                 on_next_move,
-                on_place_card
+                on_place_card,
+                on_game_message
             }
         )
     }
@@ -426,6 +427,21 @@ export default function GamePage(){
         }
     }
 
+    // Game Message enemies
+
+    function on_game_message(data: {user_id: number; type: 'take' | 'bito' | 'pass'}){
+        const cfg = MESSAGES_CONFIGS[data.type];
+
+        set_messages(prev => [
+            ...prev,
+            {
+                user_id: data.user_id,
+                color:  cfg.color as 'white' | 'yellow',
+                text: cfg.text
+            }
+        ])
+    }
+
     useEffect(()=>{
         console.log(socket)
     }, [socket])
@@ -512,7 +528,7 @@ export default function GamePage(){
 
         if(!_socket) return;
 
-        const cgf = MESSAGES_CONFIGS[text]; 
+        const cfg = MESSAGES_CONFIGS[text]; 
 
         _socket.send(
             JSON.stringify(
@@ -522,7 +538,14 @@ export default function GamePage(){
             )
         )
 
-        set_messages(prev => [...prev, {...cfg, user_id: parseInt(localStorage.getItem('user_id') || '-1')}]);
+        set_messages(prev => [...prev, 
+            {
+                user_id: parseInt(localStorage.getItem('user_id') || '-1'),
+                color:  cfg.color as 'white' | 'yellow',
+                text: cfg.text
+                
+                
+            }]);
     }
 
     return (
