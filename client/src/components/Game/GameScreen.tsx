@@ -128,7 +128,7 @@ export default function GameScreen(props: Props){
 
         props.player_throw(
             {
-                slot: index,
+                slot: index + 1,
                 card: {
                     suit: CARDS_SYMBOBS_BY_SUITS[upper_card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
                     value: upper_card.value,
