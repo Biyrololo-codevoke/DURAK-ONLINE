@@ -1,8 +1,9 @@
 import { useContext } from "react";
 import ActionButton from "./ActionButton/ActionButton";
 import UserAvatar from "./UserAvatar";
-import { GameStateContext, TimerContext } from "contexts/game";
+import { GameMessagesContext, GameStateContext, TimerContext } from "contexts/game";
 import { GameBoardCard } from "types/GameTypes";
+import { MESSAGES_CONFIGS } from "constants/GameParams";
 
 type Props = {
     handle_start_game: () => void;
@@ -17,6 +18,8 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
     const timers = useContext(TimerContext);
 
+    const messages = useContext(GameMessagesContext);
+
     const show_action = timers.timers.find((e) => String(e.id) === localStorage.getItem('user_id'));
 
     const _role = localStorage.getItem('_role');
@@ -27,11 +30,23 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
     const _game_board : GameBoardCard[] | null = JSON.parse(localStorage.getItem('_game_board') || 'null');
 
-    const is_taking = gameState === 2 && is_victim && show_action && _game_board !== null &&
+    const _has_message = messages.find(m => String(m.user_id) === user_id) !== undefined;
+
+    const is_taking = gameState === 2 && is_victim && !_has_message && _game_board !== null &&
     _game_board.find(c=>c.upper === undefined) !== undefined;
 
-    const is_bito = gameState === 2 && is_walking && _game_board !== null && 
+    const is_bito = gameState === 2 && is_walking && _game_board !== null && !_has_message &&
     _game_board.find(c=>c.upper === undefined) === undefined;
+
+    const is_pass = gameState === 2 && !_has_message && 
+    (
+        (is_walking && messages.find(m=>m.text === MESSAGES_CONFIGS.take.text) !== undefined) ||
+        (!is_walking && !is_victim && (
+            messages.find(m=>m.text === MESSAGES_CONFIGS.take.text) !== undefined ||
+            messages.find(m=>m.text === MESSAGES_CONFIGS.bito.text) !== undefined
+            )
+        )
+    )
 
     return (
         <div id="game-footer">
@@ -46,6 +61,10 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
             {
                 is_bito &&
                 <ActionButton onClick={()=>{handle_action_button('bito')}} label="Бито"/>
+            }
+            {
+                is_pass &&
+                <ActionButton onClick={()=>{handle_action_button('pass')}} label="Пас"/>
             }
             <UserAvatar user_id={user_id ? parseInt(user_id) : undefined}/>
         </div>
