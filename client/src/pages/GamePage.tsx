@@ -11,7 +11,7 @@ import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import GameInfo from "components/Game/GameInfo";
 import {handle_event} from 'components/Game/handleEvents'
-import { CARDS_SUITS_BY_SYMBOL, MESSAGES_CONFIGS } from "constants/GameParams";
+import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS, MESSAGES_CONFIGS } from "constants/GameParams";
 import { convert_card } from "features/GameFeatures";
 
 type UserIdType = number | 'me'
@@ -491,15 +491,40 @@ export default function GamePage(){
         )
     }
 
+    // transfer cards
+
+    function handle_transfer(card: CardType){
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return
+
+        const c_card : GameCard = {
+            is_trump: card.suit === trump_card.suit,
+            suit: CARDS_SYMBOBS_BY_SUITS[card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+            value: card.value
+        }
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: 'transfer_card',
+                    card: c_card
+                }
+            )
+        )
+    }
+
     function handle_start_game(){
    
-        console.log(socket)
+        const _socket = socket || socket_ref.current;
+        
+        console.log(_socket)
    
-        if(!socket) return
+        if(!_socket) return
 
         const data = {event: 'accept'}
 
-        socket.send(
+        _socket.send(
             JSON.stringify(data)
         )
 
@@ -583,6 +608,7 @@ export default function GamePage(){
                                     setUsersCards={setUsersCards}
                                     
                                     player_throw={player_throw}
+                                    handle_transfer={handle_transfer}
                                     />
                                     <GameFooter 
                                     handle_start_game={handle_start_game} 

@@ -40,6 +40,7 @@ type Props = {
     setUsersCards: React.Dispatch<React.SetStateAction<UserCards>>
 
     player_throw: (event: PlaceCard) => void;
+    handle_transfer: (card: CardType) => void
 }
 
 export default function GameScreen(props: Props){
@@ -225,7 +226,7 @@ export default function GameScreen(props: Props){
             }
         })
 
-
+        props.handle_transfer(card);
         // console.log('мои новые карты', [...users_cards['me'].filter((card, index) => index !== card_index)])
     }
 
