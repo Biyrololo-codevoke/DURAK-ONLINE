@@ -133,6 +133,10 @@ export default function GameBoard({is_transfering}: Props) {
                                 ${!card.upper ? 'aviable-to-drop' : ''}
                                 ${card.lower.new ? 'dropped-now' : ''}
                                 `}
+                            style={card.lower.new ? {
+                                '--new-x': `${card.lower.new.x}px`,
+                                '--new-y': `${card.lower.new.y}px`,
+                            } as CSSProperties : {}}
                             onMouseEnter={() => {
                                 if(card.upper) return;
                                 let _role = localStorage.getItem('_role');
@@ -157,6 +161,10 @@ export default function GameBoard({is_transfering}: Props) {
                                 alt={`${card.upper.value}-${card.upper.suit}`}
                                 onDragStart={(e) => e.preventDefault()}
                                 onContextMenu={(e) => e.preventDefault()}
+                                style={card.upper.new ? {
+                                    '--new-x': `${card.upper.new.x}px`,
+                                    '--new-y': `${card.upper.new.y}px`,
+                                } as CSSProperties : {}}
                                 className={`
                                 game-desk-card-upper
                                 ${card.upper.new ? 'dropped-now' : ''}

@@ -13,7 +13,7 @@ type Props = {
     throw_new_card: (card: CardType) => void;
 }
 
-const MAX_ROTATE = 10;
+const MAX_ROTATE = 10;  
 
 function calculateCardStyles(index: number, length: number, image?: boolean) : CSSProperties {
 
@@ -113,8 +113,15 @@ export default function PlayerCards(props: Props) {
         document.body.style.setProperty('--drag-x', `${drag_x - (card_rect_x - left)}px`)
         document.body.style.setProperty('--drag-y', `${drag_y - (card_rect_y - top)}px`)
 
+        drag_card.new = {
+            x: drag_x - (card_rect_x - left),
+            y: drag_y - (card_rect_y - top)
+        }
+
+        const is_victim = localStorage.getItem('_role') === 'victim';
         
         if(card === -1) {
+            if(is_victim) return
             console.log(drag_card)
             props.throw_new_card(drag_card);
             localStorage.removeItem('card');

@@ -1,6 +1,6 @@
 import { GameFooter, GameScreen } from "components/Game"
 import 'components/Game/Game.css'
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
 import { AcceptedContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
@@ -144,6 +144,10 @@ export default function GamePage(){
         ],
     )
 
+    useEffect(()=>{
+        localStorage.setItem('_game_board', JSON.stringify(game_board));
+    }, [game_board])
+
     const _room_id = parseInt(localStorage.getItem('_room_id') || '-1');
 
     useEffect(()=>{
@@ -192,6 +196,8 @@ export default function GamePage(){
 
 
     const [socket, setSocket] = useState<WebSocket | null>(null);
+
+    const socket_ref = useRef<WebSocket | null>(null);
 
     // trump game
 
@@ -361,13 +367,24 @@ export default function GamePage(){
 
     // on_place_card
 
-    function on_place_card(event: PlaceCard){
+    function on_place_card(event: {slot: number; card: GameCard}, player_id: number){
 
         console.log('положил карту', {event})
 
-        const slot = event.slot - 1;
+        const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
 
+        const slot = event.slot - 1;
+        
         const _card = convert_card(event.card);
+
+        if(player_box){
+            const _rect = player_box.getBoundingClientRect();
+
+            _card.new = {
+                x: _rect.x,
+                y: _rect.y
+            }
+        }
 
         if(slot >= game_board.length){
             setGameBoard(prev => [...prev, {
@@ -393,20 +410,9 @@ export default function GamePage(){
         }
     }
 
-    // player throw card
-
-    function player_throw(event: PlaceCard){
-        
-        if(!socket) return
-
-        console.log(`player throw`)
-
-        console.log(event)
-        
-        socket.send(
-            JSON.stringify(event)
-        )
-    }
+    useEffect(()=>{
+        console.log(socket)
+    }, [socket])
 
     useEffect(
         ()=>{
@@ -424,8 +430,10 @@ export default function GamePage(){
                 setSocket(null)
             }
     
+            socket_ref.current = new_socket;
+
             setSocket(new_socket);
-    
+
             return () => {
                 if(new_socket.readyState === 1){
                     new_socket.close();
@@ -434,7 +442,27 @@ export default function GamePage(){
         }, []
     )
 
+    // player throw card
+    function player_throw(data: PlaceCard){
+
+        console.log(socket_ref.current)
+
+    
+        if(!socket_ref.current) return
+
+        console.log(`player throw`)
+
+        console.log(data)
+        
+        socket_ref.current.send(
+            JSON.stringify(data)
+        )
+    }
+
     function handle_start_game(){
+   
+        console.log(socket)
+   
         if(!socket) return
 
         const data = {event: 'accept'}

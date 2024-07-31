@@ -11,7 +11,7 @@ type Props = {
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
     on_next_move: (victim: number, walking: number) => void;
-    on_place_card: (event: PlaceCard) => void;
+    on_place_card: (event: {slot: number; card: GameCard}, player_id: number) => void;
 }
 
 export default function handle_event(props: Props){
@@ -66,24 +66,13 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'game_init'
         ) {
-            const trump_card : GameCard = JSON.parse(data.last_card) as GameCard;
-            props.init_trump_card(trump_card);
+            props.init_trump_card(data.last_card);
         }
 
         else if(
             data.event === 'init_deck'
         ) {
-            const deck = JSON.parse(data.deck).cards as string;
-
-            const converted_deck : GameCard[] = [];
-
-            for(let card of deck){
-                converted_deck.push(
-                    JSON.parse(card) as GameCard
-                )
-            }
-
-            props.init_deck(converted_deck);
+            props.init_deck(data.deck.cards);
         }
 
         else if(
@@ -93,9 +82,9 @@ export default function handle_event(props: Props){
         }
 
         else if(
-            data.event === 'place_card'
+            data.event === 'place_card' || data.event === 'card_beat'
         ) {
-            props.on_place_card(data);
+            props.on_place_card(data, data.player_id);
         }
     }
 }

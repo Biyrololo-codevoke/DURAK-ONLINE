@@ -505,8 +505,8 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #game-desk .game-desk-card .dropped-now{
-    left: var(--drag-x);
-    top: var(--drag-y);
+    left: var(--new-x);
+    top: var(--new-y);
     animation: putting-card 0.3s ease-out forwards;
 }
 
