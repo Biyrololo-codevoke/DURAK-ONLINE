@@ -1,7 +1,7 @@
-import React, {useEffect, useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import UserAvatar, {EmptyUserAvatar} from "./UserAvatar";
 import { Typography } from "@mui/material";
-import { CardType, GameBoardCard, PlaceCard } from "types/GameTypes";
+import { CardType, GameBoardCard, GameBoardType, PlaceCard } from "types/GameTypes";
 import PlayerCards from "./PlayerCards";
 import CardDeck from "./CardDeck";
 import EnemyCards from "./EnemyCards";
@@ -141,9 +141,20 @@ export default function GameScreen(props: Props){
 
     function throw_new_card(add_card: CardType){
 
+        const _game_board : GameBoardCard[] | null = JSON.parse(localStorage.getItem('_game_board') || 'null');
+
+        if(_game_board === null) return
+
         console.log(`add new card to board`)
 
-        let index = game_board.length + 1;
+        console.log(
+            {
+                add_card,
+                _game_board
+            }
+        )
+
+        let index = _game_board.length + 1;
 
         if(index === 6) {
             console.log(`куда кидаешь, фул уже`)
@@ -152,9 +163,9 @@ export default function GameScreen(props: Props){
 
         let flag = false;
 
-        if(game_board.length === 0) flag = true;
+        if(_game_board.length === 0) flag = true;
 
-        for(let c of game_board){
+        for(let c of _game_board){
             if(c.lower.value === add_card.value){
                 flag = true;
                 break
@@ -194,6 +205,7 @@ export default function GameScreen(props: Props){
             }
         )
 
+        
     }
 
     function handleTransfer(card: CardType){

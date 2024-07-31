@@ -65,12 +65,14 @@ type StartGame = {
 
 type InitGame = {
     event: 'game_init';
-    last_card: string;
+    last_card: GameCard
 }
 
 type InitDeck = {
     event: 'init_deck';
-    deck: string
+    deck: {
+        cards: GameCard[]
+    }
 }
 
 type NextMove = {
@@ -86,8 +88,15 @@ type PlaceCard = {
     card: GameCard
 }
 
+type CardBeat = {
+    event: 'card_beat';
+    card: GameCard;
+    slot: number;
+    player_id: number;
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
-    InitGame | InitDeck | NextMove | PlaceCard
+    InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat
 
 export type {GameEvent}
 
