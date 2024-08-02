@@ -17,3 +17,20 @@ const CARDS_SYMBOBS_BY_SUITS = {
 export {CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS}
 
 export {AVATAR_SIZE}
+
+const MESSAGES_CONFIGS = {
+    take: {
+      text: 'Беру',
+      color: 'yellow',
+    },
+    bito: {
+      text: 'Бито', 
+      color: 'white',
+    },
+    pass: {
+      text: 'Пас',
+      color: 'white',
+    },
+};
+
+export {MESSAGES_CONFIGS}

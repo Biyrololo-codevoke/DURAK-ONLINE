@@ -3,15 +3,15 @@ import 'components/Game/Game.css'
 import { useState, useEffect, useCallback, useRef } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
-import { AcceptedContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
-import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GamePlayers, GameStateType, PlaceCard, Timer } from "types/GameTypes";
+import { AcceptedContext, GameMessagesContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
+import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GameMessage, GamePlayers, GameStateType, PlaceCard, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import GameInfo from "components/Game/GameInfo";
 import {handle_event} from 'components/Game/handleEvents'
-import { CARDS_SUITS_BY_SYMBOL } from "constants/GameParams";
+import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS, MESSAGES_CONFIGS } from "constants/GameParams";
 import { convert_card } from "features/GameFeatures";
 
 type UserIdType = number | 'me'
@@ -213,6 +213,8 @@ export default function GamePage(){
 
     const [timers_update, set_timers_update] = useState<number>(0);
 
+    const [messages, set_messages] = useState<GameMessage[]>([]);
+
     // accept game start
 
     const [accepted_start, set_accepted_start] = useState<number[]>([]);
@@ -228,7 +230,8 @@ export default function GamePage(){
                 init_trump_card,
                 init_deck,
                 on_next_move,
-                on_place_card
+                on_place_card,
+                on_game_message
             }
         )
     }
@@ -365,11 +368,19 @@ export default function GamePage(){
         set_timers_update(prev => prev + 1);
     }
 
+    useEffect(()=>{
+        localStorage.setItem('game_players', JSON.stringify(game_players))
+    }, [game_players])
+
     // on_place_card
 
     function on_place_card(event: {slot: number; card: GameCard}, player_id: number){
 
         console.log('положил карту', {event})
+
+        const _game_players : GamePlayers | null = JSON.parse(localStorage.getItem('game_players') || 'null');
+
+        if(!_game_players) return;
 
         const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
 
@@ -387,6 +398,8 @@ export default function GamePage(){
 
         if(_game_board === null) return
 
+        set_timers_update(prev => prev + 1);
+
         if(slot >= _game_board.length){
             _card.new = {
                 x: _rect.x - (deck_rect.x + deck_rect.width / 2),
@@ -395,6 +408,23 @@ export default function GamePage(){
             setGameBoard(prev => [...prev, {
                 lower: _card,
             }])
+
+            setTimers(prev=>{
+                const ts = [...prev];
+                for(let i = 0; i < ts.length; ++i){
+                    ts[i].from_start = true;
+                    if(ts[i].id === _game_players.victim){
+                        ts[i].is_active = true;
+                        ts[i].color = 'green';
+                    }
+                    else{
+                        ts[i].is_active = false;
+                        ts[i].color = 'red';
+                    }
+                }
+
+                return ts;
+            })
 
             return
         }
@@ -414,14 +444,70 @@ export default function GamePage(){
                 }
             }
 
+            let beaten_all = true;
+
             setGameBoard(prev=>{
                 const new_board = [...prev];
 
                 new_board[slot].upper = _card;
 
+                for(let i of new_board){
+                    if(!i.upper){
+                        beaten_all = false;
+                    }
+                }
+
                 return new_board
             })
+
+            setTimers(prev=>{
+                const ts = [...prev];
+                for(let i = 0; i < ts.length; ++i){
+                    ts[i].from_start = true;
+                    if(beaten_all){
+                        if(ts[i].id === _game_players.walking){
+                            ts[i].is_active = true;
+                            ts[i].color = 'red';
+                        }
+                        else if(ts[i].id === _game_players.victim){
+                            ts[i].is_active = false;
+                            ts[i].color = 'green';
+                        }
+                        else{
+                            ts[i].is_active = false;
+                            ts[i].color = 'red';
+                        }
+                    }
+                    else{
+                        if(ts[i].id === _game_players.victim){
+                            ts[i].is_active = true;
+                            ts[i].color = 'green';
+                        }
+                        else{
+                            ts[i].is_active = false;
+                            ts[i].color = 'red';
+                        }
+                    }
+                }
+
+                return ts;
+            })
         }
+    }
+
+    // Game Message enemies
+
+    function on_game_message(data: {user_id: number; type: 'take' | 'bito' | 'pass'}){
+        const cfg = MESSAGES_CONFIGS[data.type];
+
+        set_messages(prev => [
+            ...prev,
+            {
+                user_id: data.user_id,
+                color:  cfg.color as 'white' | 'yellow',
+                text: cfg.text
+            }
+        ])
     }
 
     useEffect(()=>{
@@ -473,15 +559,40 @@ export default function GamePage(){
         )
     }
 
+    // transfer cards
+
+    function handle_transfer(card: CardType){
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return
+
+        const c_card : GameCard = {
+            is_trump: card.suit === trump_card.suit,
+            suit: CARDS_SYMBOBS_BY_SUITS[card.suit] as keyof typeof CARDS_SUITS_BY_SYMBOL,
+            value: card.value
+        }
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: 'transfer_card',
+                    card: c_card
+                }
+            )
+        )
+    }
+
     function handle_start_game(){
    
-        console.log(socket)
+        const _socket = socket || socket_ref.current;
+        
+        console.log(_socket)
    
-        if(!socket) return
+        if(!_socket) return
 
         const data = {event: 'accept'}
 
-        socket.send(
+        _socket.send(
             JSON.stringify(data)
         )
 
@@ -505,46 +616,77 @@ export default function GamePage(){
         on_player_accept(p_id);
     }
 
+    function handle_action_button(text: 'take' | 'bito' | 'pass'){
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return;
+
+        const cfg = MESSAGES_CONFIGS[text]; 
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: text
+                }
+            )
+        )
+
+        set_messages(prev => [...prev, 
+            {
+                user_id: parseInt(localStorage.getItem('user_id') || '-1'),
+                color:  cfg.color as 'white' | 'yellow',
+                text: cfg.text
+                
+                
+            }]);
+    }
+
     return (
         <main id="game-page">
             <TimerContext.Provider
             value={{timer_update: timers_update, timers}}
             >
-                <AcceptedContext.Provider
-                value={accepted_start}
-                >
-                    <GameStateContext.Provider
-                    value={gameState}
+                <GameMessagesContext.Provider value={messages}>
+                    <AcceptedContext.Provider
+                    value={accepted_start}
                     >
-                        <RoomContext.Provider
-                        value={room}
+                        <GameStateContext.Provider
+                        value={gameState}
                         >
-                            <GamePlayersContext.Provider
-                            value={game_players}
+                            <RoomContext.Provider
+                            value={room}
                             >
-                                <GameInfo />
-                                <GameScreen
-                                game_board={game_board}
-                                setGameBoard={setGameBoard}
-                                new_cards={new_cards} 
-                                players_in_room={room.players_count}
-                                users_ids={users_ids}
-                                setUsersIds={setUsersIds}
-                                trump_card={trump_card}
+                                <GamePlayersContext.Provider
+                                value={game_players}
+                                >
+                                    <GameInfo />
+                                    <GameScreen
+                                    game_board={game_board}
+                                    setGameBoard={setGameBoard}
+                                    new_cards={new_cards} 
+                                    players_in_room={room.players_count}
+                                    users_ids={users_ids}
+                                    setUsersIds={setUsersIds}
+                                    trump_card={trump_card}
 
-                                enemy_cards_delta={enemy_cards_delta}
-                                set_enemy_cards_delta={set_enemy_cards_delta}
+                                    enemy_cards_delta={enemy_cards_delta}
+                                    set_enemy_cards_delta={set_enemy_cards_delta}
 
-                                users_cards={users_cards}
-                                setUsersCards={setUsersCards}
-                                
-                                player_throw={player_throw}
-                                />
-                                <GameFooter handle_start_game={handle_start_game} />
-                            </GamePlayersContext.Provider>
-                        </RoomContext.Provider>
-                    </GameStateContext.Provider>               
-                </AcceptedContext.Provider>
+                                    users_cards={users_cards}
+                                    setUsersCards={setUsersCards}
+                                    
+                                    player_throw={player_throw}
+                                    handle_transfer={handle_transfer}
+                                    />
+                                    <GameFooter 
+                                    handle_start_game={handle_start_game} 
+                                    handle_action_button={handle_action_button}
+                                    />
+                                </GamePlayersContext.Provider>
+                            </RoomContext.Provider>
+                        </GameStateContext.Provider>               
+                    </AcceptedContext.Provider>
+                </GameMessagesContext.Provider>
             </TimerContext.Provider>
         </main>
     )

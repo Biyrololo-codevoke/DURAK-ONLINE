@@ -12,6 +12,7 @@ type Props = {
     init_deck: (cards: GameCard[]) => void;
     on_next_move: (victim: number, walking: number) => void;
     on_place_card: (event: {slot: number; card: GameCard}, player_id: number) => void;
+    on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void
 }
 
 export default function handle_event(props: Props){
@@ -82,9 +83,18 @@ export default function handle_event(props: Props){
         }
 
         else if(
-            data.event === 'place_card' || data.event === 'card_beat'
+            data.event === 'place_card' || data.event === 'card_beat' || data.event === 'throw_card'
         ) {
             props.on_place_card(data, data.player_id);
+        }
+
+        else if(
+            data.event === 'bito' || data.event === 'pass' || data.event === 'take'
+        ) {
+            props.on_game_message({
+                user_id: data.player_id,
+                type: data.event
+            })
         }
     }
 }
