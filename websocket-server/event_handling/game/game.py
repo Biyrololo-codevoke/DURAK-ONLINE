@@ -41,6 +41,7 @@ class Game:
         self.passed_players = []
         self.player_taked = False
         self.is_bitten = False
+        self.can_throw = False
         
         self.victim_player = None
         self.attacker_player = None
@@ -119,6 +120,39 @@ class Game:
         for player in self.players:
             if player and player.id == id:
                 return player
+
+
+    def player_passed(self, player_id):
+        self.player_passed.append(player_id)
+        self.check_state()
+        
+    def player_bito(self):
+        self.is_bitten = True
+        self.check_state()
+        
+    def player_took(self):
+        self.player_taked = True
+        self.check_state()
+        
+    def check_state(self, force=False):
+        if self.is_bitten or self.player_taked:
+            self.can_throw = True
+        else:
+            self.can_throw = False
+            
+        if self.player_taked and sorted(self.passed_players) == sorted(self.throwing_players):  # взял и все накинули
+            self.can_next = True
+        elif self.is_bitten and sorted(self.passed_players) == sorted(self.players):  # бито + остальные накинули
+            if self.board.is_all_beaten():
+                self.can_next = True
+            else:
+                self.can_next = False
+        else:
+            self.can_next = False
+            
+        if force and not self.can_next():
+            
+
 
     def __str__(self) -> str:
         s = "<GameObject\n"

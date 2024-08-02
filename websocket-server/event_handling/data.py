@@ -289,8 +289,6 @@ def send_to_player(player_id: int, payload: dict):
 
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
-    player_id = int(key.split('_')[-1])
-    socket_id = id(key_identity[key])
     room = RoomModel.get_by_id(room_id)
     
     if not room:
@@ -301,6 +299,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
     
     serialized_game = room.game_obj
     game = Game.deserialize(serialized_game)
+    player_id = int(key.split('_')[-1])
+    socket_id = id(key_identity[key])
+    player = game.get_player(player_id)
     
     match event:
         case "place_card":
@@ -311,6 +312,14 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 value = payload["card"]["value"],
                 is_trump = payload["card"]["suit"] == game.trump_suit
             )
+
+            if not player.has_card(card):
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "Invalid move"
+                })
+                return
+
             status = game.board.add_card(card, slot)
             logger.info("status: %s" % status)
             if not status:
@@ -323,6 +332,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     })
                     return
                 else:
+                    player.deck.remove_card(card)
                     send_to_player(player_id, {
                         "status": "success"
                     })
@@ -333,6 +343,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                         "player_id": player_id
                     }, socket_id)
             else:
+                player.deck.remove_card(card)
                 payload["player_id"] = player_id
                 send_to_room(room_id, payload, socket_id)
 
@@ -340,15 +351,77 @@ def route_game_events(payload: dict, room_id: int, key: str):
             room.save()
 
         case "pass":
-            if player_id in game.throwing_players:
+            if player_id in game.throwing_players and player_id not in game.passed_players:
                 send_to_player(player_id, {
                     "status": "success"
                 })
                 send_to_room(room_id, {
                     "event": "pass",
                     "player_id": player_id
+                }, socket_id)
+                game.player_passed(player_id)
+            else:
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "Invalid move"
+                })
+                
+        case "bito":
+            if player_id == game.attacker_player.id:
+                send_to_player(player_id, {
+                    "status": "success"
+                })
+                send_to_room(room_id, {
+                    "event": "bito",
+                    "player_id": player_id
+                }, socket_id)
+                game.player_bito()
+            else:
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "Invalid move"
+                })
+        
+        case "take":
+            if player_id == game.victim_player.id:
+                send_to_player(player_id, {
+                    "status": "success"
+                })
+                send_to_room(room_id, {
+                    "event": "take",
+                    "player_id": player_id
+                }, socket_id)
+                game.player_took()
+            else:
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "Invalid move"
+                })
+
+        case "throw_card":
+            if not game.board.has_free_slot():
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "Invalid move"
                 })
                 return
+            card = Card(
+                suit = payload["card"]["suit"],
+                value = payload["card"]["value"],
+                is_trump = payload["card"]["suit"] == game.trump_suit
+            )
+
+            if player_id in game.throwing_players and game.can_throw and player.has_card(card):
+                send_to_player(player_id, {
+                    "status": "success"
+                })
+                player.deck.remove_card(card)
+                send_to_room(room_id, {
+                    "event": "throw_card",
+                    "card": payload["card"],
+                    "player_id": player_id
+                }, socket_id)
+                game.player_throws_card(payload["card"])
             
         case _:
             logger.info("unknown event: %s" % event)
@@ -357,4 +430,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "message": "Unknown event"
             })
 
+    if game.can_next:
+        game.next()
+        send_to_room(room_id, {
+            "event": "next",
+            "walking_player": game.attacker_player.id,
+            "victim_player": game.victim_player.id,
+            "throwing_players": [player.id for player in game.throwing_players]
+        })
+        
 room_list = RoomListObserver()

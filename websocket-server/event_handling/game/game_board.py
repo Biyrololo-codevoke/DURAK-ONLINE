@@ -67,6 +67,15 @@ class GameBoard:
             List[Card]: A list of all the cards on the game board.
         """
         return [x for x in [*self.slots_down, *self.slots_up] if x is not None]
+    
+    def has_free_slot(self) -> bool:
+        """
+        Checks if there is a free slot on the game board.
+
+        Returns:
+            bool: True if there is a free slot, False otherwise.
+        """
+        return None in self.slots_down
 
     def __str__(self) -> str:
         """

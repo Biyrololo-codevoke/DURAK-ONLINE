@@ -7,6 +7,7 @@ class PlayerDeck:
     def __init__(self, cards: list[Card] = None):
         self._cards = cards or []
         self.count = cards and len(cards)
+        self.diff = None
 
     def find_card(self, card: Card) -> Card | None:
         index = self._cards.find(card)
@@ -26,18 +27,22 @@ class PlayerDeck:
             return None
         else:
             return eligible_cards[0]
-        
+
     def has_card(self, card: Card) -> bool:
         return bool(self.find_card(card))
 
     def add_card(self, card: Card) -> None:
+        
         self._cards.append(card)
 
     def remove_card(self, card: Card) -> None:
-            if not self.find_card(card):
-                raise ValueError("Player has no card: " + str(card))
-            self._cards.remove(card)
+        if not self.find_card(card):
+            raise ValueError("Player has no card: " + str(card))
+        self._cards.remove(card)
             
+    def diff(self, cards: list[Card]) -> list[Card]:
+        return list(filter(lambda card: not self.has_card(card), cards))
+
     def serialize(self) -> str:
         return json.dumps({
             "cards": [card.serialize() for card in self._cards]
