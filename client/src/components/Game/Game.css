@@ -747,3 +747,79 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 .game__message_yellow {
     --game_msg_bg: rgb(250, 228, 34);
 }
+
+/* Bito */
+
+#bito{
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(50%, -50%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 250px;
+    width: 50px;
+    z-index: 1;
+    box-sizing: border-box;
+}
+
+#bito .bito__card{
+    flex-grow: 1;
+    position: relative;
+    user-select: none;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent; /* Для WebKit (Chrome, Safari) */
+    -moz-tap-highlight-color: transparent; /* Для Firefox */
+    -ms-tap-highlight-color: transparent; /* Для IE */
+    tap-highlight-color: transparent; /* Общий вариант */
+    animation: bito-putting 1s ease;
+}
+
+@keyframes bito-putting{
+    0%{
+        display: none;
+        scale: 0;
+    }
+    50%{
+        display: block;
+        scale: 0;
+    }
+    100%{
+        scale: 1;
+    }
+}
+
+#bito .bito__card:last-child{
+    height: 100px;
+    flex-grow: 0;
+}
+
+#bito .bito__card > img{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100px;
+    object-fit: cover;
+    user-select: none;
+    cursor: default;
+}
+
+/* game boards cards to bito */
+
+.to-bito{
+    position: absolute !important;
+    animation: board-to-bito 0.8s ease forwards;
+}
+
+@keyframes board-to-bito{
+    from {
+        left: 0;
+        opacity: 1;
+    }
+
+    to {
+        left: 1000px;
+        opacity: 0;
+    }
+}

@@ -126,9 +126,21 @@ type ThrowCard = {
     player_id: number;
 }
 
+type Surprise = {
+    event: 'surprise';
+    cards: GameCard[]
+}
+
+type GiveCards = {
+    event: 'give_cards';
+    player_id: number;
+    cards_count: number
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
-    (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard
+    (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard |
+    Surprise | GiveCards
 
 export type {GameEvent}
 
@@ -147,6 +159,7 @@ export type {PlaceCard}
 type GamePlayers = {
     walking: number;
     victim: number;
+    throwing_players: number[]
 }
 
 export type {GamePlayers}

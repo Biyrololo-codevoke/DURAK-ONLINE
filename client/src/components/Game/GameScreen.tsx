@@ -14,6 +14,7 @@ import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
 import RoomContext from "contexts/game/RoomContext";
 import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS } from "constants/GameParams";
+import Bito from "./Bito";
 
 type UserIdType = number | 'me'
 
@@ -328,6 +329,7 @@ export default function GameScreen(props: Props){
                     }
                 </section>
                 <CardDeck trump_card={trump_card}/>
+                <Bito cards_count={10}/>
                 {
                     game_state === 2 &&
                     <GameBoard is_transfering={is_transfering}/>
