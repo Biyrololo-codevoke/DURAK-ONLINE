@@ -46,9 +46,13 @@ export default function GamePage(){
         }
     )
 
+    /**
+     * player - 'me'
+     * enemy - {enemy_id}
+     * empty - {- index - 1}
+     */
+
     const [users_ids, setUsersIds] = useState<UserIdType[]>(
-        //[3, 5, 'me', 4, 6]
-        // [-1, -2, 'me', -4, -5]
         ['me']
     );
 
@@ -57,44 +61,20 @@ export default function GamePage(){
     const [game_players, set_game_players] = useState<GamePlayers>(
         {
             walking: -1,
-            victim: -1
+            victim: -1,
+            throwing_players: []
         }
     )
 
     // users cards
 
     const [users_cards, setUsersCards] = useState<UserCards>({
-        // 3 : 4,
-        // 5 : 7,
-        // 'me' : [
-        //     {suit: 3, value: 10},
-        //     {suit: 3, value: 9},
-        //     {suit: 3, value: 8},
-        //     {suit: 2, value: 7},
-        //     {suit: 2, value: 14},
-        //     {suit: 1, value: 14},
-        //     {suit: 4, value: 13},
-        // ],
-        // 4 : 4,
-        // 6 : 8
         'me': []
     })
 
-    // useEffect(()=>{
-    //     console.log(`cards changed`);
-    //     console.log(users_cards)
-    // }, [users_cards])
-
     // enemis cards delta for anim
 
-    const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>(
-        {
-            3 : 10,
-            5 : 20,
-            4 : 40,
-            6 : 60,
-        }
-    )
+    const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>({})
 
     // new_cards
 
@@ -108,41 +88,7 @@ export default function GamePage(){
         {suit: 4, value: 13},
     ]);
 
-    const [game_board, setGameBoard] = useState<GameBoardCard[]>([
-            // {
-            //     lower: {
-            //         suit: 4,
-            //         value: 1
-            //     },
-            //     upper: {
-            //         suit: 3,
-            //         value: 13
-            //     }
-            // },
-            // {
-            //     lower: {
-            //         suit: 2,
-            //         value: 5
-            //     },
-            // },
-            // {
-            //     lower: {
-            //         suit: 1,
-            //         value: 2
-            //     },
-            // },
-            // {
-            //     lower: {
-            //         suit: 4,
-            //         value: 5
-            //     },
-            //     upper: {
-            //         suit: 3,
-            //         value: 7
-            //     }
-            // },
-        ],
-    )
+    const [game_board, setGameBoard] = useState<GameBoardCard[]>([])
 
     useEffect(()=>{
         localStorage.setItem('_game_board', JSON.stringify(game_board));
@@ -232,7 +178,9 @@ export default function GamePage(){
                 init_deck,
                 on_next_move,
                 on_place_card,
-                on_game_message
+                on_game_message,
+                on_give_enemies_cards,
+                on_give_player_cards
             }
         )
     }
@@ -326,7 +274,7 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number){
+    function on_next_move(victim: number, walking: number, throwing_players: number[]){
         setTimers(
             [
                 {
@@ -340,14 +288,23 @@ export default function GamePage(){
                     color: 'green',
                     from_start: true,
                     is_active: false
-                }
+                },
+                ...throwing_players.map((id) => {
+                    return {
+                        id,
+                        color: 'red' as 'red' | 'green',
+                        from_start: true,
+                        is_active: false
+                    }
+                })
             ]
         )
 
         set_game_players(
             {
                 walking,
-                victim
+                victim,
+                throwing_players
             }
         )
 
@@ -366,6 +323,16 @@ export default function GamePage(){
         }
 
         set_timers_update(prev => prev + 1);
+
+        const _game_board = document.querySelectorAll('game-desk-card > img');
+
+        for(let i = 0; i < _game_board.length; i++){
+            _game_board[i].classList.add('to-bito')
+        }
+
+        setTimeout(()=>{
+            setGameBoard([]);
+        }, 600)
     }
 
     useEffect(()=>{
@@ -400,6 +367,21 @@ export default function GamePage(){
 
         set_timers_update(prev => prev + 1);
 
+        set_enemy_cards_delta(prev => {
+            const new_delta = {...prev};
+            for(let i in new_delta){
+                new_delta[i] = 0;
+            }
+
+            return new_delta
+        })
+
+        setUsersCards(prev => {
+            const new_cards = {...prev};
+            new_cards[player_id] -= 1;
+            return new_cards
+        })
+
         if(slot >= _game_board.length){
             _card.new = {
                 x: _rect.x - (deck_rect.x + deck_rect.width / 2),
@@ -410,8 +392,15 @@ export default function GamePage(){
             }])
 
             setTimers(prev=>{
-                const ts = [...prev];
-                for(let i = 0; i < ts.length; ++i){
+                const _ids = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
+                const ts : Timer[] = [];
+                for(let i = 0; i < _ids.length; ++i){
+                    ts[i] = {
+                        id: _ids[i],
+                        color: 'red',
+                        from_start: true,
+                        is_active: false
+                    };
                     ts[i].from_start = true;
                     if(ts[i].id === _game_players.victim){
                         ts[i].is_active = true;
@@ -461,8 +450,15 @@ export default function GamePage(){
             })
 
             setTimers(prev=>{
-                const ts = [...prev];
-                for(let i = 0; i < ts.length; ++i){
+                const _ids = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
+                const ts : Timer[] = [];
+                for(let i = 0; i < _ids.length; ++i){
+                    ts[i] = {
+                        id: _ids[i],
+                        color: 'red',
+                        from_start: true,
+                        is_active: false
+                    }
                     ts[i].from_start = true;
                     if(beaten_all){
                         if(ts[i].id === _game_players.walking){
@@ -495,19 +491,196 @@ export default function GamePage(){
         }
     }
 
-    // Game Message enemies
+    function on_give_enemies_cards(player_id: number, cards_count: number){
+        if(String(player_id) === localStorage.getItem('user_id')){
+            return
+        }
+        setUsersCards(prev=>{
+            const new_cards = {...prev};
+            new_cards[player_id]+= cards_count;
+            return new_cards
+        })
+
+        set_enemy_cards_delta(prev=>{
+            if(Math.floor(prev[player_id] / 10) === Math.floor(cards_count / 10)){
+                if(prev[player_id] % 10 === 9){
+                    return {
+                        ...prev,
+                        [player_id]: cards_count * 10
+                    }
+                }
+                else{
+                    return {
+                        ...prev,
+                        [player_id]: cards_count * 10 + 1
+                    }
+                }
+            }
+            return {
+                ...prev,
+                [player_id]: cards_count * 10
+            }
+        })
+    }
+
+    function on_give_player_cards(cards: CardType[]){
+        set_new_cards(cards);
+        setUsersCards(prev=>{
+            return {
+                ...prev,
+                'me': [...prev['me'], ...cards]
+            }
+        })
+    }
+
+    useEffect(()=>{
+        localStorage.setItem('game_messages', JSON.stringify(messages))
+    }, [messages])
+
+    // victim beated all cards or victim taking
+
+    function update_timers__victim_complete(_game_players : GamePlayers, _messages : GameMessage[]){
+
+        const is_walking_bito = _messages.some(m => m.text === MESSAGES_CONFIGS.bito.text && m.user_id === _game_players.walking);
+
+        setTimers(prev=>{
+            const _ids = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
+            const ts : Timer[] = [];
+            for(let i = 0; i < _ids.length; ++i){
+                ts[i] = {
+                    id: _ids[i],
+                    color: 'red',
+                    from_start: true,
+                    is_active: false
+                }
+                if(ts[i].id === _game_players.victim){
+                    ts[i].is_active = false;
+                    ts[i].color = 'green';
+                }
+                else{
+                    ts[i].color = 'red';
+                    if(is_walking_bito){
+                        ts[i].is_active = true;
+                    }
+                    else{
+                        if(ts[i].id === _game_players.walking){
+                            ts[i].is_active = true;
+                        }
+                        else{
+                            ts[i].is_active = false;
+                        }
+                    }
+                }
+            }
+
+            return ts;
+        })
+        set_timers_update(prev => prev + 1);
+    }
+
+    // player places new card or victim beated card
+
+    function update_timers__victim_beated(_game_players : GamePlayers,  _messages : GameMessage[]){
+        setTimers(prev=>{
+            const _ids = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
+            const ts : Timer[] = [];
+            for(let i = 0; i < _ids.length; ++i){
+                ts[i] = {
+                    id: _ids[i],
+                    color: 'red',
+                    from_start: true,
+                    is_active: false
+                }
+                if(ts[i].id === _game_players.victim){
+                    ts[i].is_active = true;
+                    ts[i].color = 'green';
+                }
+                else{
+                    ts[i].is_active = false;
+                    ts[i].color = 'red';
+                }
+            }
+
+            return ts;
+        })
+    }
+
+    // on player pass or bito
+
+    function update_timers__bito_or_pass(_game_players : GamePlayers, _player_id: number){
+
+        setTimers(prev=>{
+            const _ids = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
+            const ts : Timer[] = [];
+            for(let i = 0; i < _ids.length; ++i){
+                ts[i] = {
+                    id: _ids[i],
+                    color: 'red',
+                    from_start: true,
+                    is_active: false
+                }
+
+                if(ts[i].id === _game_players.victim){
+                    ts[i].is_active = false;
+                    ts[i].color = 'green';
+                }
+                else{
+                    ts[i].color = 'red';
+                    if(ts[i].id === _player_id){
+                        ts[i].is_active = false;
+                    }
+                    else{
+                        let prev_value = prev.find(t => t.id === _player_id);
+                        if(prev_value){
+                            ts[i].is_active = prev_value.is_active;
+                        }
+                        else{
+                            ts[i].is_active = true;
+                        }
+                    }
+                }
+            }
+
+            return ts;
+        })
+
+        set_timers_update(prev => prev + 1);
+    }
+
+    // Game Message enemies, game events
 
     function on_game_message(data: {user_id: number; type: 'take' | 'bito' | 'pass'}){
         const cfg = MESSAGES_CONFIGS[data.type];
 
-        set_messages(prev => [
-            ...prev,
-            {
-                user_id: data.user_id,
-                color:  cfg.color as 'white' | 'yellow',
-                text: cfg.text
-            }
-        ])
+        let msgs : GameMessage[] = [];
+
+        set_messages(prev => {
+            msgs = [
+                ...prev,
+                {
+                    user_id: data.user_id,
+                    color:  cfg.color as 'white' | 'yellow',
+                    text: cfg.text
+                }
+            ]
+            return [
+                ...prev,
+                {
+                    user_id: data.user_id,
+                    color:  cfg.color as 'white' | 'yellow',
+                    text: cfg.text
+                }
+            ]
+        })
+
+        localStorage.setItem('game_messages', JSON.stringify(msgs));
+
+        if(data.type === 'take'){
+            update_timers__victim_complete(game_players, msgs);
+            return
+        }
+
+        update_timers__bito_or_pass(game_players, data.user_id);
     }
 
     useEffect(()=>{
@@ -616,6 +789,8 @@ export default function GamePage(){
         on_player_accept(p_id);
     }
 
+    // apply in game events
+
     function handle_action_button(text: 'take' | 'bito' | 'pass'){
         const _socket = socket || socket_ref.current;
 
@@ -631,14 +806,34 @@ export default function GamePage(){
             )
         )
 
-        set_messages(prev => [...prev, 
-            {
-                user_id: parseInt(localStorage.getItem('user_id') || '-1'),
-                color:  cfg.color as 'white' | 'yellow',
-                text: cfg.text
-                
-                
-            }]);
+        let msgs : GameMessage[] = [];
+
+        set_messages(prev => {
+
+            msgs = [...prev, 
+                {
+                    user_id: parseInt(localStorage.getItem('user_id') || '-1'),
+                    color:  cfg.color as 'white' | 'yellow',
+                    text: cfg.text 
+                }]
+
+            return [...prev, 
+                {
+                    user_id: parseInt(localStorage.getItem('user_id') || '-1'),
+                    color:  cfg.color as 'white' | 'yellow',
+                    text: cfg.text 
+                }]
+        }
+        );
+
+        localStorage.setItem('game_messages', JSON.stringify(msgs));
+
+        if(text === 'take'){
+            update_timers__victim_complete(game_players, msgs);
+            return
+        }
+
+        update_timers__bito_or_pass(game_players, parseInt(localStorage.getItem('user_id') || '-1'));
     }
 
     return (
