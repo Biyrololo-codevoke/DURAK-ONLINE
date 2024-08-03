@@ -47,6 +47,9 @@ class Game:
         self.attacker_player = None
         self.throwing_players = None
 
+        self.place = 1
+        self.pl_hst = []
+
 
     def make_game(self):
         self.beaten_cards = []
@@ -91,6 +94,8 @@ class Game:
         self.passed_players = []
         self.player_taked = False
         self.is_bitten = False
+        
+        self.throw_players_in_time = [self.attacker_player, self.victim_player]
 
     def deal_cards(self):
         for _ in range(6):
@@ -121,7 +126,6 @@ class Game:
             if player and player.id == id:
                 return player
 
-
     def player_passed(self, player_id):
         self.player_passed.append(player_id)
         self.check_state()
@@ -134,25 +138,44 @@ class Game:
         self.player_taked = True
         self.check_state()
         
-    def check_state(self, force=False):
+    def check_state(self):
         if self.is_bitten or self.player_taked:
             self.can_throw = True
         else:
             self.can_throw = False
-            
-        if self.player_taked and sorted(self.passed_players) == sorted(self.throwing_players):  # взял и все накинули
-            self.can_next = True
-        elif self.is_bitten and sorted(self.passed_players) == sorted(self.players):  # бито + остальные накинули
-            if self.board.is_all_beaten():
-                self.can_next = True
-            else:
-                self.can_next = False
+    
+        if self.is_bitten and len(self.throwing_players) == len(self.player_passed) or \
+                self.player_taked and len(self.throwing_players)+1 == len(self.player_passed):
+            self.is_end = True
         else:
-            self.can_next = False
+            self.is_end = False
             
-        if force and not self.can_next():
+    def end(self):
+        cards = self.board.take_all()
+        
+        if self.is_bitten:
+            self.beaten_cards.extend(cards)
+            return False, cards
             
+        elif self.player_taked:
+            for card in cards:
+                self.victim_player.deck.add_card(card)
+            return True, cards
 
+    def update_pl_hst(self, player):
+        if player in self.pl_hst:
+           self.pl_hst.remove(player)
+        self.pl_hst.append(player)
+
+    def check_winner(self):
+        winners = []
+
+        for player in self.pl_hst:
+            if player.deck.__len__() == 0 and len(self.deck) == 0:
+                winners.append((player, self.place))
+                self.place += 1
+                
+        return winners
 
     def __str__(self) -> str:
         s = "<GameObject\n"

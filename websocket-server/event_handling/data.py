@@ -342,10 +342,12 @@ def route_game_events(payload: dict, room_id: int, key: str):
                         "slot": slot,
                         "player_id": player_id
                     }, socket_id)
+                    game.update_pl_hst(player)
             else:
                 player.deck.remove_card(card)
                 payload["player_id"] = player_id
                 send_to_room(room_id, payload, socket_id)
+                game.update_pl_hst(player)
 
             room.game_obj = game.serialize()
             room.save()
@@ -421,7 +423,15 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "card": payload["card"],
                     "player_id": player_id
                 }, socket_id)
+                game.update_pl_hst(player)
                 game.player_throws_card(payload["card"])
+                game.throw_players_in_time.append(player_id)
+
+            else:
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "Invalid move"
+                })
             
         case _:
             logger.info("unknown event: %s" % event)
@@ -430,7 +440,61 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "message": "Unknown event"
             })
 
-    if game.can_next:
+    if game.is_end:
+        player_taked, cards = game.end()
+        
+        if player_taked:
+            send_to_room(room_id, {
+                "event": "player_taked",
+                "cards_count": len(cards) 
+            })
+            send_to_player(game.victim_player.id, {
+                "event": "get_cards",
+                "cards": [card.json() for card in cards]
+            })
+        else:
+            send_to_room(room_id, {
+                "event": "beat_cards",
+                "cards": [card.json() for card in cards]
+            })
+        
+        # give cards for players
+        if player_taked:
+            del game.throw_players_in_time[1]
+
+        for player in game.throw_players_in_time:
+            if game.deck.__len__() == 0:
+                break
+
+            need_cards = 6 - player.deck.__len__()
+            if need_cards < 0:
+                continue
+            
+            if game.deck.__len__() >= need_cards:
+                player_give_cards = []  # массив к5оторый я кину игроку
+                for _ in range(need_cards):
+                    player_give_cards.append(game.deck.pop())  # добавляю карту с конца в массив
+            else:
+                player_give_cards = game.deck
+
+            send_to_player(player.id, {
+                "event": "surprise",
+                "cards": [card.json() for card in player_give_cards]  # кидлаю массив игроку!
+            })
+            send_to_room(room_id, {
+                "event": "give_cards",
+                "player_id": player.id,
+                "cards_count": len(player_give_cards)  # кидаю кол-во карт которое кинул
+            })
+        
+        winners = game.check_win()
+        
+        for winner, place in winners:
+            send_to_room(room_id, {
+                "event": "player_win",
+                "top": place
+            })
+        
         game.next()
         send_to_room(room_id, {
             "event": "next",

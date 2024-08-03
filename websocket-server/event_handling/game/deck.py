@@ -32,7 +32,6 @@ class PlayerDeck:
         return bool(self.find_card(card))
 
     def add_card(self, card: Card) -> None:
-        
         self._cards.append(card)
 
     def remove_card(self, card: Card) -> None:
@@ -55,3 +54,7 @@ class PlayerDeck:
             
     def __str__(self):
         return ", ".join([str(card) for card in self._cards])
+        
+    def __len__(self):
+        return len(self._cards)
+        
