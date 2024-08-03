@@ -24,7 +24,7 @@ function uploadPhoto(){
 }
 
 function roomListWS(){
-    return `/ws/room-list` // wss://codevoke.ru/ws/room/list
+    return `/ws/room-list` // wss://codevoke.ru/ws/room-list
 }
 
 export {roomListWS}

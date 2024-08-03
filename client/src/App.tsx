@@ -15,6 +15,8 @@ import { useEffect } from 'react';
 import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
 import {Protected} from 'hocs';
 
+const LOGIN_PAGES_URLS = ['/login', '/register']
+
 function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
@@ -36,7 +38,9 @@ function App() {
         Cookies.remove('access_token');
         const clearing_keys = ['username', 'verified', 'user_id', 'image_id', 'player_money', 'user_photo'];
         clearing_keys.forEach(key => localStorage.removeItem(key));
-        window.location.pathname = '/login'
+        if(!LOGIN_PAGES_URLS.includes(window.location.pathname)){
+          window.location.pathname = '/login'
+        }
         return;
       }
 
@@ -67,7 +71,11 @@ function App() {
           localStorage.removeItem('player_money');
           localStorage.removeItem('user_photo');
           Cookies.remove('access_token');
-          window.location.pathname = '/login'
+          axios.defaults.headers.common['Authorization'] = '';
+          if(!LOGIN_PAGES_URLS.includes(window.location.pathname)){
+            window.location.pathname = '/login'
+          }
+            
         }
       )
     },

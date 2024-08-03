@@ -1,5 +1,6 @@
+import { convert_card } from "features/GameFeatures";
 import React from "react";
-import { GameCard, GameEvent, PlaceCard } from "types/GameTypes";
+import { CardType, GameCard, GameEvent, PlaceCard } from "types/GameTypes";
 type UserIdType = number | 'me'
 
 type Props = {
@@ -10,9 +11,11 @@ type Props = {
     on_start_game: () => void;
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
-    on_next_move: (victim: number, walking: number) => void;
+    on_next_move: (victim: number, walking: number, throwing_players: number[]) => void;
     on_place_card: (event: {slot: number; card: GameCard}, player_id: number) => void;
-    on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void
+    on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void;
+    on_give_enemies_cards: (player_id: number, cards_count: number) => void;
+    on_give_player_cards: (cards: CardType[]) => void;
 }
 
 export default function handle_event(props: Props){
@@ -79,7 +82,7 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'next'
         ) {
-            props.on_next_move(data.victim_player, data.walking_player);
+            props.on_next_move(data.victim_player, data.walking_player, data.throwing_players);
         }
 
         else if(
@@ -95,6 +98,18 @@ export default function handle_event(props: Props){
                 user_id: data.player_id,
                 type: data.event
             })
+        }
+        else if(
+            data.event === 'surprise'
+        ) {
+            const converted_cards : CardType[] = data.cards.map(c => convert_card(c));
+
+            props.on_give_player_cards(converted_cards);
+        }
+        else if(
+            data.event === 'give_cards'
+        ) {
+            props.on_give_enemies_cards(data.player_id, data.cards_count);
         }
     }
 }
