@@ -82,14 +82,16 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
         !__game_board.some(c => !c.upper) && __game_board.length > 0)
 
         set_is_pass(gameState === 2 && !__has_message && 
-        (
-            (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
-            (!is_walking && !_is_victim && (
-                messages.some(m=>m.text === MESSAGES_CONFIGS.take.text) ||
-                messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text)
+            __game_board.length > 0 &&
+            (
+                (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
+                (!is_walking && !_is_victim && (
+                    messages.some(m=>m.text === MESSAGES_CONFIGS.take.text) ||
+                    messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text)
+                    )
                 )
             )
-        ))
+        )
 
     }, [timers.timer_update, messages])
 
