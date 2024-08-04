@@ -811,6 +811,63 @@ export default function GamePage(){
         socket_ref.current.send(
             JSON.stringify(data)
         )
+
+        const _game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
+
+        const _game_players : GamePlayers = JSON.parse(localStorage.getItem('game_players') || '{}');
+        
+        const _users_ids : number[] = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
+
+        const _user_id = parseInt(localStorage.getItem('user_id') || '-1');
+
+        setTimers(prev => {
+            const new_timers : Timer[] = [];
+
+            for(let id of _users_ids){
+
+                if(_game_board[data.slot - 1].upper){
+
+                    if(id === _game_players.victim){
+                        new_timers.push({
+                            id: id,
+                            color: 'green',
+                            from_start: true,
+                            is_active: false
+                        })
+                    }
+
+                    else {
+                        new_timers.push({
+                            id: id,
+                            color: 'red',
+                            from_start: true,
+                            is_active: true
+                        })
+                    }
+
+                } else {
+                    if(id === _game_players.victim){
+                        new_timers.push({
+                            id: id,
+                            color: 'green',
+                            from_start: true,
+                            is_active: true
+                        })
+                    }
+                    else{
+                        new_timers.push({
+                            id: id,
+                            color: 'red',
+                            from_start: true,
+                            is_active: false
+                        })
+                    }
+                }
+
+            }
+
+            return new_timers;
+        })
     }
 
     // transfer cards
