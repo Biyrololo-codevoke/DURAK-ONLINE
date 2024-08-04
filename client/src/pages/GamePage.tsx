@@ -439,9 +439,15 @@ export default function GamePage(){
                 x: _rect.x - (deck_rect.x + deck_rect.width / 2),
                 y: _rect.y - (deck_rect.y + deck_rect.height / 2)
             }
-            setGameBoard(prev => [...prev, {
-                lower: _card,
-            }])
+            setGameBoard(prev => {
+                let new_board = [...prev, {
+                    lower: _card,
+                }];
+
+                localStorage.setItem('_game_board', JSON.stringify(new_board));
+
+                return new_board
+            })
 
             setTimers(prev=>{
                 const _ids = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
@@ -491,6 +497,8 @@ export default function GamePage(){
                 const new_board = [...prev];
 
                 new_board[slot].upper = _card;
+
+                localStorage.setItem('_game_board', JSON.stringify(new_board));
 
                 for(let i of new_board){
                     if(!i.upper){
