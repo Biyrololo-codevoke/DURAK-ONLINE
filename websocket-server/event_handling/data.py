@@ -317,6 +317,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     return
                 else:
                     player.deck.remove_card(card)
+                    logger.info(f"after deleting cards count: {player.deck.len()}")
                     send_to_player(player_id, {
                         "status": "success"
                     })
@@ -329,9 +330,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     game.update_pl_hst(player)
             else:
                 player.deck.remove_card(card)
+                logger.info(f"after deleting cards count: {player.deck.len()}")
                 payload["player_id"] = player_id
                 send_to_room(room_id, payload, socket_id)
                 game.update_pl_hst(player)
+            s_game = game.serialize()
+            room.game_obj = s_game
+            room.save()
 
         case "pass":
             logger.info("player passed")
@@ -339,7 +344,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
             logger.info(f"{player_id in [*game.throwing_players, game.attacker_player]}")
             logger.info(f"{player_id not in game.passed_players}")
 
-            if player_id in [*[player.id for player in game.throwing_playersd], game.attacker_player.id] and player_id not in game.passed_players:
+            if player_id in [*[player.id for player in game.throwing_players], game.attacker_player.id] and player_id not in game.passed_players:
                 send_to_player(player_id, {
                     "status": "success"
                 })
@@ -348,6 +353,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "player_id": player_id
                 }, socket_id)
                 game.player_passed(player_id)
+                s_game = game.serialize()
+                room.game_obj = s_game
+                room.save()
             else:
                 send_to_player(player_id, {
                     "status": "error",
@@ -364,6 +372,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "player_id": player_id
                 }, socket_id)
                 game.player_bito()
+                s_game = game.serialize()
+                room.game_obj = s_game
+                room.save()
             else:
                 send_to_player(player_id, {
                     "status": "error",
@@ -385,6 +396,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "status": "error",
                     "message": "Invalid move"
                 })
+            s_game = game.serialize()
+            room.game_obj = s_game
+            room.save()
 
         case "throw_card":
             if not game.board.has_free_slot():
@@ -404,6 +418,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "status": "success"
                 })
                 player.deck.remove_card(card)
+                logger.info(f"after deleting cards count: {player.deck.len()}")
                 send_to_room(room_id, {
                     "event": "throw_card",
                     "card": payload["card"],
@@ -418,6 +433,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "status": "error",
                     "message": "Invalid move"
                 })
+            s_game = game.serialize()
+            room.game_obj = s_game
+            room.save()
             
         case _:
             send_to_player(player_id, {
@@ -427,6 +445,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
 
     if game.is_end:
         logger.info("game is end")
+        game.is_end = False
         player_taked, cards = game.end()
         
         if player_taked:

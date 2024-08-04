@@ -500,12 +500,7 @@ export default function GamePage(){
 
                 new_board[slot].upper = _card;
 
-<<<<<<< HEAD
-                console.log('НОВАЯ БОАРД (до локал сторейдж)', new_board, localStorage.getItem('_game_board'))
-=======
                 console.log(`ПРОТИВНИК ПОБИЛ КАРТЦ !!!!!!!!!!!`, new_board)
-
->>>>>>> 33984a4859ab2c5bbdb422e666acd08b5c33ea78
                 localStorage.setItem('_game_board', JSON.stringify(new_board));
                 console.log('НОВАЯ БОАРД (после)', new_board, localStorage.getItem('_game_board'))
 

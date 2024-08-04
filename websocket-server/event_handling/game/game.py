@@ -106,7 +106,11 @@ class Game:
         self.passed_players = []
         self.throw_players_in_time = [self.attacker_player, self.victim_player]
         self.player_taked = False
+        self.player_passed = []
         self.is_bitten = False
+        self.can_throw = False
+        self.is_end = False
+        self.pl_hst = [self.attacker_player]
 
     def deal_cards(self):
         for _ in range(6):
@@ -117,9 +121,6 @@ class Game:
     def join_player(self, player: 'Player'):
         len_pl = len([x for x in self.players if x is not None])
         if len_pl < self.players_count:
-            # try-except for code cleaning. 
-            # if players < count, then in array will be guaranteed 
-            # to be at list 1 None elem
             try:  
                 free_place = self.players.index(None)
                 self.players[free_place] = player
@@ -180,6 +181,8 @@ class Game:
             for card in cards:
                 self.victim_player.deck.add_card(card)
             return True, cards
+        else:
+            return False, cards
 
     def update_pl_hst(self, player):
         if player in self.pl_hst:
