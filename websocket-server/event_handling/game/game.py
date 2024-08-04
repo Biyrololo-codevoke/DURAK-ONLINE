@@ -101,9 +101,11 @@ class Game:
         self.attacker_player = self.players_deque[0]
         
         if self.throw_mode == "all":
-            self.throwing_players = self.players_deque[1:-1]
+            self.throwing_players = self.players_deque[:]
         else:
-            self.throwing_players = [self.players_deque[1], self.players_deque[-2]]
+            self.throwing_players = self.players_deque[1:-2]
+        self.throwing_players.remove(self.victim_player)
+        self.throwing_players.remove(self.attacker_player)
         
         self.passed_players = []
         self.player_taked = False
@@ -156,14 +158,18 @@ class Game:
         
     def check_state(self):
         if self.is_bitten or self.player_taked:
+            logger.info("bitten | taked => can throw")
             self.can_throw = True
         else:
+            logger.info("can't throw")
             self.can_throw = False
     
         if self.is_bitten and len(self.throwing_players) == len(self.player_passed) or \
                 self.player_taked and len(self.throwing_players)+1 == len(self.player_passed):
+            logger.info("бито и кол-во пассов = кол-во подкидывающих или плаер взял и подкидывающие +1 = кол-во пасов")
             self.is_end = True
         else:
+            logger.info(f"{self.is_bitten=}; {self.player_taked=}; {len(self.throwing_players)=}; {len(self.player_passed)=}")
             self.is_end = False
             
     def end(self):
@@ -172,7 +178,7 @@ class Game:
         if self.is_bitten:
             self.beaten_cards.extend(cards)
             return False, cards
-            
+
         elif self.player_taked:
             for card in cards:
                 self.victim_player.deck.add_card(card)

@@ -421,9 +421,11 @@ def route_game_events(payload: dict, room_id: int, key: str):
             })
 
     if game.is_end:
+        logger.info("game is end")
         player_taked, cards = game.end()
         
         if player_taked:
+            logger.info("player_taked")
             send_to_room(room_id, {
                 "event": "player_taked",
                 "cards_count": len(cards) 
@@ -433,6 +435,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "cards": [card.json() for card in cards]
             })
         else:
+            logger.info("beat_cards")
             send_to_room(room_id, {
                 "event": "beat_cards",
                 "cards": [card.json() for card in cards]
@@ -442,6 +445,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
         if player_taked:
             del game.throw_players_in_time[1]
 
+        logger.info("give cards and send events")
         for player in game.throw_players_in_time:
             if game.deck.__len__() == 0:
                 break
@@ -467,6 +471,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "cards_count": len(player_give_cards)  # кидаю кол-во карт которое кинул
             })
         
+        logger.info("check, we have winners, doesn't have")
         winners = game.check_win()
         
         for winner, place in winners:
@@ -476,6 +481,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "player_id": winner.id
             })
         
+        logger.info("make next hod")
         game.next()
         send_to_room(room_id, {
             "event": "next",
@@ -487,5 +493,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
         s_game = game.serialize()
         room.game_obj = s_game
         room.save()
+    else:
+        logger.info("game not end")
         
 room_list = RoomListObserver()
