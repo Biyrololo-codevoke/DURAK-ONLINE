@@ -59,7 +59,6 @@ class Game:
         self.victim_player = None
         self.attacker_player = None
         self.throwing_players = []
-        self.throw_players_in_time = []
         self.player_passed = []
         self.pl_hst = []
         self.place = 1
@@ -94,17 +93,19 @@ class Game:
         self.attacker_player = self.players_deque[0]
         
         if self.throw_mode == "all":
-            self.throwing_players = self.players_deque[:]
+            self.throwing_players = list(self.players_deque)
         else:
-            self.throwing_players = self.players_deque[1:-2]
-        self.throwing_players.remove(self.victim_player)
-        self.throwing_players.remove(self.attacker_player)
+            self.throwing_players = list(self.players_deque)[1:-2]
+
+        if self.victim_player in self.throwing_players:
+            self.throwing_players.remove(self.victim_player)
+
+        if self.attacker_player in self.throwing_players:
+            self.throwing_players.remove(self.attacker_player)
         
         self.passed_players = []
         self.player_taked = False
         self.is_bitten = False
-        
-        self.throw_players_in_time = [self.attacker_player, self.victim_player]
 
     def deal_cards(self):
         for _ in range(6):
@@ -230,7 +231,6 @@ class Game:
                 "victim_player": self.victim_player.serialize(),
                 "attacker_player": self.attacker_player.serialize(),
                 "throwing_players": [player.serialize() for player in self.throwing_players],
-                "throw_players_in_time": self.throw_players_in_time,
                 "player_passed": self.player_passed,
                 "pl_hst": [player.serialize() for player in self.pl_hst],
                 "place": self.place
@@ -275,7 +275,6 @@ class Game:
             Player.deserialize(player, game) 
             for player in states.get("throwing_players", [])
         ] if states.get("throwing_players") else []
-        game.throw_players_in_time = states.get("throw_players_in_time", [])
         game.player_passed = states.get("player_passed", [])
         game.pl_hst = [
             Player.deserialize(player, game) 
