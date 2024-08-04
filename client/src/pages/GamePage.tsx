@@ -315,6 +315,8 @@ export default function GamePage(){
             ]
         )
 
+        set_messages([]);
+
         set_game_players(
             {
                 walking,
