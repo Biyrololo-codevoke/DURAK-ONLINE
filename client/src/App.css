@@ -49,3 +49,7 @@ footer{
 #mobile-view footer{
     width: 100%;
 }
+
+* {
+    overflow-x: hidden;
+}

@@ -104,7 +104,7 @@ export default function RoomsList(){
 
         return () => {
             if(new_socket.readyState === 1){
-                new_socket.close();
+                new_socket.close(1001);
             }
         }
 
