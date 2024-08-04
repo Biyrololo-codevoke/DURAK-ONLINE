@@ -814,9 +814,9 @@ export default function GamePage(){
 
         const _game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
 
-        const _users_ids : UserIdType[] = JSON.parse(localStorage.getItem('_users_ids') || '[]');
-    
         const _game_players : GamePlayers = JSON.parse(localStorage.getItem('game_players') || '{}');
+        
+        const _users_ids : number[] = [..._game_players.throwing_players, _game_players.victim, _game_players.walking];
 
         const _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
@@ -824,14 +824,12 @@ export default function GamePage(){
             const new_timers : Timer[] = [];
 
             for(let id of _users_ids){
-                let _id = id;
-                if(_id === 'me') _id = _user_id;
 
                 if(_game_board[data.slot - 1].upper){
 
-                    if(_id === _game_players.victim){
+                    if(id === _game_players.victim){
                         new_timers.push({
-                            id: _id,
+                            id: id,
                             color: 'green',
                             from_start: true,
                             is_active: false
@@ -840,7 +838,7 @@ export default function GamePage(){
 
                     else {
                         new_timers.push({
-                            id: _id,
+                            id: id,
                             color: 'red',
                             from_start: true,
                             is_active: true
@@ -848,9 +846,9 @@ export default function GamePage(){
                     }
 
                 } else {
-                    if(_id === _game_players.victim){
+                    if(id === _game_players.victim){
                         new_timers.push({
-                            id: _id,
+                            id: id,
                             color: 'green',
                             from_start: true,
                             is_active: true
@@ -858,7 +856,7 @@ export default function GamePage(){
                     }
                     else{
                         new_timers.push({
-                            id: _id,
+                            id: id,
                             color: 'red',
                             from_start: true,
                             is_active: false
