@@ -225,7 +225,8 @@ class Game:
                 "trump_suit": self.trump_suit
             },
             "payload": {
-                "players": [player.serialize() for player in self.players]
+                "players": [player.serialize() for player in self.players],
+                "player_deque": [player.serialize() for player in list(self.players_deque)]
             },
             "state": {
                 "can_throw": self.can_throw,
@@ -257,14 +258,19 @@ class Game:
         game.board = GameBoard.deserialize(game_data.get("board"))
         game.trump_suit = game_data.get("trump_suit")
         
-        players_data = data.get("payload").get("players")
+        # payload
+        payload = data.get("payload")
+        
+        players_data = payload.get("players")
         game.players = [
             Player.deserialize(player, game)
             for player in players_data
         ]
         
-        for field in data.get("state"):
-            setattr(game, field, data.get("state").get(field))
+        game.players_deque = deque([
+            Player.deserialize(player, game)
+            for player in payload.get("player_deque")
+        ]) if payload.get("player_deque") else deque(game.players)
         
         # states
         states = data.get("state")

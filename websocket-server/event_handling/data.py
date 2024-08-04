@@ -450,16 +450,21 @@ def route_game_events(payload: dict, room_id: int, key: str):
         for player in game.throw_players_in_time:
             if game.deck.__len__() == 0:
                 break
-
+            logger.info(f"player has {player.deck.__len__()} cards")
             need_cards = 6 - player.deck.__len__()
+            logger.info(f"he need {need_cards} cards")
+            
             if need_cards < 0:
+                logger.info("cards dowsn't needs, skip")
                 continue
             
             if game.deck.__len__() >= need_cards:
+                logger.info("in deck we have much cards, we will give all cards")
                 player_give_cards = []  # массив к5оторый я кину игроку
                 for _ in range(need_cards):
                     player_give_cards.append(game.deck.pop())  # добавляю карту с конца в массив
             else:
+                logger.info("we has less cards in deck, we will give all cards")
                 player_give_cards = game.deck
 
             send_to_player(player.id, {
