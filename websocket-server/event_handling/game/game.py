@@ -50,6 +50,19 @@ class Game:
 
         self.place = 1
         self.pl_hst = []
+        
+        self.can_throw = False
+        self.is_end = False
+        self.is_bitten = False
+        self.player_taked = False
+        self.passed_players = []
+        self.victim_player = None
+        self.attacker_player = None
+        self.throwing_players = []
+        self.throw_players_in_time = []
+        self.player_passed = []
+        self.pl_hst = []
+        self.place = 1
 
 
     def make_game(self):
@@ -215,12 +228,12 @@ class Game:
                 "is_bitten": self.is_bitten,
                 "player_taked": self.player_taked,
                 "passed_players": self.passed_players,
-                "victim_player": self.victim_player,
-                "attacker_player": self.attacker_player,
-                "throwing_players": self.throwing_players,
+                "victim_player": self.victim_player.serialize(),
+                "attacker_player": self.attacker_player.serialize(),
+                "throwing_players": [player.serialize() for player in self.throwing_players],
                 "throw_players_in_time": self.throw_players_in_time,
                 "player_passed": self.player_passed,
-                "pl_hst": self.pl_hst,
+                "pl_hst": [player.serialize() for player in self.pl_hst],
                 "place": self.place
             }
         })
@@ -249,6 +262,27 @@ class Game:
         for field in data.get("state"):
             setattr(game, field, data.get("state").get(field))
         
-        logger.info(f"Players: {[str(player) for player in game.players]}")
+        # states
+        states = data.get("state")
+        logger.info("states: " + json.dumps(states, indent=2))
+        
+        game.place = states.get("place", 1)
+        game.can_throw = states.get("can_throw", False)
+        game.is_end = states.get("is_end", False)
+        game.is_bitten = states.get("is_bitten", False)
+        game.player_taked = states.get("player_taked", False)
+        game.passed_players = states.get("passed_players", [])
+        game.victim_player = Player.deserialize(states.get("victim_player"), game) if states.get("victim_player") else None
+        game.attacker_player = Player.deserialize(states.get("attacker_player"), game) if states.get("attacker_player") else None
+        game.throwing_players = [
+            Player.deserialize(player, game) 
+            for player in states.get("throwing_players", [])
+        ] if states.get("throwing_players") else []
+        game.throw_players_in_time = states.get("throw_players_in_time", [])
+        game.player_passed = states.get("player_passed", [])
+        game.pl_hst = [
+            Player.deserialize(player, game) 
+            for player in states.get("pl_hst", [])
+        ] if states.get("pl_hst") else []
         
         return game

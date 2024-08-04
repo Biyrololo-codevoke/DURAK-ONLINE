@@ -334,7 +334,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 game.update_pl_hst(player)
 
         case "pass":
-            if player_id in game.throwing_players and player_id not in game.passed_players:
+            if player_id in [*game.throwing_players, game.attacker_player] and player_id not in game.passed_players:
                 send_to_player(player_id, {
                     "status": "success"
                 })
