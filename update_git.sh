@@ -2,6 +2,5 @@
 
 git add .
 git commit -m "update"
-git pull origin main
-codevoke
-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
+git pull origin main <<< "codevoke" <<< "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"
+git push origin main <<< "codevoke" <<< "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"
