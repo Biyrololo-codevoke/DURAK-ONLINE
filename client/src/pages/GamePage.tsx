@@ -369,6 +369,8 @@ export default function GamePage(){
                     }
                 })
             }
+
+            setGameBoard([]);
         } else {
 
             for(let i = 0; i < _game_board.length; i++){

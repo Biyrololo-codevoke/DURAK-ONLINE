@@ -21,6 +21,7 @@ function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
   axios.defaults.baseURL = '/api'; //https://codevoke.ru/api
+  // axios.defaults.baseURL = 'https://codevoke.ru/api'
 
   if(isMobile){
     document.body.id = 'mobile-view';
