@@ -473,7 +473,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
             })
         
         logger.info("check, we have winners, doesn't have")
-        winners = game.check_win()
+        winners = game.check_winner()
         
         for winner, place in winners:
             send_to_room(room_id, {

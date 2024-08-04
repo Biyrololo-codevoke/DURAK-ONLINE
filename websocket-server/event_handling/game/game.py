@@ -104,6 +104,7 @@ class Game:
             self.throwing_players.remove(self.attacker_player)
         
         self.passed_players = []
+        self.throw_players_in_time = [self.attacker_player, self.victim_player]
         self.player_taked = False
         self.is_bitten = False
 
@@ -195,6 +196,7 @@ class Game:
     
     def is_total_end(self):
         return self.place == self.players_count + 1
+            
 
     def __str__(self) -> str:
         s = "<GameObject\n"
@@ -233,6 +235,7 @@ class Game:
                 "passed_players": self.passed_players,
                 "victim_player": self.victim_player.serialize(),
                 "attacker_player": self.attacker_player.serialize(),
+                "throw_players_in_time": [player.serialize() for player in self.throw_players_in_time],
                 "throwing_players": [player.serialize() for player in self.throwing_players],
                 "player_passed": self.player_passed,
                 "pl_hst": [player.serialize() for player in self.pl_hst],
@@ -278,6 +281,11 @@ class Game:
             Player.deserialize(player, game) 
             for player in states.get("throwing_players", [])
         ] if states.get("throwing_players") else []
+        game.throw_players_in_time = [
+            Player.deserialize(player, game) 
+            for player in states.get("throw_players_in_time", [])
+        ] if states.get("throw_players_in_time") else []
+        
         game.player_passed = states.get("player_passed", [])
         game.pl_hst = [
             Player.deserialize(player, game) 
