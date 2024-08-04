@@ -4,6 +4,7 @@ body{
     padding: 0;
     height: 100dvh;
     overflow: scroll;
+    overflow-x: hidden;
     /* width: 600px; */
     width: 100%;
     /* border: 1px solid white; */
@@ -48,8 +49,4 @@ footer{
 
 #mobile-view footer{
     width: 100%;
-}
-
-* {
-    overflow-x: hidden;
 }
