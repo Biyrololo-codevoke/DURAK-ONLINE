@@ -500,7 +500,9 @@ export default function GamePage(){
 
                 new_board[slot].upper = _card;
 
+                console.log('НОВАЯ БОАРД (до локал сторейдж)', new_board, localStorage.getItem('_game_board'))
                 localStorage.setItem('_game_board', JSON.stringify(new_board));
+                console.log('НОВАЯ БОАРД (после)', new_board, localStorage.getItem('_game_board'))
 
                 for(let i of new_board){
                     if(!i.upper){
