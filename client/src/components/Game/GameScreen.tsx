@@ -41,7 +41,9 @@ type Props = {
     setUsersCards: React.Dispatch<React.SetStateAction<UserCards>>
 
     player_throw: (event: PlaceCard) => void;
-    handle_transfer: (card: CardType) => void
+    handle_transfer: (card: CardType) => void;
+
+    bito_count: number
 }
 
 export default function GameScreen(props: Props){
@@ -329,7 +331,7 @@ export default function GameScreen(props: Props){
                     }
                 </section>
                 <CardDeck trump_card={trump_card}/>
-                <Bito cards_count={10}/>
+                <Bito cards_count={props.bito_count}/>
                 {
                     game_state === 2 &&
                     <GameBoard is_transfering={is_transfering}/>

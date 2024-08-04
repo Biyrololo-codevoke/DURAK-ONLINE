@@ -45,6 +45,8 @@ export default function GamePage(){
         }
     )
 
+    const [bito_count, set_bito_count] = useState<number>(0);
+
     /**
      * player - 'me'
      * enemy - {enemy_id}
@@ -244,6 +246,9 @@ export default function GamePage(){
     // init player deck
 
     function init_deck(cards: GameCard[]){
+
+        localStorage.setItem('_game_board', JSON.stringify([]));
+
         const conv_cards : CardType[] = [];
         for(let c of cards){
             conv_cards.push(convert_card(c))
@@ -269,12 +274,22 @@ export default function GamePage(){
 
         set_enemy_cards_delta(_e_delta);
 
+        setRoom(prev => {
+            return {
+                ...prev,
+                cards_count: prev.cards_count -= 6 * _users_ids.length
+            }
+        })
+
         console.log('сюда')
     }
 
     // on next move
 
     function on_next_move(victim: number, walking: number, throwing_players: number[]){
+        
+        const take_user_id = parseInt(localStorage.getItem('take_user_id') || '-1');
+        
         setTimers(
             [
                 {
@@ -326,13 +341,50 @@ export default function GamePage(){
 
         const _game_board = document.querySelectorAll('game-desk-card > img');
 
-        for(let i = 0; i < _game_board.length; i++){
-            _game_board[i].classList.add('to-bito')
+        const game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board')!);
+
+        const taking_cards : CardType[] = [];
+
+        for(let c of game_board){
+            taking_cards.push(c.lower)
+            if(c.upper) taking_cards.push(c.upper)
         }
 
-        setTimeout(()=>{
-            setGameBoard([]);
-        }, 600)
+        if(take_user_id !== -1){
+            
+            if(take_user_id === _user_id){
+
+                setUsersCards((prev) => {
+                    return {
+                        ...prev,
+                        'me': [...prev['me'], ...taking_cards]
+                    }
+                })
+            } else {
+
+                setUsersCards((prev) => {
+                    return {
+                        ...prev,
+                        [take_user_id]: prev[take_user_id] + taking_cards.length
+                    }
+                })
+            }
+        } else {
+
+            for(let i = 0; i < _game_board.length; i++){
+                _game_board[i].classList.add('to-bito')
+            }
+
+            set_bito_count(prev => prev + taking_cards.length);
+    
+            setTimeout(()=>{
+                setGameBoard([]);
+            }, 600)
+        }
+
+        localStorage.setItem('_game_board', JSON.stringify([]));
+
+        localStorage.setItem('take_user_id', '-1');
     }
 
     useEffect(()=>{
@@ -495,6 +547,16 @@ export default function GamePage(){
         if(String(player_id) === localStorage.getItem('user_id')){
             return
         }
+
+        setRoom(
+            prev=>{
+                return {
+                    ...prev,
+                    cards_count: prev.cards_count - cards_count
+                }
+            }
+        )
+
         setUsersCards(prev=>{
             const new_cards = {...prev};
             new_cards[player_id]+= cards_count;
@@ -524,6 +586,16 @@ export default function GamePage(){
     }
 
     function on_give_player_cards(cards: CardType[]){
+
+        setRoom(
+            prev=>{
+                return {
+                    ...prev,
+                    cards_count: prev.cards_count - cards.length
+                }
+            }
+        )
+
         set_new_cards(cards);
         setUsersCards(prev=>{
             return {
@@ -650,7 +722,16 @@ export default function GamePage(){
     // Game Message enemies, game events
 
     function on_game_message(data: {user_id: number; type: 'take' | 'bito' | 'pass'}){
+
+        if(String(data.user_id) === localStorage.getItem('user_id')){
+            return
+        }
+
         const cfg = MESSAGES_CONFIGS[data.type];
+
+        if(data.type === 'take'){
+            localStorage.setItem('take_user_id', String(data.user_id));
+        }
 
         let msgs : GameMessage[] = [];
 
@@ -796,6 +877,10 @@ export default function GamePage(){
 
         if(!_socket) return;
 
+        if(text === 'take'){
+            localStorage.setItem('take_user_id', localStorage.getItem('user_id') || '-1');
+        }
+
         const cfg = MESSAGES_CONFIGS[text]; 
 
         _socket.send(
@@ -872,6 +957,8 @@ export default function GamePage(){
                                     
                                     player_throw={player_throw}
                                     handle_transfer={handle_transfer}
+
+                                    bito_count={bito_count}
                                     />
                                     <GameFooter 
                                     handle_start_game={handle_start_game} 
