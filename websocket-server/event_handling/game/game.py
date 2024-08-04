@@ -79,20 +79,13 @@ class Game:
 
         self.deal_cards()
         self.choose_first_player()
+        self.next()
         
     def choose_first_player(self):
         self.players_deque = deque(self.players)
         self.players_deque.rotate(
             random.randint(0, 999)
         )
-        
-        self.victim_player = self.players_deque[-1]
-        self.attacker_player = self.players_deque[0]
-
-        if self.throw_mode == "all":
-            self.throwing_players = self.players
-        else:
-            self.throwing_players = [self.players_deque[1], self.players_deque[-2]]
         
     def next(self):
         self.players_deque.rotate(1)
@@ -164,8 +157,8 @@ class Game:
             logger.info("can't throw")
             self.can_throw = False
     
-        if self.is_bitten and len(self.throwing_players) == len(self.player_passed) or \
-                self.player_taked and len(self.throwing_players)+1 == len(self.player_passed):
+        if (self.is_bitten and len(self.throwing_players) == len(self.player_passed)) or \
+                (self.player_taked and len(self.throwing_players)+1 == len(self.player_passed)):
             logger.info("бито и кол-во пассов = кол-во подкидывающих или плаер взял и подкидывающие +1 = кол-во пасов")
             self.is_end = True
         else:
@@ -259,7 +252,6 @@ class Game:
         game.trump_suit = game_data.get("trump_suit")
         
         players_data = data.get("payload").get("players")
-        logger.info("deserialize players: " + json.dumps(players_data, indent=2))
         game.players = [
             Player.deserialize(player, game)
             for player in players_data
@@ -270,7 +262,6 @@ class Game:
         
         # states
         states = data.get("state")
-        logger.info("states: " + json.dumps(states, indent=2))
         
         game.place = states.get("place", 1)
         game.can_throw = states.get("can_throw", False)
