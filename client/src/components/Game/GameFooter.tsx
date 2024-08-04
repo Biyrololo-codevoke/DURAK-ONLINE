@@ -36,7 +36,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
     _game_board.some(c => !c.upper) && _game_board.length > 0)
 
     const [is_bito, set_is_bito] = useState(gameState === 2 && is_walking && _game_board !== null && !_has_message &&
-    _game_board.some(c => !c.upper) && _game_board.length > 0)
+    !_game_board.some(c => !c.upper) && _game_board.length > 0)
 
     const [is_pass, set_is_pass] = useState(gameState === 2 && !_has_message && 
     (
@@ -87,7 +87,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
         __game_board.some(c => !c.upper) && __game_board.length > 0)
 
         set_is_bito(gameState === 2 && _is_walking && __game_board !== null && !__has_message &&
-        __game_board.some(c => !c.upper) && __game_board.length > 0)
+        !__game_board.some(c => !c.upper) && __game_board.length > 0)
 
         set_is_pass(gameState === 2 && !__has_message && 
         (
