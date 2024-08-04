@@ -317,7 +317,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     return
                 else:
                     player.deck.remove_card(card)
-                    logger.info(f"after deleting cards count: {player.deck.len()}")
+                    logger.info(f"after deleting cards count: {player.deck.__len__()}")
                     send_to_player(player_id, {
                         "status": "success"
                     })
@@ -330,7 +330,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     game.update_pl_hst(player)
             else:
                 player.deck.remove_card(card)
-                logger.info(f"after deleting cards count: {player.deck.len()}")
+                logger.info(f"after deleting cards count: {player.deck.__len__()}")
                 payload["player_id"] = player_id
                 send_to_room(room_id, payload, socket_id)
                 game.update_pl_hst(player)
@@ -418,7 +418,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "status": "success"
                 })
                 player.deck.remove_card(card)
-                logger.info(f"after deleting cards count: {player.deck.len()}")
+                logger.info(f"after deleting cards count: {player.deck.__len__()}")
                 send_to_room(room_id, {
                     "event": "throw_card",
                     "card": payload["card"],
@@ -426,7 +426,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 }, socket_id)
                 game.update_pl_hst(player)
                 game.player_throws_card(payload["card"])
-                game.throw_players_in_time.append(player_id)
+                game.throw_players_in_time_id.append(player.id)
 
             else:
                 send_to_player(player_id, {
@@ -467,14 +467,16 @@ def route_game_events(payload: dict, room_id: int, key: str):
         
         # give cards for players
         if player_taked:
-            del game.throw_players_in_time[1]
+            del game.throw_players_in_time_id[1]
 
         logger.info("give cards and send events")
-        for player in game.throw_players_in_time:
+        for _id in game.throw_players_in_time_id:
+            _player = game.get_player(_id)
             if game.deck.__len__() == 0:
                 break
-            logger.info(f"player has {player.deck.__len__()} cards")
-            need_cards = 6 - player.deck.__len__()
+
+            logger.info(f"player has {_player.deck.__len__()} cards")
+            need_cards = 6 - _player.deck.__len__()
             logger.info(f"he need {need_cards} cards")
             
             if need_cards < 0:
@@ -490,13 +492,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 logger.info("we has less cards in deck, we will give all cards")
                 player_give_cards = game.deck
 
-            send_to_player(player.id, {
+            send_to_player(_id, {
                 "event": "surprise",
                 "cards": [card.json() for card in player_give_cards]  # кидлаю массив игроку!
             })
             send_to_room(room_id, {
                 "event": "give_cards",
-                "player_id": player.id,
+                "player_id": _id,
                 "cards_count": len(player_give_cards)  # кидаю кол-во карт которое кинул
             })
         

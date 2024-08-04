@@ -104,7 +104,7 @@ class Game:
             self.throwing_players.remove(self.attacker_player)
         
         self.passed_players = []
-        self.throw_players_in_time = [self.attacker_player, self.victim_player]
+        self.throw_players_in_time_id = [self.attacker_player.id, self.victim_player.id]
         self.player_taked = False
         self.player_passed = []
         self.is_bitten = False
@@ -241,7 +241,7 @@ class Game:
                 "passed_players": self.passed_players,
                 "victim_player": self.victim_player.serialize(),
                 "attacker_player": self.attacker_player.serialize(),
-                "throw_players_in_time": [player.serialize() for player in self.throw_players_in_time],
+                "throw_players_in_time_id": [player.serialize() for player in self.throw_players_in_time_id],
                 "throwing_players": [player.serialize() for player in self.throwing_players],
                 "player_passed": self.player_passed,
                 "pl_hst": [player.serialize() for player in self.pl_hst],
@@ -292,10 +292,10 @@ class Game:
             Player.deserialize(player, game) 
             for player in states.get("throwing_players", [])
         ] if states.get("throwing_players") else []
-        game.throw_players_in_time = [
+        game.throw_players_in_time_id = [
             Player.deserialize(player, game) 
-            for player in states.get("throw_players_in_time", [])
-        ] if states.get("throw_players_in_time") else []
+            for player in states.get("throw_players_in_time_id", [])
+        ] if states.get("throw_players_in_time_id") else []
         
         game.player_passed = states.get("player_passed", [])
         game.pl_hst = [
