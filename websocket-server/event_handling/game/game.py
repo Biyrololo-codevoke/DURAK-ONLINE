@@ -190,8 +190,11 @@ class Game:
             if player.deck.__len__() == 0 and len(self.deck) == 0:
                 winners.append((player, self.place))
                 self.place += 1
-                
+        
         return winners
+    
+    def is_total_end(self):
+        return self.place == self.players_count + 1
 
     def __str__(self) -> str:
         s = "<GameObject\n"
