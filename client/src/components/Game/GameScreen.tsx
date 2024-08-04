@@ -122,6 +122,8 @@ export default function GameScreen(props: Props){
                 }
             )
             
+            console.log(`ПОБИЛ КАРТУ !!!!!!!!!!!!!!!!!!!!!!!!!!`, new_board)
+
             localStorage.setItem('_game_board', JSON.stringify(new_board))
 
             return new_board
@@ -192,6 +194,8 @@ export default function GameScreen(props: Props){
             let new_board = [...prev, {
                 lower: add_card
             }];
+
+            console.log(`НОВАЯ КАРТА !!!!!!!!!!!!!!!!!`, new_board)
 
             localStorage.setItem('_game_board', JSON.stringify(new_board));
 
