@@ -876,6 +876,8 @@ export default function GamePage(){
 
             return new_timers;
         })
+
+        set_timers_update(prev => prev + 1);
     }
 
     // transfer cards
