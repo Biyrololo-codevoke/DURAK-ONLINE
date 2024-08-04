@@ -33,10 +33,10 @@ class Card:
 
     def __str__(self) -> str:
         if 2 <= self.value <= 10:
-            return str(self.value) + self.suit
+            return str(self.value) + self.suit + "!" if self.is_trump else "_"
 
         str_value = ["10", "Q", "V", "K", "T"][self.value-10]
-        return str_value + self.suit
+        return str_value + self.suit + "!" if self.is_trump else "_"
 
     def __gt__(self, other: Card) -> bool:
         if self.is_trump:

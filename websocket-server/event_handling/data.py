@@ -52,9 +52,7 @@ class RoomListObserver:
                 "player_id": author_id,
                 "time": int(round(time.time() * 1000)),
             })
-            logger.info("create room and add author there")
-        else:
-            logger.info("create room")
+
         self.notify()
 
     def join_to_room(self, room_id, player_id, password=None) -> tuple[bool, str]:
@@ -62,7 +60,6 @@ class RoomListObserver:
             room = RoomModel.get_by_id(room_id)
             
             if not room.check_password(password):
-                logger.info(f"password: {password} != {room.password}")
                 return False, "Incorrect password"
 
             if player_id in room.user_ids:
@@ -129,7 +126,6 @@ class RoomListObserver:
                 "event": "player_connected",
                 "player_id": player_id
             }
-            logger.info("send accept")
             send_to_room(room_id, room_event, id(user_socket))
 
             # update player_count in room_list
@@ -187,13 +183,10 @@ class RoomListObserver:
                 "message": "huy!"*9
             })
             self.start_game(room_id)
-        else:
-            logger.info(f'{self._room_accepts[room_id]["value"]}/{self._room_accepts[room_id]["accepts"]}')
 
         return status, message
     
     def start_game(self, room_id: int):
-        logger.info("start game with id %d" % room_id)
         room = RoomModel.get_by_id(room_id)
         game = Game(
             id            = room.id,
@@ -205,13 +198,10 @@ class RoomListObserver:
             win_type      = room.win_type,
             throw_mode    = room.throw_type
         )
-        logger.info("make game object")
 
         for player_id in room.user_ids:
             player = Player(player_id)
             game.join_player(player)
-            
-        logger.info("add players")
 
         room.game_obj = game.serialize()
         room.save()
@@ -226,7 +216,6 @@ class RoomListObserver:
                 "event": "init_deck",
                 "deck": player.deck.json()
             }
-            logger.info("send to player[%d]: %s" % (player.id, json.dumps(payload, indent=2)))
             send_to_player(player.id, payload)
             
         send_to_room(room_id, {
@@ -255,9 +244,6 @@ class RoomListObserver:
         self._followers.append(follower)
 
     def notify(self):
-        logger.info("new event! notify followers... (%s)" % ", ".join(
-            [str(socket.remote_address) for socket in self._followers]
-        ))
         tasks = []
         data = self.get_rooms()
         
@@ -301,11 +287,11 @@ def route_game_events(payload: dict, room_id: int, key: str):
     game = Game.deserialize(serialized_game)
     player_id = int(key.split('_')[-1])
     socket_id = id(key_identity[key])
+    
     player = game.get_player(player_id)
     
     match event:
         case "place_card":
-            logger.info("place card")
             slot = payload["slot"]
             card = Card(
                 suit = payload["card"]["suit"],
@@ -316,19 +302,17 @@ def route_game_events(payload: dict, room_id: int, key: str):
             if not player.has_card(card):
                 send_to_player(player_id, {
                     "status": "error",
-                    "message": "Invalid move"
+                    "message": "карты нету такой!"
                 })
                 return
 
             status = game.board.add_card(card, slot)
-            logger.info("status: %s" % status)
             if not status:
                 status2 = game.board.beat_card(card, slot)
-                logger.info("status2: %s" % status2)
                 if not status2:
                     send_to_player(player_id, {
                         "status": "error",
-                        "message": "Invalid move"
+                        "message": "слот занят бля"
                     })
                     return
                 else:
@@ -349,9 +333,6 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 send_to_room(room_id, payload, socket_id)
                 game.update_pl_hst(player)
 
-            room.game_obj = game.serialize()
-            room.save()
-
         case "pass":
             if player_id in game.throwing_players and player_id not in game.passed_players:
                 send_to_player(player_id, {
@@ -365,7 +346,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
             else:
                 send_to_player(player_id, {
                     "status": "error",
-                    "message": "Invalid move"
+                    "message": "не время пасовать"
                 })
                 
         case "bito":
@@ -381,7 +362,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
             else:
                 send_to_player(player_id, {
                     "status": "error",
-                    "message": "Invalid move"
+                    "message": "нельзя щас тыкать бито"
                 })
         
         case "take":
@@ -434,7 +415,6 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 })
             
         case _:
-            logger.info("unknown event: %s" % event)
             send_to_player(player_id, {
                 "status": "error",
                 "message": "Unknown event"
@@ -492,7 +472,8 @@ def route_game_events(payload: dict, room_id: int, key: str):
         for winner, place in winners:
             send_to_room(room_id, {
                 "event": "player_win",
-                "top": place
+                "top": place,
+                "player_id": winner.id
             })
         
         game.next()
@@ -502,5 +483,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
             "victim_player": game.victim_player.id,
             "throwing_players": [player.id for player in game.throwing_players]
         })
+        
+        s_game = game.serialize()
+        room.game_obj = s_game
+        room.save()
         
 room_list = RoomListObserver()

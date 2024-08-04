@@ -27,13 +27,18 @@ class Player:
 
     def serialize(self) -> str:
         return json.dumps({
-            "user_id": self.id
+            "user_id": self.id,
+            "deck": self.deck.json()
         })
         
     def has_card(self, card: Card) -> bool:
         return self.deck.has_card(card)
     
     @staticmethod
-    def deserialize(raw_data) -> Player:
+    def deserialize(raw_data, game) -> Player:
         data = json.loads(raw_data)
-        return Player(user_id=data.get("user_id"))
+        new_player = Player(data.get("user_id"))
+        new_player.deck = PlayerDeck.deserialize(data.get("deck"))
+        new_player.set_game(game)
+
+        return new_player

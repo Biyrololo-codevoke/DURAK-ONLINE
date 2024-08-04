@@ -1,3 +1,5 @@
+import json
+
 from websockets import WebSocketServerProtocol as WebSocket, serve as make_websocket_server
 from websockets.exceptions import ConnectionClosed
 
@@ -14,16 +16,15 @@ async def socket_listener(socket: WebSocket, path: str):
         auth = False
         
         if path.startswith("/ws/room?"):
-            logger.info("first request for /ws/room")
             await router(path, {"event": "join_room"}, socket)
 
             async for message in socket:
-                logger.info("server has new message in /ws/room: " + message)
+                logger.info(f"message: {json.dumps(json.loads(message), indent=2)}")
                 await router(path, deserialize(message), socket)
 
         async for message in socket:
             payload = deserialize(message)
-            logger.info(f"[id: {socket_id}] ({path}) <- {payload}")
+            logger.info(f"message: {json.dumps(payload, indent=2)}")
 
             # auth
             if not auth:

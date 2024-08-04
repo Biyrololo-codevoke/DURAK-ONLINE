@@ -10,12 +10,11 @@ class PlayerDeck:
         self.diff = None
 
     def find_card(self, card: Card) -> Card | None:
-        index = self._cards.find(card)
-        if index == -1:
-            return None
-        else:
-            return self._cards[index]
-
+        for _card in self._cards:
+            if _card == card:
+                return True
+        return False
+            
     def get_card(self, suit: Card.Suites, value: int):
         eligible_cards = list(
             filter(
@@ -51,7 +50,16 @@ class PlayerDeck:
         return {
             "cards": [card.json() for card in self._cards]
         }        
-            
+    
+    @staticmethod
+    def deserialize(data):
+        cards = []
+        for card in data.get("cards"):
+            cards.append(
+                Card(**card)
+            )
+        return PlayerDeck(cards)
+
     def __str__(self):
         return ", ".join([str(card) for card in self._cards])
         

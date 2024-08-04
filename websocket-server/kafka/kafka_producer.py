@@ -14,11 +14,9 @@ config = {
     "client.id": "python-producer",
 }
 
-logger.info("waiting 30s for kafka to be ready")
-time.sleep(30)
+logger.info("waiting 10s for kafka")
+time.sleep(10)
 
-# try to establish connection
-logger.info(f"try to establish connection with kafka by uri: {KAFKA_URI}")
 producer = Producer(config)
 
 try:
@@ -57,5 +55,3 @@ def send_event(payload):
     partition = key_partitions.get(key)
 
     produce(KAFKA_TOPIC, payload, partition=partition, key=payload["event"])
-
-logger.info("init kafka producer")

@@ -1,4 +1,5 @@
 import asyncio
+import json
 
 from websockets import WebSocketServerProtocol as WebSocket
 
@@ -14,14 +15,14 @@ async def send_to_socket(socket: WebSocket, payload: dict):
 
 async def send_to_user(user_id: int, payload: dict):
     socket = user_socket[user_id]
-    logger.info(f"send_to_user[{user_id}]: {payload=}\n{socket=}")
+    logger.info(f"send_to_user[{user_id}]: {json.dumps(payload, indent=2)}")
     await send_to_socket(socket, payload)
 
 
 async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = None):
     room_sockets = room_list.get_room_connections(room_id)
     if room_sockets:
-        logger.info(f"{room_sockets=}; {broadcast_socket_id=}\n {payload=}")
+        logger.info(f"send_to_room[{room_id}] event: {payload.get('event')}")
         for socket in room_sockets:
             if broadcast_socket_id == id(socket):
                 continue
@@ -78,12 +79,9 @@ async def handle_room(payload: dict, socket: WebSocket):
             asyncio.create_task(
                 send_to_socket(socket, response)
             )
-            
-        case "place_card":
-            route_game_events(payload, room_id, key)
-            
+
         case _:
-            await send_to_socket(socket, {"status": "error", "message": f"{event=} not found"})
+            route_game_events(payload, room_id, key)
 
 
 async def handle_list(socket: WebSocket, payload: dict):

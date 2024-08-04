@@ -14,21 +14,17 @@ consumer = None
 
 
 def handle_message(message):
-    logger.info(message)
     destination_type = message.get("dest_type")  # "room" or "user" or "list"
 
     recipient_id = message.get("dest_id")
 
     if destination_type == "room":
-        logger.info("event for room")
         send_to_room(recipient_id, message)
 
     elif destination_type == "user":
-        logger.info("event for user")   
         send_to_user(recipient_id, message)
         
-    elif destination_type == "list":  # { "dest_type": "list", ... }
-        logger.info("event for list")   
+    elif destination_type == "list":
         event_type = message["event_type"]
         
         if event_type == "create_room":  # { "event_type": "new_room", "room_id": 1 }
@@ -48,7 +44,7 @@ def handle_message(message):
 async def start_consumer() -> None:
     global consumer, KAFKA_URI
 
-    logger.info(f"try to connect to kafka by uri: {KAFKA_URI}")
+    logger.info(f"connect to kafka: {KAFKA_URI}")
     consumer = AIOKafkaConsumer(
         KAFKA_TOPIC,
         bootstrap_servers=KAFKA_URI,
@@ -57,17 +53,13 @@ async def start_consumer() -> None:
 
     try:
         await consumer.start()
-        logger.info("successfully connected (huy)")
+        logger.info("successfully connected")
 
     except kafka_errors.KafkaConnectionError:
         logger.info("can't connect to host.")
         await consumer.stop()
         exit(-1)
-        
-    finally:
-        logger.info("starting consumer loop")
 
-    logger.info("starting consumer loop")
     # handling messages in loop
     try:
         async for message in consumer:

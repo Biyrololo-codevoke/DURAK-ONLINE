@@ -10,7 +10,6 @@ from .data import key_identity
 
 async def router(path: str, payload: dict, socket: WebSocket):
     endpoint, data = handle_path(path)
-    logger.info(f"router({path=}, {payload=})")
 
     match endpoint:
         case "/room-list":

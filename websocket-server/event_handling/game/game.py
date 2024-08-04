@@ -8,6 +8,7 @@ from collections import deque
 from .game_board import GameBoard
 from .card import Card
 from .player import Player
+from .game_logger import logger
 
 
 class Game:
@@ -122,8 +123,10 @@ class Game:
             self.make_game()
 
     def get_player(self, id: int):
+        logger.info(str(self.players) + " find " + str(id))
         for player in self.players:
             if player and player.id == id:
+                logger.info("find player " + str(player))
                 return player
 
     def player_passed(self, player_id):
@@ -205,6 +208,20 @@ class Game:
             },
             "payload": {
                 "players": [player.serialize() for player in self.players]
+            },
+            "state": {
+                "can_throw": self.can_throw,
+                "is_end": self.is_end,
+                "is_bitten": self.is_bitten,
+                "player_taked": self.player_taked,
+                "passed_players": self.passed_players,
+                "victim_player": self.victim_player,
+                "attacker_player": self.attacker_player,
+                "throwing_players": self.throwing_players,
+                "throw_players_in_time": self.throw_players_in_time,
+                "player_passed": self.player_passed,
+                "pl_hst": self.pl_hst,
+                "place": self.place
             }
         })
         
@@ -223,10 +240,15 @@ class Game:
         game.trump_suit = game_data.get("trump_suit")
         
         players_data = data.get("payload").get("players")
+        logger.info("deserialize players: " + json.dumps(players_data, indent=2))
         game.players = [
-            Player.deserialize(player)
+            Player.deserialize(player, game)
             for player in players_data
         ]
         
+        for field in data.get("state"):
+            setattr(game, field, data.get("state").get(field))
+        
+        logger.info(f"Players: {[str(player) for player in game.players]}")
+        
         return game
-
