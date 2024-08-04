@@ -33,10 +33,10 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
     const _has_message = messages.find(m => String(m.user_id) === user_id) !== undefined;
 
     const is_taking = gameState === 2 && is_victim && !_has_message && _game_board !== null &&
-    _game_board.some(c => !c.upper) && _game_board.length > 0;
+    !_game_board.some(c => !c.upper) && _game_board.length > 0;
 
     const is_bito = gameState === 2 && is_walking && _game_board !== null && !_has_message &&
-    !_game_board.some(c => !c.upper) && _game_board.length > 0;
+    _game_board.some(c => !c.upper) && _game_board.length > 0;
 
     const is_pass = gameState === 2 && !_has_message && 
     (
