@@ -109,7 +109,7 @@ export default function GameScreen(props: Props){
         let index = -1;
 
         setGameBoard((prev) => {
-            return prev.map(
+            let new_board = prev.map(
                 (c, i) => {
                     if(c.lower.value === lower_card.value && c.lower.suit === lower_card.suit){
                         index = i;
@@ -121,6 +121,10 @@ export default function GameScreen(props: Props){
                     return c
                 }
             )
+            
+            localStorage.setItem('_game_board', JSON.stringify(new_board))
+
+            return new_board
         })
 
         setUsersCards((prev) => {
@@ -184,11 +188,15 @@ export default function GameScreen(props: Props){
 
         if(!flag) return
 
-        setGameBoard(prev=>(
-            [...prev, {
+        setGameBoard(prev=>{
+            let new_board = [...prev, {
                 lower: add_card
-            }]
-        ))
+            }];
+
+            localStorage.setItem('_game_board', JSON.stringify(new_board));
+
+            return new_board
+        })
 
         setUsersCards((prev) => {
             return {
