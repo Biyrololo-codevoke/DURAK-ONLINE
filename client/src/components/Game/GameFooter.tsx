@@ -50,6 +50,8 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
     useEffect(() => {
 
+        console.log(localStorage)
+
         const __role = localStorage.getItem('_role');
 
         const _is_victim = __role === 'victim'
