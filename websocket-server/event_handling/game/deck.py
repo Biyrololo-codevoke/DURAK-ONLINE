@@ -1,6 +1,7 @@
 import json
 
 from .card import Card
+from .game_logger import logger
 
 
 class PlayerDeck:
@@ -36,8 +37,16 @@ class PlayerDeck:
     def remove_card(self, card: Card) -> None:
         if not self.find_card(card):
             raise ValueError("Player has no card: " + str(card))
-        self._cards.remove(card)
-            
+        logger.info(f"Removing card: {card}")
+        logger.info(len(self._cards))
+        index = -1
+        for i, _card in enumerate(self._cards):
+            if _card == card:
+                index = i
+                break
+        self._cards.pop(index)
+        logger.info(len(self._cards))
+
     def diff(self, cards: list[Card]) -> list[Card]:
         return list(filter(lambda card: not self.has_card(card), cards))
 

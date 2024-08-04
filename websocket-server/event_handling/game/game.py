@@ -170,6 +170,8 @@ class Game:
     def end(self):
         cards = self.board.take_all()
         
+        logger.info(f"{self.is_bitten=}; {self.player_taked=};")
+        
         if self.is_bitten:
             self.beaten_cards.extend(cards)
             return False, cards

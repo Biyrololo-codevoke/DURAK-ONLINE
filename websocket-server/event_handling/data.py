@@ -335,6 +335,10 @@ def route_game_events(payload: dict, room_id: int, key: str):
 
         case "pass":
             logger.info("player passed")
+            logger.info(f"{player_id =} in {[player.id for player in game.throwing_players]}+{game.attacker_player.id} and player_id not in {game.passed_players}")
+            logger.info(f"{player_id in [*game.throwing_players, game.attacker_player]}")
+            logger.info(f"{player_id not in game.passed_players}")
+
             if player_id in [*game.throwing_players, game.attacker_player] and player_id not in game.passed_players:
                 send_to_player(player_id, {
                     "status": "success"
