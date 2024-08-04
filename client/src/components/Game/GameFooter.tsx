@@ -56,7 +56,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
         
         const _is_walking = __role === 'walking'
 
-        const __game_board : GameBoardCard[] | null = JSON.parse(localStorage.getItem('_game_board') || 'null');
+        const __game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
 
         const __has_message = messages.find(m => String(m.user_id) === user_id) !== undefined;
 
