@@ -92,10 +92,6 @@ export default function GamePage(){
 
     const [game_board, setGameBoard] = useState<GameBoardCard[]>([])
 
-    useEffect(()=>{
-        localStorage.setItem('_game_board', JSON.stringify(game_board));
-    }, [game_board])
-
     const _room_id = parseInt(localStorage.getItem('_room_id') || '-1');
 
     useEffect(()=>{
@@ -247,6 +243,8 @@ export default function GamePage(){
 
     function init_deck(cards: GameCard[]){
 
+        console.log(`ИНИТ ДЕКА !!!!!!!!!!!!!`, [])
+
         localStorage.setItem('_game_board', JSON.stringify([]));
 
         const conv_cards : CardType[] = [];
@@ -384,6 +382,8 @@ export default function GamePage(){
             }, 600)
         }
 
+        console.log(`НОВЫЙ ХОД !!!!!!!!!!!!!!!!!`)
+
         localStorage.setItem('_game_board', JSON.stringify([]));
 
         localStorage.setItem('take_user_id', '-1');
@@ -415,9 +415,7 @@ export default function GamePage(){
 
         if(!_rect) return
         
-        const _game_board : GameBoardCard[] | null = JSON.parse(localStorage.getItem('_game_board') || 'null');
-
-        if(_game_board === null) return
+        const _game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
 
         set_timers_update(prev => prev + 1);
 
@@ -445,6 +443,8 @@ export default function GamePage(){
                 let new_board = [...prev, {
                     lower: _card,
                 }];
+
+                console.log(`НОВАЯ КАРТА ОТ ПРОТИВНИКА !!!`, new_board)
 
                 localStorage.setItem('_game_board', JSON.stringify(new_board));
 
@@ -499,6 +499,8 @@ export default function GamePage(){
                 const new_board = [...prev];
 
                 new_board[slot].upper = _card;
+
+                console.log(`ПРОТИВНИК ПОБИЛ КАРТЦ !!!!!!!!!!!`, new_board)
 
                 localStorage.setItem('_game_board', JSON.stringify(new_board));
 
@@ -773,10 +775,6 @@ export default function GamePage(){
 
         update_timers__bito_or_pass(game_players, data.user_id);
     }
-
-    useEffect(()=>{
-        console.log(socket)
-    }, [socket])
 
     useEffect(
         ()=>{
