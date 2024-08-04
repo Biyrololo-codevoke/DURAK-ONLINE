@@ -59,7 +59,6 @@ class Game:
         self.victim_player = None
         self.attacker_player = None
         self.throwing_players = []
-        self.player_passed = []
         self.pl_hst = []
         self.place = 1
 
@@ -89,6 +88,9 @@ class Game:
     def next(self):
         self.players_deque.rotate(1)
         
+        if self.player_taked and self.players_count == 2:
+            self.players_deque.rotate(1)
+        
         self.victim_player = self.players_deque[-1]
         self.attacker_player = self.players_deque[0]
         
@@ -106,7 +108,6 @@ class Game:
         self.passed_players = []
         self.throw_players_in_time_id = [self.attacker_player.id, self.victim_player.id]
         self.player_taked = False
-        self.player_passed = []
         self.is_bitten = False
         self.can_throw = False
         self.is_end = False
@@ -141,7 +142,7 @@ class Game:
                 return player
 
     def player_passed(self, player_id):
-        self.player_passed.append(player_id)
+        self.passed_players.append(player_id)
         self.check_state()
         
     def player_bito(self):
@@ -160,12 +161,12 @@ class Game:
             logger.info("can't throw")
             self.can_throw = False
     
-        if (self.is_bitten and len(self.throwing_players) == len(self.player_passed)) or \
-                (self.player_taked and len(self.throwing_players)+1 == len(self.player_passed)):
+        if (self.is_bitten and len(self.throwing_players) == len(self.passed_players)) or \
+                (self.player_taked and len(self.throwing_players)+1 == len(self.passed_players)):
             logger.info("бито и кол-во пассов = кол-во подкидывающих или плаер взял и подкидывающие +1 = кол-во пасов")
             self.is_end = True
         else:
-            logger.info(f"{self.is_bitten=}; {self.player_taked=}; {len(self.throwing_players)=}; {len(self.player_passed)=}")
+            logger.info(f"{self.is_bitten=}; {self.player_taked=}; {len(self.throwing_players)=}; {len(self.passed_players)=}")
             self.is_end = False
             
     def end(self):
@@ -241,9 +242,9 @@ class Game:
                 "passed_players": self.passed_players,
                 "victim_player": self.victim_player.serialize(),
                 "attacker_player": self.attacker_player.serialize(),
-                "throw_players_in_time_id": [player.serialize() for player in self.throw_players_in_time_id],
+                "throw_players_in_time_id": self.throw_players_in_time_id,
                 "throwing_players": [player.serialize() for player in self.throwing_players],
-                "player_passed": self.player_passed,
+                "passed_players": self.passed_players,
                 "pl_hst": [player.serialize() for player in self.pl_hst],
                 "place": self.place
             }
@@ -292,12 +293,9 @@ class Game:
             Player.deserialize(player, game) 
             for player in states.get("throwing_players", [])
         ] if states.get("throwing_players") else []
-        game.throw_players_in_time_id = [
-            Player.deserialize(player, game) 
-            for player in states.get("throw_players_in_time_id", [])
-        ] if states.get("throw_players_in_time_id") else []
+        game.throw_players_in_time_id = states.get("throw_players_in_time_id", [])
         
-        game.player_passed = states.get("player_passed", [])
+        game.passed_players = states.get("passed_players", [])
         game.pl_hst = [
             Player.deserialize(player, game) 
             for player in states.get("pl_hst", [])

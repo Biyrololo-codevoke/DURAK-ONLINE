@@ -491,7 +491,10 @@ def route_game_events(payload: dict, room_id: int, key: str):
             else:
                 logger.info("we has less cards in deck, we will give all cards")
                 player_give_cards = game.deck
-
+            
+            for card in player_give_cards:
+                _player.deck.add_card(card)
+            
             send_to_player(_id, {
                 "event": "surprise",
                 "cards": [card.json() for card in player_give_cards]  # кидлаю массив игроку!
