@@ -827,22 +827,45 @@ export default function GamePage(){
                 let _id = id;
                 if(_id === 'me') _id = _user_id;
 
-                if(_id === _game_players.victim){
-                    new_timers.push({
-                        id: _id,
-                        color: 'green',
-                        from_start: true,
-                        is_active: true
-                    })
+                if(_game_board[data.slot - 1].upper){
+
+                    if(_id === _game_players.victim){
+                        new_timers.push({
+                            id: _id,
+                            color: 'green',
+                            from_start: true,
+                            is_active: false
+                        })
+                    }
+
+                    else {
+                        new_timers.push({
+                            id: _id,
+                            color: 'red',
+                            from_start: true,
+                            is_active: true
+                        })
+                    }
+
+                } else {
+                    if(_id === _game_players.victim){
+                        new_timers.push({
+                            id: _id,
+                            color: 'green',
+                            from_start: true,
+                            is_active: true
+                        })
+                    }
+                    else{
+                        new_timers.push({
+                            id: _id,
+                            color: 'red',
+                            from_start: true,
+                            is_active: false
+                        })
+                    }
                 }
-                else{
-                    new_timers.push({
-                        id: _id,
-                        color: 'red',
-                        from_start: true,
-                        is_active: false
-                    })
-                }
+
             }
 
             return new_timers;
