@@ -40,17 +40,15 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
     const [is_pass, set_is_pass] = useState(gameState === 2 && !_has_message && 
     (
-        (is_walking && messages.find(m=>m.text === MESSAGES_CONFIGS.take.text) !== undefined) ||
+        (is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
         (!is_walking && !is_victim && (
-            messages.find(m=>m.text === MESSAGES_CONFIGS.take.text) !== undefined ||
-            messages.find(m=>m.text === MESSAGES_CONFIGS.bito.text) !== undefined
+            messages.some(m=>m.text === MESSAGES_CONFIGS.take.text) ||
+            messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text)
             )
         )
     ) )
 
     useEffect(() => {
-
-        console.log(localStorage)
 
         const __role = localStorage.getItem('_role');
 
@@ -60,15 +58,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
         const __game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
 
-        const __has_message = messages.find(m => String(m.user_id) === user_id) !== undefined;
-
-        console.log({
-            gameState,
-            is_victim,
-            _has_message,
-            _game_board,
-            is_walking            
-        })
+        const __has_message = messages.some(m => String(m.user_id) === user_id);
 
         console.log({
             __role,
@@ -92,16 +82,18 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
         !__game_board.some(c => !c.upper) && __game_board.length > 0)
 
         set_is_pass(gameState === 2 && !__has_message && 
-        (
-            (_is_walking && messages.find(m=>m.text === MESSAGES_CONFIGS.take.text) !== undefined) ||
-            (!_is_walking && !_is_victim && (
-                messages.find(m=>m.text === MESSAGES_CONFIGS.take.text) !== undefined ||
-                messages.find(m=>m.text === MESSAGES_CONFIGS.bito.text) !== undefined
+            __game_board.length > 0 &&
+            (
+                (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
+                (!is_walking && !_is_victim && (
+                    messages.some(m=>m.text === MESSAGES_CONFIGS.take.text) ||
+                    messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text)
+                    )
                 )
             )
-        ))
+        )
 
-    }, [timers.timer_update])
+    }, [timers.timer_update, messages])
 
     return (
         <div id="game-footer">
