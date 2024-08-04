@@ -110,7 +110,7 @@ export default function PrivateRoomsList(){
 
         return () => {
             if(new_socket.readyState === 1){
-                new_socket.close(1001);
+                new_socket.close(1000);
             }
         }
 
