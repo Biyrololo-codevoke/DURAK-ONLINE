@@ -98,7 +98,7 @@ class Game:
             self.throwing_players = list(self.players_deque)
         else:
             self.throwing_players = list(self.players_deque)[1:-2]
-
+ 
         if self.victim_player in self.throwing_players:
             self.throwing_players.remove(self.victim_player)
 

@@ -113,6 +113,15 @@ class RoomModel(Base):
     @game_type.setter
     def game_type(self, value: Room.GameType) -> None:
         self._game_type = Room.GameType(value)
+        
+    @property
+    def game_state(self) -> str:
+        return self._game_state.value
+    
+    @game_state.setter
+    def game_state(self, value: Room.RoomState) -> None:
+        self._game_state = Room.RoomState(value)
+        self.save()
 
     @property
     def throw_type(self) -> str:

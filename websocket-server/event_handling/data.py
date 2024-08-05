@@ -203,6 +203,7 @@ class RoomListObserver:
             player = Player(player_id)
             game.join_player(player)
 
+        room.game_state = "in_game"
         room.game_obj = game.serialize()
         room.save()
         
