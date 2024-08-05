@@ -50,3 +50,7 @@ footer{
 #mobile-view footer{
     width: 100%;
 }
+
+.in-game {
+    overflow: hidden !important;
+}

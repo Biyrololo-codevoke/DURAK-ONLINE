@@ -2,7 +2,7 @@ import { useContext, useEffect, useState } from "react";
 import ActionButton from "./ActionButton/ActionButton";
 import UserAvatar from "./UserAvatar";
 import { GameMessagesContext, GameStateContext, TimerContext } from "contexts/game";
-import { GameBoardCard } from "types/GameTypes";
+import { GameBoardCard, GamePlayers } from "types/GameTypes";
 import { MESSAGES_CONFIGS } from "constants/GameParams";
 
 type Props = {
@@ -60,7 +60,9 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
         const __has_message = messages.some(m => String(m.user_id) === user_id);
 
-        console.log({
+        const _game_players : GamePlayers = JSON.parse(localStorage.getItem('game_players') || '{}');
+
+        console.table({
             __role,
             _is_victim,
             __has_message,
@@ -68,7 +70,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
             _is_walking
         })
 
-        console.log(
+        console.table(
             {
                 messages,
                 gameState
@@ -78,17 +80,21 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
         set_is_taking(gameState === 2 && _is_victim && !__has_message && __game_board !== null &&
         __game_board.some(c => !c.upper) && __game_board.length > 0)
 
-        set_is_bito(gameState === 2 && _is_walking && __game_board !== null && !__has_message &&
-        !__game_board.some(c => !c.upper) && __game_board.length > 0)
+        set_is_bito(gameState === 2 && __game_board !== null && !__has_message &&
+        !__game_board.some(c => !c.upper) && __game_board.length > 0 && (
+            _is_walking || (
+                !is_walking && !is_victim && (
+                    messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text && m.user_id === _game_players.walking)
+                )
+            )
+        ))
 
         set_is_pass(gameState === 2 && !__has_message && 
             __game_board.length > 0 &&
             (
                 (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
-                (!is_walking && !_is_victim && (
-                    messages.some(m=>m.text === MESSAGES_CONFIGS.take.text) ||
-                    messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text)
-                    )
+                (!is_walking && !_is_victim && 
+                    messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)
                 )
             )
         )

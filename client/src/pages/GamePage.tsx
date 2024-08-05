@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback, useRef } from "react"
 import { gameWS } from "constants/ApiUrls";
 import Cookies from "js-cookie";
 import { AcceptedContext, GameMessagesContext, GamePlayersContext, GameStateContext, TimerContext } from "contexts/game";
-import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GameMessage, GamePlayers, GameStateType, PlaceCard, Timer } from "types/GameTypes";
+import { CardSuitType, CardType, CardValueType, GameBoardCard, GameCard, GameEvent, GameMessage, GamePlayers, GameStateType, PlaceCard, Reward, Timer } from "types/GameTypes";
 import axios from "axios";
 import { getRoomInfo } from "constants/ApiUrls";
 import { RoomResponseType } from "types/ApiTypes";
@@ -13,6 +13,7 @@ import GameInfo from "components/Game/GameInfo";
 import {handle_event} from 'components/Game/handleEvents'
 import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS, MESSAGES_CONFIGS } from "constants/GameParams";
 import { convert_card } from "features/GameFeatures";
+import EndGameUI from "components/Game/EndGameUI";
 
 type UserIdType = number | 'me'
 
@@ -27,6 +28,16 @@ type EnemyCardDelta = {
 
 
 export default function GamePage(){
+
+    // set className in-game
+    useEffect(()=>{
+        window.scrollTo(0, 0);
+        document.body.classList.add('in-game');
+
+        return ()=>{
+            document.body.classList.remove('in-game');
+        }
+    }, []);
 
     const [gameState, setGameState] = useState<GameStateType>(0); 
 
@@ -56,6 +67,10 @@ export default function GamePage(){
     const [users_ids, setUsersIds] = useState<UserIdType[]>(
         ['me']
     );
+
+    // REWARDS in end game
+
+    const [rewards, set_rewards] = useState<Reward[]>([]);
 
     // moving/walking && defender/victim
 
@@ -177,7 +192,11 @@ export default function GamePage(){
                 on_place_card,
                 on_game_message,
                 on_give_enemies_cards,
-                on_give_player_cards
+                on_give_player_cards,
+                on_get_cards,
+                on_player_took,
+                on_player_win,
+                on_game_over
             }
         )
     }
@@ -352,23 +371,23 @@ export default function GamePage(){
 
         if(take_user_id !== -1){
             
-            if(take_user_id === _user_id){
+            // if(take_user_id === _user_id){
 
-                setUsersCards((prev) => {
-                    return {
-                        ...prev,
-                        'me': [...prev['me'], ...taking_cards]
-                    }
-                })
-            } else {
+            //     setUsersCards((prev) => {
+            //         return {
+            //             ...prev,
+            //             'me': [...prev['me'], ...taking_cards]
+            //         }
+            //     })
+            // } else {
 
-                setUsersCards((prev) => {
-                    return {
-                        ...prev,
-                        [take_user_id]: prev[take_user_id] + taking_cards.length
-                    }
-                })
-            }
+            //     setUsersCards((prev) => {
+            //         return {
+            //             ...prev,
+            //             [take_user_id]: prev[take_user_id] + taking_cards.length
+            //         }
+            //     })
+            // }
 
             setGameBoard([]);
         } else {
@@ -619,6 +638,45 @@ export default function GamePage(){
         })
     }
 
+    function on_get_cards(cards: CardType[]){
+        setUsersCards((prev) => {
+            return {
+                ...prev,
+                'me': [...prev['me'], ...cards]
+            }
+        })
+    }
+
+    function on_player_took(cards_count: number, player_id: number){
+        setUsersCards((prev) => {
+            return {
+                ...prev,
+                [player_id]: prev[player_id] + cards_count
+            }
+        })   
+    }
+
+    function on_game_over(looser_id: number){
+
+        console.warn('GAME OVER', looser_id)
+
+        const _player_div = document.querySelector(`[data-user-id="${looser_id}"]`)!;
+
+        const _rect = _player_div.getBoundingClientRect();
+
+        set_rewards(prev => {
+            return [
+                ...prev,
+                {
+                    id: looser_id,
+                    x: _rect.x,
+                    y: _rect.y - 10,
+                    money: -1
+                }
+            ]
+        })
+    }
+
     useEffect(()=>{
         localStorage.setItem('game_messages', JSON.stringify(messages))
     }, [messages])
@@ -776,6 +834,25 @@ export default function GamePage(){
         }
 
         update_timers__bito_or_pass(game_players, data.user_id);
+    }
+
+    function on_player_win(player_id: number, money: number){
+
+        const _player_div = document.querySelector(`[data-user-id="${player_id}"]`)!;
+
+        const _rect = _player_div.getBoundingClientRect();
+
+        set_rewards(prev => {
+            return [
+                ...prev,
+                {
+                    id: player_id,
+                    x: _rect.x,
+                    y: _rect.y - 10,
+                    money
+                }
+            ]
+        })
     }
 
     useEffect(
@@ -1039,6 +1116,7 @@ export default function GamePage(){
                     </AcceptedContext.Provider>
                 </GameMessagesContext.Provider>
             </TimerContext.Provider>
+            <EndGameUI rewards={rewards}/>
         </main>
     )
 }
