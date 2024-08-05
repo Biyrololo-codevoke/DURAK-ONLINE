@@ -89,9 +89,12 @@ class GameBoard:
         Returns:
             str: The string representation of the game board.
         """
-        s = f"<GameBoard {id(self)}:\n"
-        for i in range(6):
-            s += f"[{self.slots_up[i]} -> {self.slots_down[i]}];"
+        
+        s = f"""
+            [{self.slots_up[0] or 'x'} / {self.slots_down[0] or 'x'}] [{self.slots_up[1] or 'x'} / {self.slots_down[1] or 'x'}] [{self.slots_up[2] or 'x'} / {self.slots_down[2] or 'x'}]
+            [{self.slots_up[3] or 'x'} / {self.slots_down[3] or 'x'}] [{self.slots_up[4] or 'x'} / {self.slots_down[4] or 'x'}] [{self.slots_up[5] or 'x'} / {self.slots_down[5] or 'x'}]
+        """
+        
         return s
 
     def serialize(self) -> str:

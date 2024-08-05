@@ -299,6 +299,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 value = payload["card"]["value"],
                 is_trump = payload["card"]["suit"] == game.trump_suit
             )
+            logger.info(f"player[{player_id}] place card {str(card)}")
 
             if not player.has_card(card):
                 send_to_player(player_id, {
@@ -318,7 +319,6 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     return
                 else:
                     player.deck.remove_card(card)
-                    logger.info(f"after deleting cards count: {player.deck.__len__()}")
                     send_to_player(player_id, {
                         "status": "success"
                     })
@@ -331,7 +331,6 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     game.update_pl_hst(player)
             else:
                 player.deck.remove_card(card)
-                logger.info(f"after deleting cards count: {player.deck.__len__()}")
                 payload["player_id"] = player_id
                 send_to_room(room_id, payload, socket_id)
                 game.update_pl_hst(player)
@@ -340,11 +339,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
             room.save()
 
         case "pass":
-            logger.info("player passed")
-            logger.info(f"{player_id =} in {[player.id for player in game.throwing_players]}+{game.attacker_player.id} and player_id not in {game.passed_players}")
-            logger.info(f"{player_id in [*game.throwing_players, game.attacker_player]}")
-            logger.info(f"{player_id not in game.passed_players}")
-
+            logger.info(f"player[{player_id}] pass")
             if player_id in [*[player.id for player in game.throwing_players], game.attacker_player.id] and player_id not in game.passed_players:
                 send_to_player(player_id, {
                     "status": "success"
@@ -364,6 +359,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 })
                 
         case "bito":
+            logger.info(f"player[{player_id}] bito")
             if player_id == game.attacker_player.id:
                 send_to_player(player_id, {
                     "status": "success"
@@ -383,6 +379,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 })
         
         case "take":
+            logger.info(f"player[{player_id}] take")
             if player_id == game.victim_player.id:
                 send_to_player(player_id, {
                     "status": "success"
@@ -413,13 +410,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 value = payload["card"]["value"],
                 is_trump = payload["card"]["suit"] == game.trump_suit
             )
+            logger.info(f"player[{player_id}] throw card {str(card)}")
 
             if player_id in game.throwing_players and game.can_throw and player.has_card(card):
                 send_to_player(player_id, {
                     "status": "success"
                 })
                 player.deck.remove_card(card)
-                logger.info(f"after deleting cards count: {player.deck.__len__()}")
                 send_to_room(room_id, {
                     "event": "throw_card",
                     "card": payload["card"],
@@ -445,12 +442,11 @@ def route_game_events(payload: dict, room_id: int, key: str):
             })
 
     if game.is_end:
-        logger.info("game is end")
+        logger.info(f"time is end with effect: {'player taked' if player_taked else 'beat cards'}")
         game.is_end = False
         player_taked, cards = game.end()
         
         if player_taked:
-            logger.info("player_taked")
             send_to_room(room_id, {
                 "event": "player_taked",
                 "cards_count": len(cards) 
@@ -465,7 +461,6 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 victim_player.deck.add_card(card)
 
         else:
-            logger.info("beat_cards")
             send_to_room(room_id, {
                 "event": "beat_cards",
                 "cards": [card.json() for card in cards]
@@ -475,30 +470,24 @@ def route_game_events(payload: dict, room_id: int, key: str):
         if player_taked:
             del game.throw_players_in_time_id[1]
 
-        logger.info("give cards and send events")
         for _id in game.throw_players_in_time_id:
             _player = game.get_player(_id)
             if game.deck.__len__() == 0:
                 break
-
-            logger.info(f"player has {_player.deck.__len__()} cards")
             need_cards = 6 - _player.deck.__len__()
-            logger.info(f"he need {need_cards} cards")
             
             if need_cards < 0:
-                logger.info("cards dowsn't needs, skip")
                 continue
             
             if game.deck.__len__() >= need_cards:
-                logger.info("in deck we have much cards, we will give all cards")
                 player_give_cards = []  # массив к5оторый я кину игроку
                 for _ in range(need_cards):
                     player_give_cards.append(game.deck.pop())  # добавляю карту с конца в массив
             else:
-                logger.info("we has less cards in deck, we will give all cards")
                 player_give_cards = game.deck
             
             for card in player_give_cards:
+                logger.info(f"player[{_id}] get card {str(card)}")
                 _player.deck.add_card(card)
             
             send_to_player(_id, {
@@ -511,7 +500,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "cards_count": len(player_give_cards)  # кидаю кол-во карт которое кинул
             })
         
-        logger.info("check, we have winners, doesn't have")
+        # check winner
         winners = game.check_winner()
         
         for winner, place in winners:
@@ -520,8 +509,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "top": place,
                 "player_id": winner.id
             })
-        
-        logger.info("make next hod")
+
         game.next()
         send_to_room(room_id, {
             "event": "next",
@@ -529,11 +517,21 @@ def route_game_events(payload: dict, room_id: int, key: str):
             "victim_player": game.victim_player.id,
             "throwing_players": [player.id for player in game.throwing_players]
         })
-        
+        logger.info("next time")
         s_game = game.serialize()
         room.game_obj = s_game
         room.save()
-    else:
-        logger.info("game not end")
         
+        # logging
+        logger.info("GameLog\n\nPlayers:")
+        for player in game.players:
+            logger.info(str(player))
+        logger.info("")    
+        logger.info(f"deck: {[str(card) for card in game.deck]}")
+        logger.info(f"bito: {[str(card) for card in game.beaten_cards]}")
+        logger.info("")
+        logger.info(f"board: {str(game.boarda)}")
+    else:
+        pass
+
 room_list = RoomListObserver()

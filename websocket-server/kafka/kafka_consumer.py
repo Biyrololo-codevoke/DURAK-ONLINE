@@ -44,7 +44,6 @@ def handle_message(message):
 async def start_consumer() -> None:
     global consumer, KAFKA_URI
 
-    logger.info(f"connect to kafka: {KAFKA_URI}")
     consumer = AIOKafkaConsumer(
         KAFKA_TOPIC,
         bootstrap_servers=KAFKA_URI,
@@ -53,7 +52,7 @@ async def start_consumer() -> None:
 
     try:
         await consumer.start()
-        logger.info("successfully connected")
+        logger.info("successfully connected kafka consumer")
 
     except kafka_errors.KafkaConnectionError:
         logger.info("can't connect to host.")

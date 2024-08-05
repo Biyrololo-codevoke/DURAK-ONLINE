@@ -23,7 +23,7 @@ class Player:
         self.player_deck.remove(card)
     
     def __str__(self):
-        return "<Player id=%d>" % self.id
+        return f"player [{self.id}] {str(self.deck)}"
 
     def serialize(self) -> str:
         return json.dumps({

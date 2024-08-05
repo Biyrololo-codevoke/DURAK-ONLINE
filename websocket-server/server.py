@@ -12,19 +12,16 @@ from event_handling import serialize, deserialize, router, auth_socket
 async def socket_listener(socket: WebSocket, path: str):
     try:
         socket_id = id(socket)
-        logger.info(f"{socket.remote_address}[id: {socket_id}] -> {path}")
         auth = False
         
         if path.startswith("/ws/room?"):
             await router(path, {"event": "join_room"}, socket)
 
             async for message in socket:
-                logger.info(f"message: {json.dumps(json.loads(message), indent=2)}")
                 await router(path, deserialize(message), socket)
 
         async for message in socket:
             payload = deserialize(message)
-            logger.info(f"message: {json.dumps(payload, indent=2)}")
 
             # auth
             if not auth:

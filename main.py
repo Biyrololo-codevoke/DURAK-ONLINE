@@ -11,15 +11,16 @@ def analyze_file(file_path):
     _k = 0
     try:
         with open(file_path, 'r') as file:
+            _is = []
+            i = 0
             for line in file:
-                if line.strip() == '':
-                    _n += 1
-                elif line.startswith('#') or line.startswith('/'):
-                    _c += 1
-                else:
-                    _k += 1
-        print(f"file: {file_path}")
-        print(f"empty: {_n}, comments: {_c}, regular: {_k}")
+                if "logger.info" in line:
+                    _is.append(i)
+                i += 1
+            if len(_is) > 1:
+                print(file_path)
+                print(", ".join(map(str, _is)))
+            
     except Exception:
         pass
     return _n, _c, _k
@@ -39,7 +40,6 @@ if __name__ == "__main__":
         try:
             folder_name = input("Enter folder name: ")
             analyze_folder(folder_name)
-            print(f"Total: empty: {n}, comments: {c}, regular: {k}")
         except InterruptedError:
             break
 

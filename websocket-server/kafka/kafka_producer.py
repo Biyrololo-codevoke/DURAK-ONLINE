@@ -14,15 +14,12 @@ config = {
     "client.id": "python-producer",
 }
 
-logger.info("waiting 10s for kafka")
-time.sleep(10)
-
 producer = Producer(config)
 
 try:
     producer.produce("test", value="test")
     producer.flush()
-    logger.info("successfully connected to kafka")
+    logger.info("successfully connected producer to kafka")
 except Exception as e:
     logger.info(f"Failed to connect to kafka: {e}")
     exit(-1)

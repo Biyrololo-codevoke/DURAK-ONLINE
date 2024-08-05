@@ -15,7 +15,7 @@ async def send_to_socket(socket: WebSocket, payload: dict):
 
 async def send_to_user(user_id: int, payload: dict):
     socket = user_socket[user_id]
-    logger.info(f"send_to_user[{user_id}]: {json.dumps(payload, indent=2)}")
+    logger.info(f"send_to_user[{user_id}] event {payload.get('event')}: -> {payload}")
     await send_to_socket(socket, payload)
 
 
@@ -30,19 +30,14 @@ async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = N
 
 
 async def handle_room(payload: dict, socket: WebSocket):
-    logger.info(f"handle_room: {payload=}")
 
     event = payload["event"]
-    logger.info("received event %s" % event)
     room_id = int(payload["req"]["room_id"])
     key = payload["req"]["key"]
 
     match event:
         case "join_room":
-            logger.info("try to join room")
-
             status, message = room_list.connect_to_room(room_id, key)
-            logger.info(f"join result: {status=} {message=}")
 
             if not status:
                 asyncio.gather(*[
@@ -59,12 +54,10 @@ async def handle_room(payload: dict, socket: WebSocket):
                 )
 
         case "accept":
-            logger.info("try to accept room")
             room_id = int(payload["req"]["room_id"])
             key = payload["req"]["key"]
             
             status, message = room_list.accept_start(room_id, key)
-            logger.info(f"accept result: {status=} {message=}")
             
             if not status:
                 response = {

@@ -79,6 +79,15 @@ class Game:
         self.choose_first_player()
         self.next()
         
+        logger.info("GameLog\n\nPlayers:")
+        for player in self.players:
+            logger.info(str(player))
+        logger.info("")    
+        logger.info(f"deck: {[str(card) for card in self.deck]}")
+        logger.info(f"bito: {[str(card) for card in self.beaten_cards]}")
+        logger.info("")
+        logger.info(f"board: {str(self.boarda)}")
+        
     def choose_first_player(self):
         self.players_deque = deque(self.players)
         self.players_deque.rotate(
@@ -135,10 +144,8 @@ class Game:
             self.make_game()
 
     def get_player(self, id: int):
-        logger.info(str(self.players) + " find " + str(id))
         for player in self.players:
             if player and player.id == id:
-                logger.info("find player " + str(player))
                 return player
 
     def player_passed(self, player_id):
@@ -155,24 +162,18 @@ class Game:
         
     def check_state(self):
         if self.is_bitten or self.player_taked:
-            logger.info("bitten | taked => can throw")
             self.can_throw = True
         else:
-            logger.info("can't throw")
             self.can_throw = False
     
         if (self.is_bitten and len(self.throwing_players) == len(self.passed_players)) or \
                 (self.player_taked and len(self.throwing_players)+1 == len(self.passed_players)):
-            logger.info("бито и кол-во пассов = кол-во подкидывающих или плаер взял и подкидывающие +1 = кол-во пасов")
             self.is_end = True
         else:
-            logger.info(f"{self.is_bitten=}; {self.player_taked=}; {len(self.throwing_players)=}; {len(self.passed_players)=}")
             self.is_end = False
             
     def end(self):
         cards = self.board.take_all()
-        
-        logger.info(f"{self.is_bitten=}; {self.player_taked=};")
         
         if self.is_bitten:
             self.beaten_cards.extend(cards)
@@ -183,6 +184,7 @@ class Game:
                 self.victim_player.deck.add_card(card)
             return True, cards
         else:
+            logger.info(f"ПИЗДЕЦ! {self.is_bitten=}; {self.player_taked=};")
             return False, cards
 
     def update_pl_hst(self, player):
