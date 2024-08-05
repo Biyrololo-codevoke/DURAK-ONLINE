@@ -137,10 +137,27 @@ type GiveCards = {
     cards_count: number
 }
 
+type GetCards = {
+    event: 'get_cards';
+    cards: GameCard[]
+}
+
+type PlayerTaked = {
+    event: 'player_taked';
+    player_id: number;
+    cards_count: number
+}
+
+type PlayerWin = {
+    event: 'player_win';
+    player_id: number;
+    money: number
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
     (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard |
-    Surprise | GiveCards
+    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin
 
 export type {GameEvent}
 
@@ -163,3 +180,11 @@ type GamePlayers = {
 }
 
 export type {GamePlayers}
+
+type Reward = {
+    x: number;
+    y: number;
+    money: number;
+}
+
+export type {Reward}

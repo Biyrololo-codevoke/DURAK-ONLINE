@@ -823,3 +823,51 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
         opacity: 0;
     }
 }
+
+/* End Game UI - REWARDS */
+
+#rewards{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;
+    z-index: 15;
+}
+
+.game__reward {
+    position: relative;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: reward-anim 2s ease forwards;
+}
+
+.game__reward > img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes reward-anim {
+    0% {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    50% {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+
+    100% {
+        top: var(--reward-y);
+        left: var(--reward-x);
+        transform: translate(0, 0);
+    }
+}

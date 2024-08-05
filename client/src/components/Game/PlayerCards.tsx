@@ -88,6 +88,8 @@ export default function PlayerCards(props: Props) {
             return
         }
 
+        if(localStorage.getItem('back_move') === 'true') return
+
         console.log('trying throw')
 
         if(!props.cards) return;
@@ -323,6 +325,8 @@ export default function PlayerCards(props: Props) {
         <>
             <section id="player-cards" className={`${draggin_card !== -1 ? 'dragging' : ''}`}
             data-index={'player-cards'}
+            onMouseEnter={()=>{localStorage.setItem('back_move', 'true')}}
+            onMouseLeave={()=>{localStorage.setItem('back_move', 'false')}}
             >
                 {
                     props.cards.map(
