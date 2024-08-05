@@ -16,6 +16,9 @@ type Props = {
     on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void;
     on_give_enemies_cards: (player_id: number, cards_count: number) => void;
     on_give_player_cards: (cards: CardType[]) => void;
+    on_get_cards: (cards: CardType[]) => void;
+    on_player_took: (cards_count: number, player_id: number) => void;
+    on_player_win: (player_id: number, money: number) => void;
 }
 
 export default function handle_event(props: Props){
@@ -23,7 +26,7 @@ export default function handle_event(props: Props){
     const {data, setUsersIds} = props;
 
     console.log(`recieved message`)
-    console.log(data);
+    console.table(data);
     if('event' in data){
         if(data.event === 
             'player_connected'
@@ -110,6 +113,22 @@ export default function handle_event(props: Props){
             data.event === 'give_cards'
         ) {
             props.on_give_enemies_cards(data.player_id, data.cards_count);
+        }
+        else if(
+            data.event === 'get_cards'
+        ) {
+            const converted_cards : CardType[] = data.cards.map(c => convert_card(c));
+            props.on_get_cards(converted_cards);
+        }
+        else if(
+            data.event === 'player_taked'
+        ) {
+            props.on_player_took(data.cards_count, data.player_id);
+        }
+        else if(
+            data.event === 'player_win'
+        ) {
+            props.on_player_win(data.player_id, data.money);
         }
     }
 }

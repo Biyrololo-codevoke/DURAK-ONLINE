@@ -42,6 +42,17 @@ export default function CardDeck(props: Props){
         <section id="card-deck">
             <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
             <div id="card-deck-container">
+                {
+                    (game_state !== 2  || cards_count > 1 ) && (
+                        <img
+                        src={getCardImage(trump_card)}
+                        alt="trump back" 
+                        id="card-deck-trump"
+                        onDragStart={(e) => e.preventDefault()}
+                        onContextMenu={(e) => e.preventDefault()}
+                        />
+                    )
+                }
                 <img
                 src={CARD_COVER} 
                 alt="card back" 
@@ -50,7 +61,7 @@ export default function CardDeck(props: Props){
                 onContextMenu={(e) => e.preventDefault()}
                 />
                 {
-                    game_state == 2 &&
+                    game_state == 2 && cards_count > 0 &&
                     <img
                     src={getCardImage(trump_card)}
                     alt="trump back" 
