@@ -690,6 +690,8 @@ export default function GamePage(){
                 'me': [...prev['me'], ...done_cards]
             }
         })
+
+        setGameBoard([]);
     }
 
     function on_player_took(cards_count: number, player_id: number){
