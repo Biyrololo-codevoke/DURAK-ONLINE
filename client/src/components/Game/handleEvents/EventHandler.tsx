@@ -19,6 +19,7 @@ type Props = {
     on_get_cards: (cards: CardType[]) => void;
     on_player_took: (cards_count: number, player_id: number) => void;
     on_player_win: (player_id: number, money: number) => void;
+    on_game_over(looser_id: number) : void
 }
 
 export default function handle_event(props: Props){
@@ -129,6 +130,11 @@ export default function handle_event(props: Props){
             data.event === 'player_win'
         ) {
             props.on_player_win(data.player_id, data.money);
+        }
+        else if(
+            data.event === 'game_over'
+        ) {
+            props.on_game_over(data.looser_id);
         }
     }
 }
