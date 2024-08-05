@@ -347,6 +347,16 @@ export default function PlayerCards(props: Props) {
                                 }
                             }
 
+                            let _style : CSSProperties = {}
+
+                            if(card.taken){
+                                className += 'taken-player-card';
+                                _style = {
+                                    '--taken-from-x': `${card.taken.x}px`,
+                                    '--taken-from-y': `${card.taken.y}px`,
+                                } as CSSProperties
+                            }
+
                             return (
                                 <div key={`${card.value}-${card.suit}`} className={`player-card  ${className}`}
                                 style={
@@ -354,7 +364,8 @@ export default function PlayerCards(props: Props) {
                                         ...calculateCardStyles(index, props.cards!.length),
                                         opacity: draggin_card === index ? 0.3 : 1,
                                         '--offset': offset,
-                                        animationDelay: `${(props.cards!.length - 1 - index)*0.3}s`
+                                        animationDelay: `${(props.cards!.length - 1 - index)*0.3}s`,
+                                        ..._style
                                     } as CSSProperties
                                 }
                                 onContextMenu={(e) => e.preventDefault()}

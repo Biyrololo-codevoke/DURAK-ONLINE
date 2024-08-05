@@ -382,6 +382,39 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     }
 }
 
+#player-cards .player-card.taken-player-card{
+    animation: card_anim 1s forwards;
+}
+
+#player-cards .player-card.taken-player-card > img{
+    animation: player_take_card 1.5s ease-out forwards;
+}
+
+@keyframes player_take_card {
+    0%{
+        top: calc(var(--taken-from-y) - var(--player-cards-container-y) - 50px );
+        left: calc(var(--taken-from-x) - var(--player-cards-container-x) + var(--offset));
+        rotate: 20deg;
+        scale: 0.5;
+        opacity: 1;
+    }
+    10%{
+        scale: 0.5;
+        opacity: 1;
+    }
+    60%{
+        scale: 1;
+        top: 0;
+        left: calc(var(--offset) - 120px);
+        opacity: 1;
+    }
+    100%{
+        scale: 1;
+        left: 0;
+        opacity: 1;
+    }
+}
+
 #mobile-view #player-cards{
     height: 130px;
 }
@@ -809,18 +842,32 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 
 .to-bito{
     position: absolute !important;
-    animation: board-to-bito 0.8s ease forwards;
+    animation: board-to-bito 1s ease forwards;
 }
 
 @keyframes board-to-bito{
     from {
-        left: 0;
-        opacity: 1;
+        left: 0 !important;
     }
 
     to {
-        left: 1000px;
-        opacity: 0;
+        left: var(--to-bito-x) !important;
+    }
+}
+
+.taken-card {
+    position: absolute !important;
+    animation: taking-cards 1s ease forwards;
+}
+
+@keyframes taking-cards{
+    from {
+        left: 0 !important;
+        top: 0 !important;
+    }
+    to {
+        left: var(--taken-x) !important;
+        top: var(--taken-y) !important;
     }
 }
 

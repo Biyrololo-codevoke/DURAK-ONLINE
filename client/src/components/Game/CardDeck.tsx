@@ -43,7 +43,7 @@ export default function CardDeck(props: Props){
             <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
             <div id="card-deck-container">
                 {
-                    (game_state !== 2  || cards_count > 1 ) && (
+                    game_state === 2  && cards_count > 1 && (
                         <img
                         src={getCardImage(trump_card)}
                         alt="trump back" 
