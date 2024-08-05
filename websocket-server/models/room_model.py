@@ -28,7 +28,7 @@ class RoomModel(Base):
     _game_type = Column(Enum(Room.GameType), default=Room.GameType.THROW)
     _throw_type = Column(Enum(Room.ThrowType), default=Room.ThrowType.ALL)
     _win_type = Column(Enum(Room.WinType), default=Room.WinType.CLASSIC)
-    game_state = Column(Enum(Room.RoomState), default=Room.RoomState, nullable=True)
+    _game_state = Column(Enum(Room.RoomState), default=Room.RoomState, nullable=True)
     private = Column(Boolean, default=False)
     password = Column(String, nullable=True)
     game_obj = Column(String, nullable=True)

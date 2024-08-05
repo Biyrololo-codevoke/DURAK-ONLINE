@@ -9,16 +9,19 @@ def analyze_file(file_path):
     _n = 0
     _c = 0
     _k = 0
-    with open(file_path, 'r') as file:
-        for line in file:
-            if line.strip() == '':
-                _n += 1
-            elif line.startswith('#') or line.startswith('/'):
-                _c += 1
-            else:
-                _k += 1
-    print(f"file: {file_path}")
-    print(f"empty: {_n}, comments: {_c}, regular: {_k}")
+    try:
+        with open(file_path, 'r') as file:
+            for line in file:
+                if line.strip() == '':
+                    _n += 1
+                elif line.startswith('#') or line.startswith('/'):
+                    _c += 1
+                else:
+                    _k += 1
+        print(f"file: {file_path}")
+        print(f"empty: {_n}, comments: {_c}, regular: {_k}")
+    except Exception:
+        pass
     return _n, _c, _k
 
 def analyze_folder(folder_name):
@@ -32,6 +35,11 @@ def analyze_folder(folder_name):
             k += _k
 
 if __name__ == "__main__":
-    folder_name = input("Enter folder name: ")
-    analyze_folder(folder_name)
-    print(f"Total: empty: {n}, comments: {c}, regular: {k}")
+    while True:
+        try:
+            folder_name = input("Enter folder name: ")
+            analyze_folder(folder_name)
+            print(f"Total: empty: {n}, comments: {c}, regular: {k}")
+        except InterruptedError:
+            break
+

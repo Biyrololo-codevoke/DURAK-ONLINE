@@ -459,6 +459,11 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "event": "get_cards",
                 "cards": [card.json() for card in cards]
             })
+            # take all cards from board
+            victim_player = game.get_player(game.victim_player.id)
+            for card in cards:
+                victim_player.deck.add_card(card)
+
         else:
             logger.info("beat_cards")
             send_to_room(room_id, {

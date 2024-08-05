@@ -201,8 +201,7 @@ class Game:
         return winners
     
     def is_total_end(self):
-        return self.place == self.players_count + 1
-            
+        return self.place == self.players_count
 
     def __str__(self) -> str:
         s = "<GameObject\n"
