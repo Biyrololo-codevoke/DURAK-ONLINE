@@ -86,7 +86,7 @@ class Game:
         logger.info(f"deck: {[str(card) for card in self.deck]}")
         logger.info(f"bito: {[str(card) for card in self.beaten_cards]}")
         logger.info("")
-        logger.info(f"board: {str(self.boarda)}")
+        logger.info(f"board: {str(self.board)}")
         
     def choose_first_player(self):
         self.players_deque = deque(self.players)

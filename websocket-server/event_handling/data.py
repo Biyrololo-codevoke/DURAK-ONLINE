@@ -530,7 +530,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
         logger.info(f"deck: {[str(card) for card in game.deck]}")
         logger.info(f"bito: {[str(card) for card in game.beaten_cards]}")
         logger.info("")
-        logger.info(f"board: {str(game.boarda)}")
+        logger.info(f"board: {str(game.board)}")
     else:
         pass
 
