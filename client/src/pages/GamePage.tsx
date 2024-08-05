@@ -358,7 +358,7 @@ export default function GamePage(){
 
         set_timers_update(prev => prev + 1);
 
-        const _game_board = document.querySelectorAll('game-desk-card > img');
+        const _game_board = document.querySelectorAll('.game-desk-card > img');
 
         const game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board')!);
 
@@ -389,18 +389,43 @@ export default function GamePage(){
             //     })
             // }
 
-            setGameBoard([]);
+            if(_user_id !== take_user_id){
+                const _player_div = document.querySelector(`[data-user-id="${take_user_id}"]`)!;
+                const _rect = _player_div.getBoundingClientRect();
+
+                for(let i = 0; i < taking_cards.length; i++){
+                    _game_board[i].classList.add('taken-card');
+
+                    let _card_rect = _game_board[i].getBoundingClientRect();
+
+                    let _x = _rect.x - _card_rect.x;
+                    let _y = _rect.y - _card_rect.y;
+
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+                }
+                setTimeout(()=>{
+                    setGameBoard([]);
+                }, 1000)
+            }
+
+
         } else {
 
+            const _width = document.documentElement.clientWidth;
+
             for(let i = 0; i < _game_board.length; i++){
-                _game_board[i].classList.add('to-bito')
-            }
+                if(_game_board[i]){
+                    _game_board[i].classList.add('to-bito');
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${_width - _game_board[i].getBoundingClientRect().x}px`);
+                }
+            } 
 
             set_bito_count(prev => prev + taking_cards.length);
     
             setTimeout(()=>{
                 setGameBoard([]);
-            }, 600)
+            }, 1200)
         }
 
         console.log(`НОВЫЙ ХОД !!!!!!!!!!!!!!!!!`)
@@ -639,21 +664,43 @@ export default function GamePage(){
     }
 
     function on_get_cards(cards: CardType[]){
+
+        const done_cards : CardType[] = [];
+
+        for(let i = 0; i < cards.length; ++i){
+            let _c = cards[i];
+
+            let _card_on_board = document.querySelector(`[data-card-name="card-${_c.value}-${_c.suit}"]`);
+
+            if(_card_on_board){
+
+                const _rect = _card_on_board.getBoundingClientRect();
+                _c.taken = {
+                    x: _rect.x,
+                    y: _rect.y
+                }
+            }
+            
+            done_cards.push(_c);
+        }
+
         setUsersCards((prev) => {
             return {
                 ...prev,
-                'me': [...prev['me'], ...cards]
+                'me': [...prev['me'], ...done_cards]
             }
         })
     }
 
     function on_player_took(cards_count: number, player_id: number){
-        setUsersCards((prev) => {
-            return {
-                ...prev,
-                [player_id]: prev[player_id] + cards_count
-            }
-        })   
+        setTimeout(()=>{
+            setUsersCards((prev) => {
+                return {
+                    ...prev,
+                    [player_id]: prev[player_id] + cards_count
+                }
+            })   
+        }, 1000)
     }
 
     function on_game_over(looser_id: number){
@@ -1069,6 +1116,7 @@ export default function GamePage(){
 
     return (
         <main id="game-page">
+            <EndGameUI rewards={rewards}/>
             <TimerContext.Provider
             value={{timer_update: timers_update, timers}}
             >
@@ -1116,7 +1164,6 @@ export default function GamePage(){
                     </AcceptedContext.Provider>
                 </GameMessagesContext.Provider>
             </TimerContext.Provider>
-            <EndGameUI rewards={rewards}/>
         </main>
     )
 }

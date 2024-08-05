@@ -152,6 +152,7 @@ export default function GameBoard({is_transfering}: Props) {
                             }}
                             onMouseLeave={() => blurCard()}
 
+                            data-card-name ={`card-${card.lower.value}-${card.lower.suit}`}
                             data-index={`${card.upper ? 'undefined' : index}`}
                             />
                             {
@@ -169,6 +170,8 @@ export default function GameBoard({is_transfering}: Props) {
                                 game-desk-card-upper
                                 ${card.upper.new ? 'dropped-now' : ''}
                                 `}
+
+                                data-card-name ={`card-${card.upper.value}-${card.upper.suit}`}
                                 />
                             }
                         </div>

@@ -13,7 +13,11 @@ type CardType = {
     new?: {
         x: number;
         y: number;
-    }
+    };
+    taken?: {
+        x: number;
+        y: number;
+    };
 }
 
 type GameBoardCard = {
