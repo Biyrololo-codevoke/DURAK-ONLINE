@@ -20,6 +20,13 @@ export default function CardDeck(props: Props){
 
     useEffect(
         ()=>{
+            console.table({cards_count, trump_card});
+        },
+        [cards_count]
+    )
+
+    useEffect(
+        ()=>{
             const deck_rect = document.querySelector('#card-deck-back')?.getBoundingClientRect();
 
             if(!deck_rect) return;
@@ -43,7 +50,7 @@ export default function CardDeck(props: Props){
             <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
             <div id="card-deck-container">
                 {
-                    (game_state !== 2  || cards_count > 1 ) && (
+                    game_state === 2  && cards_count > 1 && (
                         <img
                         src={getCardImage(trump_card)}
                         alt="trump back" 
