@@ -154,10 +154,15 @@ type PlayerWin = {
     money: number
 }
 
+type GameOver = {
+    event: 'game_over';
+    looser_id: number;
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
     (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard |
-    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin
+    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver
 
 export type {GameEvent}
 

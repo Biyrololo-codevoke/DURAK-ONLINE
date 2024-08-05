@@ -196,7 +196,8 @@ export default function GamePage(){
                 on_give_player_cards,
                 on_get_cards,
                 on_player_took,
-                on_player_win
+                on_player_win,
+                on_game_over
             }
         )
     }
@@ -652,8 +653,28 @@ export default function GamePage(){
                 ...prev,
                 [player_id]: prev[player_id] + cards_count
             }
+        })   
+    }
+
+    function on_game_over(looser_id: number){
+
+        console.warn('GAME OVER', looser_id)
+
+        const _player_div = document.querySelector(`[data-user-id="${looser_id}"]`)!;
+
+        const _rect = _player_div.getBoundingClientRect();
+
+        set_rewards(prev => {
+            return [
+                ...prev,
+                {
+                    id: looser_id,
+                    x: _rect.x,
+                    y: _rect.y - 10,
+                    money: -1
+                }
+            ]
         })
-        
     }
 
     useEffect(()=>{
