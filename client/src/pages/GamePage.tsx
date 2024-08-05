@@ -679,8 +679,6 @@ export default function GamePage(){
                     x: _rect.x,
                     y: _rect.y
                 }
-
-                done_cards.push(_c);
             }
             
             done_cards.push(_c);
