@@ -20,6 +20,13 @@ export default function CardDeck(props: Props){
 
     useEffect(
         ()=>{
+            console.table({cards_count, trump_card});
+        },
+        [cards_count]
+    )
+
+    useEffect(
+        ()=>{
             const deck_rect = document.querySelector('#card-deck-back')?.getBoundingClientRect();
 
             if(!deck_rect) return;
