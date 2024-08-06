@@ -14,10 +14,7 @@ type CardType = {
         x: number;
         y: number;
     };
-    taken?: {
-        x: number;
-        y: number;
-    };
+    taken?: boolean
     from_enemy?: boolean;
 }
 

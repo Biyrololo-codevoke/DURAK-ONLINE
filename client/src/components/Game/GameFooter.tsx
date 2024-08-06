@@ -1,9 +1,11 @@
-import { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import ActionButton from "./ActionButton/ActionButton";
 import UserAvatar from "./UserAvatar";
 import { GameMessagesContext, GameStateContext, TimerContext } from "contexts/game";
 import { GameBoardCard, GamePlayers } from "types/GameTypes";
 import { MESSAGES_CONFIGS } from "constants/GameParams";
+import MoneyShortName from "features/MoneyShortName";
+import Money from "components/Money/MoneyIcon";
 
 type Props = {
     handle_start_game: () => void;
@@ -47,6 +49,21 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
             )
         )
     ) )
+
+    const is_my_turn : boolean = useMemo(()=> {
+        const _has_message = messages.some(m => String(m.user_id) === user_id);
+        if(_has_message) return false;
+        if(gameState !== 2) return false;
+        let res : boolean = false;
+        for(let i = 0; i < timers.timers.length; ++i) {
+            if(String(timers.timers[i].id) === user_id) {
+                res = timers.timers[i].is_active && timers.timers[i].color === 'red';
+                break;
+            }
+
+        }
+        return res
+    }, [timers.timers, timers.timer_update, gameState, messages]);
 
     useEffect(() => {
 
@@ -119,7 +136,15 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
                 is_pass &&
                 <ActionButton onClick={()=>{handle_action_button('pass')}} label="Пас"/>
             }
+            {
+                is_my_turn &&
+                <ActionButton text={true} onClick={()=>{}} label="Ваш ход"/>
+            }
             <UserAvatar user_id={user_id ? parseInt(user_id) : undefined}/>
+            <div id="game-footer-money">
+                {MoneyShortName(parseInt(localStorage.getItem('player_money') || '0'))}
+                <Money size="small"/>
+            </div>
         </div>
     )
 }
