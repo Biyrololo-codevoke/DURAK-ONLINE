@@ -22,6 +22,16 @@
     border-top: 1px solid #C1C1C1;
 }
 
+#game-footer-money{
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    display: flex;
+    gap: 5px;
+    font-size: 18px;
+    color: #333333;
+}
+
 .game-user-avatar-container{
     width: 80px;
     height: 80px;
@@ -383,6 +393,23 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #player-cards .player-card.taken-player-card{
+    animation: card_anim_taken 1s linear forwards !important;
+}
+
+@keyframes card_anim_taken{
+    from {
+        width: 0px;
+    }
+    to {
+
+    }
+}
+
+#player-cards .player-card.taken-player-card > img{
+    animation: none !important;
+}
+
+#player-cards .player-card.taken-player-card{
     animation: card_anim 1s forwards;
 }
 
@@ -535,6 +562,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     position: absolute;
     top: 0;
     left: 0;
+    transition: rotate 0.3s ease-out;
 }
 
 #game-desk .game-desk-card .dropped-now{
@@ -573,6 +601,11 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     animation: putting-card-upper 0.3s ease-out forwards;
 }
 
+#game-desk .game-desk-card .game-desk-card-upper.from-enemy{
+    left: var(--new-x);
+    top: var(--new-y);
+}
+
 @keyframes putting-card-upper{
     0%{
         scale: var(--scale-anim);
@@ -592,6 +625,8 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     rotate: 5deg;
     top: 20px;
     left: 20px;
+    --card-absolute-top: 20px;
+    --card-absolute-left: 20px;
 }
 
 #game-desk-container{
@@ -864,17 +899,35 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 
 .taken-card {
     position: absolute !important;
-    animation: taking-cards 1s linear forwards;
+    animation: taking-cards 0.5s linear forwards !important;
 }
 
 @keyframes taking-cards{
     from {
-        left: 0px;
-        top: 0px;
+        left: var(--card-absolute-left, 0px);
+        top: var(--card-absolute-top, 0px);
     }
     to {
         left: var(--taken-x) !important;
         top: var(--taken-y) !important;
+        scale: 0.5;
+    }
+}
+
+.taken-card-player{
+    position: absolute !important;
+    animation: taking-cards-player 0.5s linear forwards !important;
+}
+
+@keyframes taking-cards-player{
+    from {
+        left: var(--card-absolute-left, 0px);
+        top: var(--card-absolute-top, 0px);
+    }
+    to {
+        left: var(--taken-x) !important;
+        top: var(--taken-y) !important;
+        scale: 2.2;
     }
 }
 
@@ -901,11 +954,16 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     animation: reward-anim 2s ease forwards;
 }
 
+.game__reward .reward__money{
+    z-index: 20;
+}
+
 .game__reward > img {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 16;
 }
 
 @keyframes reward-anim {

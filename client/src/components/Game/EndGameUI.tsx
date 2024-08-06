@@ -1,6 +1,8 @@
 import { Reward } from "types/GameTypes"
 import { CSSProperties } from "react"
 import { Typography } from "@mui/material"
+import MoneyShortName from "features/MoneyShortName"
+import Money from "components/Money/MoneyIcon"
 
 type Props = {
     rewards: Reward[]
@@ -25,8 +27,8 @@ export default function EndGameUI({rewards}: Props) {
                             {
                                 reward.money !== -1 ?
                                 <>
-                                    <Typography variant="h4">{reward.money}</Typography>
-                                    <img src="/static/currency.png" alt="currency" className='currency'/>
+                                    <Typography variant="h6" className="reward__money">{MoneyShortName(reward.money)}</Typography>
+                                    <Money size="large"/>
                                 </> :
                                 <LooserImg/>
                             }

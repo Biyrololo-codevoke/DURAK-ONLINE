@@ -5,6 +5,7 @@ import { DrawableIcon, LoseIcon } from "components/GameFilters/Icons";
 import { FirstSpeedIcon, SecondSpeedIcon } from "components/GameFilters/Icons";
 import Money from "components/Money/MoneyIcon";
 import RoomContext from "contexts/game/RoomContext";
+import MoneyShortName from "features/MoneyShortName";
 import numberWithSpaces from "features/NumberWithSpaces";
 import { useContext } from "react";
 import { RoomResponseType } from "types/ApiTypes";
@@ -40,7 +41,7 @@ export default function GameInfo(){
             </section>
             <div id="__game-reward">
                 <Typography variant="h4" style={{color: 'white'}}>
-                    {numberWithSpaces(room.reward)}
+                    {MoneyShortName(room.reward)}
                 </Typography>
                 <Money />
             </div>
