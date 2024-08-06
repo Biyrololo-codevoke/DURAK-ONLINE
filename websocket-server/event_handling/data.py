@@ -277,19 +277,29 @@ def send_to_player(player_id: int, payload: dict):
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
     room = RoomModel.get_by_id(room_id)
-    
+
     if not room:
         send_to_player(player_id, {
             "status": "error",
             "message": "Room not found"
         })
-    
+
     serialized_game = room.game_obj
     game = Game.deserialize(serialized_game)
     player_id = int(key.split('_')[-1])
     socket_id = id(key_identity[key])
-    
+
     player = game.get_player(player_id)
+
+
+    logger.info("GameLog\n\nPlayers:")
+    for player in game.players:
+        logger.info(str(player))
+    logger.info("")    
+    logger.info(f"deck: {[str(card) for card in game.deck]}")
+    logger.info(f"bito: {[str(card) for card in game.beaten_cards]}")
+    logger.info("")
+    logger.info(f"board: {str(game.board)}")
     
     match event:
         case "place_card":
@@ -300,7 +310,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 is_trump = payload["card"]["suit"] == game.trump_suit
             )
             logger.info(f"player[{player_id}] place card {str(card)}")
-
+            logger.info(f"player[{player.id}] deck: {str(player.deck)}")
             if not player.has_card(card):
                 send_to_player(player_id, {
                     "status": "error",
@@ -442,9 +452,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
             })
 
     if game.is_end:
-        logger.info(f"time is end with effect: {'player taked' if player_taked else 'beat cards'}")
         game.is_end = False
         player_taked, cards = game.end()
+        logger.info(f"time is end with effect: {'player taked' if player_taked else 'beat cards'}")
         
         if player_taked:
             send_to_room(room_id, {
@@ -478,14 +488,15 @@ def route_game_events(payload: dict, room_id: int, key: str):
             
             if need_cards < 0:
                 continue
-            
+
+            player_give_cards = []  # массив к5оторый я кину игроку
+
             if game.deck.__len__() >= need_cards:
-                player_give_cards = []  # массив к5оторый я кину игроку
                 for _ in range(need_cards):
                     player_give_cards.append(game.deck.pop())  # добавляю карту с конца в массив
             else:
                 player_give_cards = game.deck
-            
+
             for card in player_give_cards:
                 logger.info(f"player[{_id}] get card {str(card)}")
                 _player.deck.add_card(card)
@@ -521,16 +532,6 @@ def route_game_events(payload: dict, room_id: int, key: str):
         s_game = game.serialize()
         room.game_obj = s_game
         room.save()
-        
-        # logging
-        logger.info("GameLog\n\nPlayers:")
-        for player in game.players:
-            logger.info(str(player))
-        logger.info("")    
-        logger.info(f"deck: {[str(card) for card in game.deck]}")
-        logger.info(f"bito: {[str(card) for card in game.beaten_cards]}")
-        logger.info("")
-        logger.info(f"board: {str(game.board)}")
     else:
         pass
 

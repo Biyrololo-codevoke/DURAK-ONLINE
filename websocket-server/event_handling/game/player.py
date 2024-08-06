@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 
 from .deck import PlayerDeck
 from .card import Card
+from .game_logger import logger
 
 if TYPE_CHECKING:
     from game import Game
@@ -32,6 +33,7 @@ class Player:
         })
         
     def has_card(self, card: Card) -> bool:
+        logger.info(f"try to find card {str(card)} in deck:{self.deck}")
         return self.deck.has_card(card)
     
     @staticmethod

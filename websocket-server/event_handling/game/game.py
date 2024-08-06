@@ -79,15 +79,6 @@ class Game:
         self.choose_first_player()
         self.next()
         
-        logger.info("GameLog\n\nPlayers:")
-        for player in self.players:
-            logger.info(str(player))
-        logger.info("")    
-        logger.info(f"deck: {[str(card) for card in self.deck]}")
-        logger.info(f"bito: {[str(card) for card in self.beaten_cards]}")
-        logger.info("")
-        logger.info(f"board: {str(self.board)}")
-        
     def choose_first_player(self):
         self.players_deque = deque(self.players)
         self.players_deque.rotate(
@@ -167,7 +158,8 @@ class Game:
             self.can_throw = False
     
         if (self.is_bitten and len(self.throwing_players) == len(self.passed_players)) or \
-                (self.player_taked and len(self.throwing_players)+1 == len(self.passed_players)):
+                (self.is_bitten and len(self.throwing_players) == 1) or \
+                    (self.player_taked and len(self.throwing_players)+1 == len(self.passed_players)):
             self.is_end = True
         else:
             self.is_end = False

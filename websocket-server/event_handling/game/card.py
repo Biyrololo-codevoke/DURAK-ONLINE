@@ -24,19 +24,17 @@ class Card:
                 card_list.append(Card(suit, value))
         random.shuffle(card_list)
 
-        trump_suit = card_list[-1].suit
-
         for card in card_list:
-            card.is_trump = (card.suit == trump_suit)
+            card.is_trump = (card.suit == card_list[0].suit)
 
         return card_list
 
     def __str__(self) -> str:
         if 2 <= self.value <= 10:
-            return str(self.value) + self.suit + "!" if self.is_trump else "_"
+            return str(self.value) + self.suit + ("!" if self.is_trump else ".")
 
         str_value = ["10", "Q", "V", "K", "T"][self.value-10]
-        return str_value + self.suit + "!" if self.is_trump else "_"
+        return str_value + self.suit + ("!" if self.is_trump else ".")
 
     def __gt__(self, other: Card) -> bool:
         if self.is_trump:

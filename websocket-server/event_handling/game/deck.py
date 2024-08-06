@@ -12,10 +12,17 @@ class PlayerDeck:
 
     def find_card(self, card: Card) -> Card | None:
         for _card in self._cards:
-            if _card == card:
+            logger.info(f"check card {_card}")
+            logger.info(f"value: {_card.value == card.value}, suit: {_card.suit == card.suit}")
+
+            if _card.value == card.value and _card.suit == card.suit:
+                logger.info("card found")
                 return True
+            else:
+                logger.info("card wrong")
+        logger.info("card not found")
         return False
-            
+
     def get_card(self, suit: Card.Suites, value: int):
         eligible_cards = list(
             filter(
