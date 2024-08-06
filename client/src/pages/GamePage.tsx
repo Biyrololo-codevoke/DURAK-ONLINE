@@ -311,6 +311,7 @@ export default function GamePage(){
         localStorage.removeItem('can_throw');
         localStorage.removeItem('_role');
         localStorage.removeItem('game_players');
+        const game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
         localStorage.setItem('_game_board', JSON.stringify([]));
         
         setTimeout(() => {
@@ -367,8 +368,6 @@ export default function GamePage(){
 
         const _game_board = document.querySelectorAll('.game-desk-card > img');
 
-        const game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board')!);
-
         const taking_cards : CardType[] = [];
 
         for(let c of game_board){
@@ -393,11 +392,27 @@ export default function GamePage(){
                     (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
                     (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
                 }
-                setTimeout(()=>{
-                    setGameBoard([]);
-                }, 1000)
             }
+            else {
+                const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
 
+                for(let i = 0; i < taking_cards.length; i++){
+                    _game_board[i].classList.add('taken-card-player');
+
+                    let _card_rect = _game_board[i].getBoundingClientRect();
+
+                    let _x = (_player_cards.x + _player_cards.width/2 - _card_rect.width/2) - _card_rect.x;
+                    let _y = _player_cards.y - _card_rect.y;
+
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+                }
+
+                set_new_cards([]);
+            }
+            setTimeout(()=>{
+                setGameBoard([]);
+            }, 500)
 
         } else {
 
@@ -427,6 +442,10 @@ export default function GamePage(){
 
         localStorage.setItem('take_user_id', '-1');
     }
+
+    useEffect(()=>{
+        console.table({bito_count});
+    }, [bito_count])
 
     useEffect(()=>{
         localStorage.setItem('game_players', JSON.stringify(game_players))
@@ -478,7 +497,7 @@ export default function GamePage(){
         if(slot >= _game_board.length){
             _card.new = {
                 x: _rect.x - (deck_rect.x + deck_rect.width / 2),
-                y: _rect.y - (deck_rect.y + deck_rect.height / 4)
+                y: _rect.y - deck_rect.y
             }
             setGameBoard(prev => {
                 let new_board = [...prev, {
@@ -665,16 +684,7 @@ export default function GamePage(){
         for(let i = 0; i < cards.length; ++i){
             let _c = cards[i];
 
-            let _card_on_board = document.querySelector(`[data-card-name="card-${_c.value}-${_c.suit}"]`);
-
-            if(_card_on_board){
-
-                const _rect = _card_on_board.getBoundingClientRect();
-                _c.taken = {
-                    x: _rect.x,
-                    y: _rect.y
-                }
-            }
+            _c.taken = true;
             
             done_cards.push(_c);
         }
@@ -685,9 +695,6 @@ export default function GamePage(){
                 'me': [...prev['me'], ...done_cards]
             }
         })
-
-        set_new_cards([]);
-        setGameBoard([]);
     }
 
     function on_player_took(cards_count: number, player_id: number){

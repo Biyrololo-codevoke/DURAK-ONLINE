@@ -297,7 +297,7 @@ export default function PlayerCards(props: Props) {
     }
 
 
-    const box_size = 600;
+    const [box_size, setBox_size] = useState(600);
 
     useEffect(() => {
         document.addEventListener('mouseup', handleMouseUp);
@@ -307,6 +307,8 @@ export default function PlayerCards(props: Props) {
         document.addEventListener('touchmove', handleTouchMove);
 
         document.addEventListener('touchend', handleMouseUp);
+
+        setBox_size(prev => document.querySelector('#player-cards')?.getBoundingClientRect().width || prev);
 
         return () => {
             document.removeEventListener('mouseup', handleMouseUp);
@@ -349,12 +351,24 @@ export default function PlayerCards(props: Props) {
 
                             let _style : CSSProperties = {}
 
+                            let offset_taken = '';
+
                             if(card.taken){
                                 className += 'taken-player-card';
-                                _style = {
-                                    '--taken-from-x': `${card.taken.x}px`,
-                                    '--taken-from-y': `${card.taken.y}px`,
-                                } as CSSProperties
+
+                                if(index >= props.cards!.length / 2){
+                                    offset_taken = `${-(index / (props.cards!.length) - 0.5) * box_size}px`
+                                }
+                                else{
+                                    offset_taken = `${(0.5 - index / (props.cards!.length)) * box_size}px`
+                                }
+
+                                console.table({offset_taken, taken: card.taken})
+
+                                // _style = {
+                                //     '--taken-from-x': `${card.taken.x}px`,
+                                //     '--taken-from-y': `${card.taken.y}px`,
+                                // } as CSSProperties
                             }
 
                             return (
@@ -383,7 +397,8 @@ export default function PlayerCards(props: Props) {
                                         {
                                             ...calculateCardStyles(index, props.cards!.length, true),
                                             animationDelay: `${(props.cards!.length - 1 - index)*0.3}s`,
-                                            opacity: `${className? '0' : '1'}`
+                                            opacity: `${className? '0' : '1'}`,
+                                            ...(offset_taken ? {'--offset-x': offset_taken} : {})
                                         } as CSSProperties
                                     }
                                     onDragStart={(e) => e.preventDefault()}

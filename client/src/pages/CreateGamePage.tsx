@@ -50,7 +50,7 @@ export default function CreateGamePage() {
             players_count,
             cards_count,
             speed: game_speed,
-            game_type: is_transfering ? 'throw' : 'translate',
+            game_type: is_transfering ? 'translate' : 'throw',
             throw_type: all_tossing ? 'all' : 'neighborhood',
             win_type: is_classic ? 'classic' : 'draw',
             private: password !== false,
