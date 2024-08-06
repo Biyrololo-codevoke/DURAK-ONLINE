@@ -541,11 +541,16 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     left: var(--new-x);
     top: var(--new-y);
     animation: putting-card 0.3s ease-out forwards;
+    --scale-anim: 2.2;
+}
+
+#game-desk .game-desk-card .from-enemy{
+    --scale-anim: 0.5;
 }
 
 @keyframes putting-card{
     0%{
-        scale: 2.2;
+        scale: var(--scale-anim);
         rotate: 0deg;
         z-index: 100;
     }
@@ -570,7 +575,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 
 @keyframes putting-card-upper{
     0%{
-        scale: 2.2;
+        scale: var(--scale-anim);
         rotate: 0deg;
         z-index: 100;
     }
@@ -842,28 +847,30 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 
 .to-bito{
     position: absolute !important;
-    animation: board-to-bito 1s ease forwards;
-}
+    animation: board-to-bito 1s linear forwards !important;
+}   
 
 @keyframes board-to-bito{
     from {
-        left: 0 !important;
+        left: 0px;
+        top: 0px;
     }
 
     to {
         left: var(--to-bito-x) !important;
+        top: var(--to-bito-y) !important;
     }
 }
 
 .taken-card {
     position: absolute !important;
-    animation: taking-cards 1s ease forwards;
+    animation: taking-cards 1s linear forwards;
 }
 
 @keyframes taking-cards{
     from {
-        left: 0 !important;
-        top: 0 !important;
+        left: 0px;
+        top: 0px;
     }
     to {
         left: var(--taken-x) !important;

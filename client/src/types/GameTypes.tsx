@@ -18,6 +18,7 @@ type CardType = {
         x: number;
         y: number;
     };
+    from_enemy?: boolean;
 }
 
 type GameBoardCard = {
