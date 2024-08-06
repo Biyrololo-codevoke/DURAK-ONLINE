@@ -134,10 +134,16 @@ class Game:
         if all(self.players):
             self.make_game()
 
-    def get_player(self, id: int):
+    def get_player(self, _id: int):
+        logger.info(f"try get_player: {_id}")
         for player in self.players:
-            if player and player.id == id:
-                return player
+            if player:
+                logger.info("player: " + str(player.id))
+                if int(player.id) == int(_id):
+                    logger.info("find player, return it")
+                    return player
+                else:
+                    logger.info(f"{player.id} != {_id}")
 
     def player_passed(self, player_id):
         self.passed_players.append(player_id)
@@ -189,10 +195,29 @@ class Game:
 
         for player in self.pl_hst:
             if player.deck.__len__() == 0 and len(self.deck) == 0:
-                winners.append((player, self.place))
+                winners.append((player, self.place, self.calc_rewards(self.place)))
+                self.remove_player_from_deque(player.id)
                 self.place += 1
-        
+
         return winners
+    
+    def remove_player_from_deque(self, player_id):
+        deque_list = self.players_deque
+        for index, player in enumerate(deque_list):
+            if player.id == player_id:
+                del deque_list[index]
+                break
+        self.players_deque = deque(deque_list)
+    
+    def calc_rewards(self, place: int):
+        reward_coef = {
+            6: { 1: 0.38, 2: 0.21, 3: 0.16, 4: 0.12, 5: 0.03 },
+            5: { 1: 0.40, 2: 0.25, 3: 0.18, 4: 0.7 },
+            4: { 1: 0.48, 2: 0.28, 3: 0.14 },
+            3: { 1: 0.60, 2: 0.30 },
+            2: { 1: 0.90 }
+        }
+        return int(self.reward * reward_coef[self.players_count][place])
     
     def is_total_end(self):
         return self.place == self.players_count

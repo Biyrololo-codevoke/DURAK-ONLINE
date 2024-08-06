@@ -289,12 +289,14 @@ def route_game_events(payload: dict, room_id: int, key: str):
     player_id = int(key.split('_')[-1])
     socket_id = id(key_identity[key])
 
+    logger.info("find player with id %d" % player_id)
     player = game.get_player(player_id)
+    logger.info("get player: %d" % player.id)
 
 
     logger.info("GameLog\n\nPlayers:")
-    for player in game.players:
-        logger.info(str(player))
+    for _player in game.players:
+        logger.info(str(_player))
     logger.info("")    
     logger.info(f"deck: {[str(card) for card in game.deck]}")
     logger.info(f"bito: {[str(card) for card in game.beaten_cards]}")
@@ -514,24 +516,31 @@ def route_game_events(payload: dict, room_id: int, key: str):
         # check winner
         winners = game.check_winner()
         
-        for winner, place in winners:
+        for winner, place, reward in winners:
             send_to_room(room_id, {
                 "event": "player_win",
                 "top": place,
+                "money": reward,
                 "player_id": winner.id
             })
-
-        game.next()
-        send_to_room(room_id, {
-            "event": "next",
-            "walking_player": game.attacker_player.id,
-            "victim_player": game.victim_player.id,
-            "throwing_players": [player.id for player in game.throwing_players]
-        })
-        logger.info("next time")
-        s_game = game.serialize()
-        room.game_obj = s_game
-        room.save()
+            
+        if game.is_total_end():
+            send_to_room(room_id, {
+                "event": "game_over",
+                "looser_id": game.players[0].id
+            })
+        else:
+            game.next()
+            send_to_room(room_id, {
+                "event": "next",
+                "walking_player": game.attacker_player.id,
+                "victim_player": game.victim_player.id,
+                "throwing_players": [player.id for player in game.throwing_players]
+            })
+            logger.info("next time")
+            s_game = game.serialize()
+            room.game_obj = s_game
+            room.save()
     else:
         pass
 
