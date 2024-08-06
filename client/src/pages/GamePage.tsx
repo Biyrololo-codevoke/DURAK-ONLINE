@@ -306,57 +306,64 @@ export default function GamePage(){
     function on_next_move(victim: number, walking: number, throwing_players: number[]){
         
         const take_user_id = parseInt(localStorage.getItem('take_user_id') || '-1');
-        
-        setTimers(
-            [
-                {
-                    id: walking,
-                    color: 'red',
-                    from_start: true,
-                    is_active: true
-                },
-                {
-                    id: victim,
-                    color: 'green',
-                    from_start: true,
-                    is_active: false
-                },
-                ...throwing_players.map((id) => {
-                    return {
-                        id,
-                        color: 'red' as 'red' | 'green',
-                        from_start: true,
-                        is_active: false
-                    }
-                })
-            ]
-        )
-
-        set_messages([]);
-
-        set_game_players(
-            {
-                walking,
-                victim,
-                throwing_players
-            }
-        )
-
         let _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
-        if(walking === _user_id || victim === _user_id){
-            localStorage.setItem('can_throw', 'true')
-        } else {
-            localStorage.setItem('can_throw', 'false')
-        }
+        localStorage.removeItem('can_throw');
+        localStorage.removeItem('_role');
+        localStorage.removeItem('game_players');
+        localStorage.setItem('_game_board', JSON.stringify([]));
+        
+        setTimeout(() => {
+            setTimers(
+                [
+                    {
+                        id: walking,
+                        color: 'red',
+                        from_start: true,
+                        is_active: true
+                    },
+                    {
+                        id: victim,
+                        color: 'green',
+                        from_start: true,
+                        is_active: false
+                    },
+                    ...throwing_players.map((id) => {
+                        return {
+                            id,
+                            color: 'red' as 'red' | 'green',
+                            from_start: true,
+                            is_active: false
+                        }
+                    })
+                ]
+            )
+    
+            set_messages([]);
+    
+            set_game_players(
+                {
+                    walking,
+                    victim,
+                    throwing_players
+                }
+            )
+    
+            if(walking === _user_id || victim === _user_id){
+                localStorage.setItem('can_throw', 'true')
+            } else {
+                localStorage.setItem('can_throw', 'false')
+            }
+    
+            if(_user_id === victim){
+                localStorage.setItem('_role', 'victim');
+            } else if(_user_id === walking){
+                localStorage.setItem('_role', 'walking')
+            }
+    
+            set_timers_update(prev => prev + 1);
+        }, 1200)
 
-        if(_user_id === victim){
-            localStorage.setItem('_role', 'victim');
-        } else if(_user_id === walking){
-            localStorage.setItem('_role', 'walking')
-        }
-
-        set_timers_update(prev => prev + 1);
 
         const _game_board = document.querySelectorAll('.game-desk-card > img');
 
@@ -370,24 +377,6 @@ export default function GamePage(){
         }
 
         if(take_user_id !== -1){
-            
-            // if(take_user_id === _user_id){
-
-            //     setUsersCards((prev) => {
-            //         return {
-            //             ...prev,
-            //             'me': [...prev['me'], ...taking_cards]
-            //         }
-            //     })
-            // } else {
-
-            //     setUsersCards((prev) => {
-            //         return {
-            //             ...prev,
-            //             [take_user_id]: prev[take_user_id] + taking_cards.length
-            //         }
-            //     })
-            // }
 
             if(_user_id !== take_user_id){
                 const _player_div = document.querySelector(`[data-user-id="${take_user_id}"]`)!;
@@ -413,11 +402,15 @@ export default function GamePage(){
         } else {
 
             const _width = document.documentElement.clientWidth;
+            const _height = document.documentElement.clientHeight / 2;
 
             for(let i = 0; i < _game_board.length; i++){
                 if(_game_board[i]){
                     _game_board[i].classList.add('to-bito');
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${_width - _game_board[i].getBoundingClientRect().x}px`);
+                    let to_bito_x = _width - _game_board[i].getBoundingClientRect().x;
+                    console.table({_width, rect: _game_board[i].getBoundingClientRect(), to_bito_x, i});
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${to_bito_x + 200}px`);
+                    (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-y', `${_height - _game_board[i].getBoundingClientRect().y - _game_board[i].getBoundingClientRect().height / 2}px`);
                 }
             } 
 
@@ -425,7 +418,7 @@ export default function GamePage(){
     
             setTimeout(()=>{
                 setGameBoard([]);
-            }, 1200)
+            }, 1100)
         }
 
         console.log(`НОВЫЙ ХОД !!!!!!!!!!!!!!!!!`)
@@ -449,13 +442,15 @@ export default function GamePage(){
 
         if(!_game_players) return;
 
-        const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
+        const player_box = document.querySelector(`[data-user-id="${player_id}"]`)!
 
         const deck_rect = document.getElementById('game-desk')!.getBoundingClientRect();
 
         const slot = event.slot - 1;
         
         const _card = convert_card(event.card);
+
+        _card.from_enemy = true;
 
         let _rect = player_box?.getBoundingClientRect();
 
@@ -483,7 +478,7 @@ export default function GamePage(){
         if(slot >= _game_board.length){
             _card.new = {
                 x: _rect.x - (deck_rect.x + deck_rect.width / 2),
-                y: _rect.y - (deck_rect.y + deck_rect.height / 2)
+                y: _rect.y - (deck_rect.y + deck_rect.height / 4)
             }
             setGameBoard(prev => {
                 let new_board = [...prev, {
@@ -530,7 +525,7 @@ export default function GamePage(){
                 return
             }
 
-            const card_rect = document.querySelectorAll('.game-desk-card-lower')[slot]?.getBoundingClientRect();
+            const card_rect = document.querySelector(`[data-card-name="card-${_game_board[slot].lower.value}-${_game_board[slot].lower.suit}"]`)?.getBoundingClientRect();
 
             if(card_rect){
                 _card.new = {
@@ -691,6 +686,7 @@ export default function GamePage(){
             }
         })
 
+        set_new_cards([]);
         setGameBoard([]);
     }
 

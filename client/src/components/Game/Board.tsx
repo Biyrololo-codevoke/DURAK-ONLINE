@@ -132,7 +132,7 @@ export default function GameBoard({is_transfering}: Props) {
                                 `game-desk-card-lower 
                                 ${!card.upper ? 'aviable-to-drop' : ''}
                                 ${card.lower.new ? 'dropped-now' : ''}
-                                `}
+                                ${card.lower.from_enemy ? 'from-enemy' : ''}`}
                             style={card.lower.new ? {
                                 '--new-x': `${card.lower.new.x}px`,
                                 '--new-y': `${card.lower.new.y}px`,
@@ -169,7 +169,7 @@ export default function GameBoard({is_transfering}: Props) {
                                 className={`
                                 game-desk-card-upper
                                 ${card.upper.new ? 'dropped-now' : ''}
-                                `}
+                                ${card.upper.from_enemy ? 'from-enemy' : ''}`}
 
                                 data-card-name ={`card-${card.upper.value}-${card.upper.suit}`}
                                 />
