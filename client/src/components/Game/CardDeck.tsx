@@ -3,7 +3,7 @@ import { CARD_COVER } from "constants/GameImages"
 import { GameStateContext } from "contexts/game"
 import RoomContext from "contexts/game/RoomContext"
 import { getCardImage } from "features/GameFeatures"
-import { useContext, useEffect } from "react"
+import { useContext, useEffect, useState } from "react"
 import { CardType } from "types/GameTypes"
 
 type Props = {
@@ -18,11 +18,28 @@ export default function CardDeck(props: Props){
 
     const game_state = useContext(GameStateContext);
 
+    /* [cover, lower] */
+    const [params, set_params] = useState<[boolean, boolean, CardType]>([false, false, trump_card]);
+
     useEffect(
         ()=>{
-            console.table({cards_count, trump_card});
+            set_params(prev => {
+                const new_params : [boolean, boolean, CardType] = [false, false, trump_card];
+                
+                if(cards_count > 1 && game_state !== 0){
+                    new_params[0] = true;
+                }
+
+                if(cards_count > 0 && game_state === 2){
+                    new_params[1] = true;
+                }
+
+                console.table(new_params)
+
+                return new_params
+            });
         },
-        [cards_count]
+        [cards_count, trump_card, game_state]
     )
 
     useEffect(
@@ -50,27 +67,19 @@ export default function CardDeck(props: Props){
             <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
             <div id="card-deck-container">
                 {
-                    game_state === 2  && cards_count > 1 && (
-                        <img
-                        src={getCardImage(trump_card)}
-                        alt="trump back" 
-                        id="card-deck-trump"
-                        onDragStart={(e) => e.preventDefault()}
-                        onContextMenu={(e) => e.preventDefault()}
-                        />
-                    )
-                }
-                <img
-                src={CARD_COVER} 
-                alt="card back" 
-                id="card-deck-back"
-                onDragStart={(e) => e.preventDefault()}
-                onContextMenu={(e) => e.preventDefault()}
-                />
-                {
-                    game_state == 2 && cards_count > 0 &&
+                    params[0] &&
                     <img
-                    src={getCardImage(trump_card)}
+                    src={CARD_COVER} 
+                    alt="card back" 
+                    id="card-deck-back"
+                    onDragStart={(e) => e.preventDefault()}
+                    onContextMenu={(e) => e.preventDefault()}
+                    />
+                }
+                {
+                    params[1] &&
+                    <img
+                    src={getCardImage(params[2])}
                     alt="trump back" 
                     id="card-deck-trump"
                     onDragStart={(e) => e.preventDefault()}

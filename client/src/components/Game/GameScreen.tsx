@@ -56,7 +56,9 @@ export default function GameScreen(props: Props){
 
     const room = useContext(RoomContext);
 
-    const is_transfering = room.game_type === 'translate';
+    const is_transfering = useMemo(() => {
+        return room.game_type === 'translate'
+    }, [room.game_type, room]);
 
     // const [users_ids, setUsersIds] = useState<UserIdType[]>(
     //     //[3, 5, 'me', 4, 6]
