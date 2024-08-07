@@ -308,6 +308,7 @@ export default function GamePage(){
         const take_user_id = parseInt(localStorage.getItem('take_user_id') || '-1');
         let _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
+        localStorage.removeItem('is_first_bito_was')
         localStorage.removeItem('can_throw');
         localStorage.removeItem('_role');
         localStorage.removeItem('game_players');
@@ -430,6 +431,10 @@ export default function GamePage(){
             } 
 
             set_bito_count(prev => prev + taking_cards.length);
+
+            if(taking_cards.length > 0){
+                localStorage.setItem('is_first_bito_was', 'true');
+            }
     
             setTimeout(()=>{
                 setGameBoard([]);
@@ -721,7 +726,7 @@ export default function GamePage(){
                 ...prev,
                 {
                     id: looser_id,
-                    x: _rect.x,
+                    x: _rect.x + _rect.width / 2 - 25,
                     y: _rect.y - 10,
                     money: -1
                 }
@@ -899,7 +904,7 @@ export default function GamePage(){
                 ...prev,
                 {
                     id: player_id,
-                    x: _rect.x,
+                    x: _rect.x + _rect.width / 2 - 25,
                     y: _rect.y - 10,
                     money
                 }

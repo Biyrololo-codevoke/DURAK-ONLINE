@@ -27,9 +27,10 @@
     bottom: 10px;
     right: 10px;
     display: flex;
+    align-items: center;
     gap: 5px;
-    font-size: 18px;
-    color: #333333;
+    font-size: 19px;
+    color: #6e6e6e;
 }
 
 .game-user-avatar-container{
@@ -504,6 +505,22 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     user-select: none;
 }
 
+#trump__suit{
+    rotate: none !important;
+}
+
+body:not(#mobile-view) #trump__suit {
+    width: 41px !important;
+    left: 27px !important;
+    top: 56px !important;
+}
+
+#mobile-view #trump__suit {    
+    width: 31px !important;
+    left: 18px !important;
+    top: 49px !important;
+}
+
 #card-deck #card-deck-container #card-deck-back{
     z-index: 15;
 }
@@ -630,6 +647,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #game-desk-container{
+    margin-top: 10px;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -768,6 +786,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     gap: 10px;
     justify-content: center;
     align-items: center;
+    margin-bottom: 10px;
 }
 
 #__game-reward{
@@ -776,7 +795,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     position: absolute;
     top: 0;
     right: 0;
-    gap: 10px;
+    gap: 5px;
 }
 
 #game-info,
@@ -971,12 +990,21 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        scale: 1.6;
+    }
+
+    30% {
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        scale: 1;
     }
 
     50% {
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
+        scale: 1;
     }
 
     100% {

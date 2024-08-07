@@ -1,7 +1,7 @@
 import React, {useCallback, useEffect, useMemo, useState} from "react";
 import UserAvatar, {EmptyUserAvatar} from "./UserAvatar";
 import { Typography } from "@mui/material";
-import { CardType, GameBoardCard, GameBoardType, PlaceCard } from "types/GameTypes";
+import { CardType, GameBoardCard, GameBoardType, GamePlayers, PlaceCard } from "types/GameTypes";
 import PlayerCards from "./PlayerCards";
 import CardDeck from "./CardDeck";
 import EnemyCards from "./EnemyCards";
@@ -168,10 +168,19 @@ export default function GameScreen(props: Props){
 
         let index = _game_board.length + 1;
 
-        if(index === 6) {
-            console.log(`куда кидаешь, фул уже`)
-            return
+        let is_first_bito_was = localStorage.getItem('is_first_bito_was') === 'true';
+
+        if(is_first_bito_was){
+            if(index === 7) {
+                return
+            }
+        } else {
+            if(index === 6) {
+                console.log(`куда кидаешь, фул уже`)
+                return
+            }
         }
+
 
         let flag = false;
 
@@ -227,6 +236,21 @@ export default function GameScreen(props: Props){
     }
 
     function handleTransfer(card: CardType){
+
+
+        // const _game_players : GamePlayers = JSON.parse(localStorage.getItem('game_players') || '{}');
+
+        // const is_first_bito_was = localStorage.getItem('is_first_bito_was') === 'true';
+
+        // if(is_first_bito_was){
+        //     if(users_cards[_game_players.]){
+        //         return
+        //     }
+        // } else {
+        //     if(_game_players.throwing_players.length === 1){
+        //         return
+        //     }
+        // }
 
         // console.log('новая карта', users_cards['me'][card_index], card_index, users_cards['me'])
 

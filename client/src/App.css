@@ -33,10 +33,15 @@ footer{
 
 .currency{
     width: 40px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
 
 .currency-small{
     width: 25px;
+}
+
+.currency-large{
+    width: 50px;
 }
 
 .currency-tiny{
@@ -53,4 +58,8 @@ footer{
 
 .in-game {
     overflow: hidden !important;
+}
+
+.light-shadow{
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px;
 }
