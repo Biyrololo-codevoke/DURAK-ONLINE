@@ -7,7 +7,7 @@ export default function MoneyShortName(money: number) : string {
         return `${(money / 1000).toFixed(1)}K`;
     }
 
-    if(money < 100_000) {
+    if(money < 1_000_000) {
         return `${(money / 1000).toFixed(0)}K`;
     }
 

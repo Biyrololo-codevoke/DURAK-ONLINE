@@ -130,6 +130,7 @@ export default function GameBoard({is_transfering}: Props) {
                             onContextMenu={(e) => e.preventDefault()}
                             className={
                                 `game-desk-card-lower 
+                                light-shadow
                                 ${!card.upper ? 'aviable-to-drop' : ''}
                                 ${card.lower.new ? 'dropped-now' : ''}
                                 ${card.lower.from_enemy ? 'from-enemy' : ''}`}
@@ -168,6 +169,7 @@ export default function GameBoard({is_transfering}: Props) {
                                 } as CSSProperties : {}}
                                 className={`
                                 game-desk-card-upper
+                                light-shadow
                                 ${card.upper.new ? 'dropped-now' : ''}
                                 ${card.upper.from_enemy ? 'from-enemy' : ''}`}
 
