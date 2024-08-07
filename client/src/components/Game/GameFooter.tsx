@@ -51,6 +51,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
     ) )
 
     const is_my_turn : boolean = useMemo(()=> {
+        if(localStorage.getItem('_role') !== 'walking') return false;
         const _has_message = messages.some(m => String(m.user_id) === user_id);
         if(_has_message) return false;
         if(gameState !== 2) return false;
@@ -137,7 +138,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
                 <ActionButton onClick={()=>{handle_action_button('pass')}} label="Пас"/>
             }
             {
-                is_my_turn &&
+                is_my_turn && !is_bito &&
                 <ActionButton text={true} onClick={()=>{}} label="Ваш ход"/>
             }
             <UserAvatar user_id={user_id ? parseInt(user_id) : undefined}/>

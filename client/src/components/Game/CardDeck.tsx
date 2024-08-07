@@ -10,6 +10,13 @@ type Props = {
     trump_card: CardType
 }
 
+const ICONS_BY_SUIT = {
+    1: '/static/serdce.png',
+    2: '/static/chervi.png',
+    3: '/static/tref.png',
+    4: '/static/ruby.png'
+}
+
 export default function CardDeck(props: Props){
 
     const {trump_card} = props;
@@ -67,11 +74,19 @@ export default function CardDeck(props: Props){
             <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
             <div id="card-deck-container">
                 {
+                    game_state === 2 && 
+                    <img id="trump__suit"
+                    src={ICONS_BY_SUIT[trump_card.suit]}
+                    alt="trump suit"
+                    />
+                }
+                {
                     params[0] &&
                     <img
                     src={CARD_COVER} 
                     alt="card back" 
                     id="card-deck-back"
+                    className="light-shadow"
                     onDragStart={(e) => e.preventDefault()}
                     onContextMenu={(e) => e.preventDefault()}
                     />
@@ -82,6 +97,7 @@ export default function CardDeck(props: Props){
                     src={getCardImage(params[2])}
                     alt="trump back" 
                     id="card-deck-trump"
+                    className="light-shadow"
                     onDragStart={(e) => e.preventDefault()}
                     onContextMenu={(e) => e.preventDefault()}
                     />

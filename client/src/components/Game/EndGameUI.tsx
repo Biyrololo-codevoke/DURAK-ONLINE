@@ -21,7 +21,7 @@ export default function EndGameUI({rewards}: Props) {
                                 '--reward-y': `${reward.y}px`
                             } as CSSProperties
                         }
-                        className="game__reward"
+                        className="game__reward light-shadow"
                         key={index}
                         >
                             {
@@ -44,11 +44,13 @@ function LooserImg(){
     return (
         <div style={
             {
-                width: '40px',
-                height: '40px',
+                width: '50px',
+                height: '50px',
                 background: 'red'
             }
-        }>
+        }
+        className="light-shadow"
+        >
 
         </div>
     )
