@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from websockets import WebSocketServerProtocol as WS
 
-from models import RoomModel, Exceptions
+from models import RoomModel, UserModel, Exceptions
 from websocket_logger import logger
 
 from .game import Game, Player, Card
@@ -58,9 +58,13 @@ class RoomListObserver:
     def join_to_room(self, room_id, player_id, password=None) -> tuple[bool, str]:
         try:
             room = RoomModel.get_by_id(room_id)
+            player = UserModel.get_by_id(player_id)
             
             if not room.check_password(password):
                 return False, "Incorrect password"
+            
+            if room.reward > player.money:
+                return False, "Not enough money"
 
             if player_id in room.user_ids:
                 return False, "Player already joined to room"

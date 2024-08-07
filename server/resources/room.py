@@ -44,8 +44,13 @@ class Room(BaseResource):
                 "_password": String[4, 8],
             }
         )
+
         args = parser.parse_args()
         author_id = get_jwt_identity()["id"]
+        
+        player = UserModel.get_by_id(author_id)
+        if player and player.money < args["reward"]:
+            return {"error": "not enough money"}, HTTPStatus.BAD_REQUEST
 
         if args.private and not args.password:
             return {
