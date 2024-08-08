@@ -11,6 +11,7 @@ import handleAddRooms from "features/RoomList/handleAddRoom";
 import handle_message from "features/RoomList/handleEvents";
 import { useNavigate } from "react-router-dom";
 import joinRoom from "features/RoomList/JoiningRoom";
+import { Typography } from "@mui/material";
 
 export default function PrivateRoomsList(){
 
@@ -135,6 +136,19 @@ export default function PrivateRoomsList(){
                         )
                     )
                 }
+                {
+                    rooms.length === 0 && (
+                    <center style={{margin: '25px 0 0 0'}}>
+                        <Typography
+                            variant="h6"
+                            component="span"
+                            sx={{ color: 'white'}}
+                        >
+                            Нет доступных комнат
+                        </Typography>
+                    </center>
+                )
+            }
             </div>
             <PasswordDialog room_id={room_id} setRoomId={setRoomId} onSubmit={handle_join_room}/>
 
