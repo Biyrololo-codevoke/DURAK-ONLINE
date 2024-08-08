@@ -24,9 +24,8 @@ class Game:
             game_mode: Literal["throw", "translate"] = "throw",
             win_type: Literal["classic", "draw"] = "classic",
             throw_mode: Literal["all", "neighborhood"] = "all"):
-        self.players = [None] * players_count
-        self.last_card = None
 
+        # config
         self.id = id
         self.reward = reward
         self.speed = speed
@@ -35,8 +34,12 @@ class Game:
         self.game_mode = game_mode
         self.win_type = win_type
         self.throw_mode = throw_mode
+        
+        # payload
         self.deck = None
         self.players_deque = None
+        self.players = [None] * players_count
+        self.last_card = None
         
         # for game lite data
         self.passed_players = []
