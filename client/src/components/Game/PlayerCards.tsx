@@ -260,7 +260,10 @@ export default function PlayerCards(props: Props) {
 
         const card_box = card.getBoundingClientRect();
 
-        const {left: card_left, top: card_top} = card_box
+        const {left: card_left, top: card_top, width: card_width, height: card_height} = card_box
+
+        localStorage.setItem('__player_cards_width', `${card_width}`);
+        localStorage.setItem('__player_cards_height', `${card_height}`);
 
         const clientX = e.touches[0].clientX;
         const clientY = e.touches[0].clientY;

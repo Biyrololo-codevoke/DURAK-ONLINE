@@ -64,7 +64,17 @@ export default function GameBoard({is_transfering}: Props) {
             
             if(!touch) return;
 
-            const element = document.elementFromPoint(touch.clientX, touch.clientY);
+            const card_width = parseFloat(localStorage.getItem('__player_cards_width') || '0');
+            const card_height = parseFloat(localStorage.getItem('__player_cards_height') || '0');
+
+            const padding_x = parseFloat(localStorage.getItem('padding_x') || '0');
+            const padding_y = parseFloat(localStorage.getItem('padding_y') || '0');
+
+            const element = document.elementFromPoint(touch.clientX, touch.clientY) ||
+                document.elementFromPoint(touch.clientX - padding_x, touch.clientY - padding_y) ||
+                document.elementFromPoint(touch.clientX - padding_x + card_width, touch.clientY - padding_y) ||
+                document.elementFromPoint(touch.clientX - padding_x + card_width, touch.clientY - padding_y + card_height) ||
+                document.elementFromPoint(touch.clientX - padding_x, touch.clientY - padding_y + card_height);
 
             if(!element) return;
 
