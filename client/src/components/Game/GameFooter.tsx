@@ -10,9 +10,10 @@ import Money from "components/Money/MoneyIcon";
 type Props = {
     handle_start_game: () => void;
     handle_action_button: (text: 'take' | 'bito' | 'pass') => void;
+    handle_time_out_loose: () => void;
 }
 
-export default function GameFooter({handle_start_game, handle_action_button}: Props) {
+export default function GameFooter({handle_start_game, handle_action_button, handle_time_out_loose}: Props) {
 
     const user_id = localStorage.getItem('user_id')
 
@@ -119,6 +120,21 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
 
     }, [timers.timer_update, messages])
 
+    function handle_time_out(){
+        if(is_pass){
+            console.log('PASS')
+            handle_action_button('pass')
+        }
+        else if(is_bito){
+            console.log('BITO')
+            handle_action_button('bito')
+        }
+        else if(is_taking){
+            console.log('IS TAKING')
+            handle_time_out_loose();
+        }
+    }
+
     return (
         <div id="game-footer">
             {
@@ -141,7 +157,7 @@ export default function GameFooter({handle_start_game, handle_action_button}: Pr
                 is_my_turn && !is_bito &&
                 <ActionButton text={true} onClick={()=>{}} label="Ваш ход"/>
             }
-            <UserAvatar user_id={user_id ? parseInt(user_id) : undefined}/>
+            <UserAvatar user_id={user_id ? parseInt(user_id) : undefined} on_time_out={handle_time_out}/>
             <div id="game-footer-money">
                 {MoneyShortName(parseInt(localStorage.getItem('player_money') || '0'))}
                 <Money size="small"/>

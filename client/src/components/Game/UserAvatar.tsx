@@ -11,7 +11,8 @@ import { Message } from "./Message";
 type Props = {
     user_id: string | number | undefined;
     update_progress?: number;
-    progress_color?: 'red' | 'green'
+    progress_color?: 'red' | 'green';
+    on_time_out?: () => void;
 }
 
 const PROGRESS_COLOR_CLASS = {
@@ -50,6 +51,9 @@ export default function UserAvatar(props: Props) {
     function on_time_out(){
         // TODO
         console.log('time out')
+        if(props.on_time_out && show_action && gameState === 2){
+            props.on_time_out();
+        }
     }
 
     useEffect(
