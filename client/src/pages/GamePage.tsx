@@ -88,6 +88,12 @@ export default function GamePage(){
         'me': []
     })
 
+    useEffect(
+        ()=>{
+            localStorage.setItem('_users_cards', JSON.stringify(users_cards));
+        }, [users_cards]
+    )
+
     // enemis cards delta for anim
 
     const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>({})

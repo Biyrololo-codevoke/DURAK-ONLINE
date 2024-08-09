@@ -65,6 +65,13 @@ export default function PlayerCards(props: Props) {
 
     function tryThrow(){
 
+        const players_cards_ = document.querySelectorAll('.player-card');
+
+        for(let i = 0; i < players_cards_.length; ++i){
+            (players_cards_[i] as HTMLImageElement).blur();
+            (players_cards_[i] as HTMLImageElement).classList.remove('hovered');
+        }
+
         const drag_index = Number(localStorage.getItem('drag_index') === null ? undefined : localStorage.getItem('drag_index'));
 
         if(Number.isNaN(drag_index)) return
