@@ -937,6 +937,7 @@ export default function GamePage(){
 
     useEffect(
         ()=>{
+            console.log('компонент монтируется, подрубаю сокет')
             const key = localStorage.getItem('_game_key');
             const room_id = localStorage.getItem('_room_id');
 
@@ -948,6 +949,7 @@ export default function GamePage(){
             }
 
             new_socket.onerror = () => {
+                console.log('айайай, ошибка, ошибка')
                 setSocket(null)
             }
     
@@ -956,6 +958,8 @@ export default function GamePage(){
             setSocket(new_socket);
 
             return () => {
+                console.log('Компонент размонтирован, вырубаю сокет')
+                console.log(`Сокет реди стейт: ${new_socket.readyState}`)
                 if(new_socket.readyState === 1){
                     new_socket.close();
                 }
@@ -1147,6 +1151,21 @@ export default function GamePage(){
         update_timers__bito_or_pass(game_players, parseInt(localStorage.getItem('user_id') || '-1'));
     }
 
+    function player_time_out_loose(){
+        console.log('PLAYER LOST ON TIME')
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return;
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: 'loose'
+                }
+            )
+        )
+    }
+
     return (
         <main id="game-page">
             <EndGameUI rewards={rewards}/>
@@ -1190,6 +1209,7 @@ export default function GamePage(){
                                     <GameFooter 
                                     handle_start_game={handle_start_game} 
                                     handle_action_button={handle_action_button}
+                                    handle_time_out_loose={player_time_out_loose}
                                     />
                                 </GamePlayersContext.Provider>
                             </RoomContext.Provider>
