@@ -181,6 +181,15 @@ export default function GameScreen(props: Props){
             }
         }
 
+        const _users_cards : UserCards = JSON.parse(localStorage.getItem('_users_cards') || '{}');
+
+        const _game_players : GamePlayers = JSON.parse(localStorage.getItem('game_players') || '{}');
+
+        let victim = _game_players.victim;
+        
+        if(_users_cards[victim] === 0){
+            return
+        }
 
         let flag = false;
 

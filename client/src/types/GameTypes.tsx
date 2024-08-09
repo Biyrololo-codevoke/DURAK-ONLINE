@@ -32,6 +32,13 @@ export type {UserShort}
 
 export type {CardSuitType, CardValueType, CardType}
 
+type UserCards = {
+    'me' : CardType[],
+    [key : number]: number
+}
+
+export type {UserCards}
+
 export type {GameBoardCard, GameBoardType}
 
 type GameStateType = 0 | 1 | 2;
