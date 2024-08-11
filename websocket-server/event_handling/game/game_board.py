@@ -33,10 +33,10 @@ class GameBoard:
         Returns:
             bool: True if the card was added successfully, False otherwise.
         """
-        if self.slots_down[slot_id] is not None:
+        if self.slots_down[slot_id-1] is not None:
             return False
         else:
-            self.slots_down[slot_id] = card
+            self.slots_down[slot_id-1] = card
             return True
 
     def beat_card(self, beat_card: Card, slot_id: int) -> bool:
@@ -50,13 +50,13 @@ class GameBoard:
         Returns:
             bool: True if the card was beaten successfully, False otherwise.
         """
-        if self.slots_up[slot_id] is not None:
+        if self.slots_up[slot_id-1] is not None:
             return False
         else:
-            if self.slots_down[slot_id] is None:
+            if self.slots_down[slot_id-1] is None:
                 return False
             else:
-                self.slots_down[slot_id] = beat_card
+                self.slots_down[slot_id-1] = beat_card
                 return True
 
     def take_all(self) -> List[Card]:
@@ -96,6 +96,20 @@ class GameBoard:
         """
         
         return s
+    
+    def can_transfer(self, card: Card) -> tuple[bool, str]:
+        if any(self.slots_up):
+            return False, "There is some beaten cards"
+        
+        if len(set([card.value for card in self.slots_down])) != 1:
+            return False, "Some cards have different values"
+        
+        if not self.has_free_slot():
+            return False, "There is no free slot"
+        
+        free_slot = self.slots_down.index(None)
+        self.slots_down[free_slot] = card
+        return True, "successful transfer"
 
     def serialize(self) -> str:
         """

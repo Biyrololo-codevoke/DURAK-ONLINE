@@ -16,14 +16,14 @@ services:
       ZOOKEEPER_TICK_TIME: 2000
       ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: ERROR
     ports:
-      - 2181:2181
+      - "2181:2181"
 
   kafka:
     image: confluentinc/cp-kafka:latest
     depends_on:
       - zookeeper
     ports:
-      - 9092:9092
+      - "9092:9092"
     hostname: kafka
     environment:
       KAFKA_BROKER_ID: 1
@@ -39,7 +39,7 @@ services:
     image: provectuslabs/kafka-ui
     container_name: kafka-ui
     ports:
-      - 8090:8080
+      - "8090:8080"
     restart: always
     environment:
       - KAFKA_CLUSTERS_0_NAME=local
@@ -91,7 +91,7 @@ services:
       - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
       - KAFKA_URI=kafka:9092
     deploy:
-      replicas: 4
+      replicas: 1
     depends_on:
       - kafka
       - zookeeper

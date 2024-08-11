@@ -205,12 +205,12 @@ class Game:
         return winners
     
     def remove_player_from_deque(self, player_id):
-        deque_list = self.players_deque
-        for index, player in enumerate(deque_list):
-            if player.id == player_id:
-                del deque_list[index]
-                break
-        self.players_deque = deque(deque_list)
+        self.player_queue = deque(
+            [player 
+             for player in self.player_queue 
+             if player.id != player_id
+             ]
+        )
     
     def calc_rewards(self, place: int):
         reward_coef = {
