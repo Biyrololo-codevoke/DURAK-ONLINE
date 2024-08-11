@@ -1098,6 +1098,8 @@ export default function GamePage(){
                 }
             )
         )
+
+        set_game_players(prev =>({...prev, victim: -1}))
     }
 
     function handle_start_game(){
