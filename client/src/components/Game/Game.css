@@ -658,6 +658,10 @@ body:not(#mobile-view) #trump__suit {
     border: 3px solid red;
 }
 
+.red-border-game-card{
+    border: 3px solid red !important;
+}
+
 .game-desk-card-transfering{
     transition: 0.1s;
 }

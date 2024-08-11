@@ -11,7 +11,7 @@ type Props = {
     on_start_game: () => void;
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
-    on_next_move: (victim: number, walking: number, throwing_players: number[]) => void;
+    on_next_move: (victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer') => void;
     on_place_card: (event: {slot: number; card: GameCard}, player_id: number) => void;
     on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void;
     on_give_enemies_cards: (player_id: number, cards_count: number) => void;
@@ -19,7 +19,8 @@ type Props = {
     on_get_cards: (cards: CardType[]) => void;
     on_player_took: (cards_count: number, player_id: number) => void;
     on_player_win: (player_id: number, money: number) => void;
-    on_game_over(looser_id: number) : void
+    on_game_over: (looser_id: number) => void;
+    on_transfer: (card: CardType, player_id: number) => void;
 }
 
 export default function handle_event(props: Props){
@@ -86,7 +87,7 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'next'
         ) {
-            props.on_next_move(data.victim_player, data.walking_player, data.throwing_players);
+            props.on_next_move(data.victim_player, data.walking_player, data.throwing_players, data.type);
         }
 
         else if(
@@ -135,6 +136,12 @@ export default function handle_event(props: Props){
             data.event === 'game_over'
         ) {
             props.on_game_over(data.looser_id);
+        }
+        else if(
+            data.event === 'transfer_card'
+        ) {
+            const c_card = convert_card(data.card)
+            props.on_transfer(c_card, data.player_id)
         }
     }
 }

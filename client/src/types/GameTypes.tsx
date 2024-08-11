@@ -96,7 +96,8 @@ type NextMove = {
     event: 'next';
     victim_player: number;
     walking_player: number;
-    throwing_players: number[]
+    throwing_players: number[];
+    type: 'basic' | 'transfer'
 }
 
 type PlaceCard = {
@@ -168,10 +169,15 @@ type GameOver = {
     looser_id: number;
 }
 
+type Transfer = {
+    event: 'transfer_card';
+    card: GameCard
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
     (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard |
-    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver
+    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver | (Transfer & PlayerId)
 
 export type {GameEvent}
 

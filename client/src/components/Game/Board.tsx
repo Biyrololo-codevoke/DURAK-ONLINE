@@ -1,12 +1,29 @@
 import { GameBoardContext, GamePlayersContext } from "contexts/game"
 import { getCardImage } from "features/GameFeatures";
-import { CSSProperties, useContext, useEffect } from "react"
+import { CSSProperties, useContext, useEffect, useMemo } from "react"
 import { CardType } from "types/GameTypes";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import can_i_beat from "features/GameFeatures/CardsInteraction/CanIBeat";
 
 type Props = {
     is_transfering: boolean
+}
+
+function element_point_dist(el: Element | null, point: {clientX: number, clientY: number}){
+    if(!el) return Number.MAX_SAFE_INTEGER - 1;
+
+    const rect = el.getBoundingClientRect();
+
+    return Math.sqrt(
+        Math.pow(
+            rect.x + rect.width / 2 - point.clientX,
+            2
+        ) +
+        Math.pow(
+            rect.y + rect.height / 2 - point.clientY,
+            2
+        )
+    )
 }
 
 export default function GameBoard({is_transfering}: Props) {
@@ -18,27 +35,29 @@ export default function GameBoard({is_transfering}: Props) {
     const _users_id = parseInt(localStorage.getItem('user_id') || '-1');
 
     const {cards, setCards} = board;
-    
-    let transfer_flag = true;
 
-    for(let card of cards){
-        if(card.upper){
-            transfer_flag = false;
-            break;
+    const show_transfer = useMemo(()=>{
+        let transfer_flag = true;
+
+        for(let card of cards){
+            if(card.upper){
+                transfer_flag = false;
+                break;
+            }
         }
-    }
 
-    for(let i = 1; i < cards.length; ++i){
-        if(cards[i].lower.value !== cards[i - 1].lower.value){
-            transfer_flag = false;
-            break
+        for(let i = 1; i < cards.length; ++i){
+            if(cards[i].lower.value !== cards[i - 1].lower.value){
+                transfer_flag = false;
+                break
+            }
         }
-    }
 
-    const show_transfer = is_transfering && transfer_flag &&
+        return is_transfering && transfer_flag &&
         game_players.victim === _users_id &&
-        cards.length > 1 && cards.length < 6 &&
+        cards.length > 0 && cards.length < 6 &&
         cards.find((c) => c.upper !== undefined) === undefined;
+    }, [cards, game_players, is_transfering, _users_id, board])
 
     function focusCard(card: CardType, index: number) {
         localStorage.setItem('card', JSON.stringify(card));
@@ -127,6 +146,93 @@ export default function GameBoard({is_transfering}: Props) {
     [cards]
     )
 
+    useEffect(()=>{
+        function handleMouseMove(e: {clientX: number, clientY: number}){
+            const drag_card : CardType | null = JSON.parse(localStorage.getItem('drag_card') || 'null');
+            if(drag_card === null) return
+
+            let _role = localStorage.getItem('_role');
+            if(_role !== 'victim') return;
+
+            const is_back = localStorage.getItem('back_move') === 'true';
+
+            const aviable_cards = document.querySelectorAll('.aviable-to-drop');
+
+            const transfer_card = document.querySelector('.game-desk-card-transfering');
+
+            if(is_back) {
+                for(let i = 0; i < aviable_cards.length; ++i){
+                    (aviable_cards[i] as HTMLImageElement).classList.remove('red-border-game-card');
+                }
+                if(transfer_card){
+                    (transfer_card as HTMLDivElement).classList.remove('red-border-game-card');
+                }
+                return
+            }
+
+            let close_element = -1;
+            let close_dist = 0;
+
+            if(transfer_card){
+                close_dist = element_point_dist(transfer_card, e);
+            } else {
+                if(aviable_cards.length === 0){
+                    return
+                }
+                close_element = 0;
+                close_dist = element_point_dist(aviable_cards[0], e);
+            }
+
+            for(let i = 0; i < aviable_cards.length; ++i){
+                let _d = element_point_dist(aviable_cards[i], e);
+
+                if(_d < close_dist){
+                    close_dist = _d;
+                    close_element = i;
+                }
+            }
+            for(let i = 0; i < aviable_cards.length; ++i){
+                (aviable_cards[i] as HTMLImageElement).classList.remove('red-border-game-card');
+            }
+            if(transfer_card){
+                (transfer_card as HTMLDivElement).classList.remove('red-border-game-card');
+            }
+
+            if(close_element === -1){
+                (transfer_card as HTMLDivElement)!.classList.add('red-border-game-card');
+                const rect = transfer_card!.getBoundingClientRect();
+                localStorage.setItem('card-rect-x', `${rect.left}`);
+                localStorage.setItem('card-rect-y', `${rect.top}`);
+                localStorage.setItem('card', 'null');
+                return
+            }
+
+            aviable_cards[close_element].classList.add('red-border-game-card');
+
+            const index = parseInt(aviable_cards[close_element].getAttribute('data-index')!)
+
+            const lower_card = cards[index].lower;
+
+            console.log(cards, index, lower_card)
+
+            if(can_i_beat(lower_card, drag_card)){
+                focusCard(lower_card, index);
+            }
+
+        }
+
+        function handleTouchMove(e: TouchEvent){
+            handleMouseMove(e.touches[0]);
+        }
+        window.addEventListener('mousemove', handleMouseMove)
+        window.addEventListener('touchmove', handleTouchMove);
+
+        return ()=> {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('touchmove', handleTouchMove);
+        }
+    })
+
     return (
         <div id="game-desk-container">
             <section id="game-desk">
@@ -148,20 +254,6 @@ export default function GameBoard({is_transfering}: Props) {
                                 '--new-x': `${card.lower.new.x}px`,
                                 '--new-y': `${card.lower.new.y}px`,
                             } as CSSProperties : {}}
-                            onMouseEnter={() => {
-                                if(card.upper) return;
-                                let _role = localStorage.getItem('_role');
-                                if(_role !== 'victim') return;
-
-                                const drag_card : CardType | null = JSON.parse(localStorage.getItem('drag_card') || 'null');
-                                if(drag_card === null) return
-
-                                if(can_i_beat(card.lower, drag_card)){
-                                    focusCard(card.lower, index)
-                                }
-
-                            }}
-                            onMouseLeave={() => blurCard()}
 
                             data-card-name ={`card-${card.lower.value}-${card.lower.suit}`}
                             data-index={`${card.upper ? 'undefined' : index}`}
@@ -202,13 +294,6 @@ export default function GameBoard({is_transfering}: Props) {
                             boxSizing: 'border-box',
                         }
                     }
-                    onMouseEnter={() => {
-                        const rect = document.querySelector('.game-desk-card-transfering')!.getBoundingClientRect();
-                        localStorage.setItem('card-rect-x', `${rect.left}`);
-                        localStorage.setItem('card-rect-y', `${rect.top}`);
-                        localStorage.setItem('card', 'null');
-                    }}
-                    onMouseLeave={blurCard}
                     data-index={'null'}
                     >
                         <RefreshIcon 
