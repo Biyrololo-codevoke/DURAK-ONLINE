@@ -203,7 +203,8 @@ export default function GamePage(){
                 on_get_cards,
                 on_player_took,
                 on_player_win,
-                on_game_over
+                on_game_over,
+                on_transfer
             }
         )
     }
@@ -267,6 +268,8 @@ export default function GamePage(){
     // init player deck
 
     function init_deck(cards: GameCard[]){
+        
+        localStorage.removeItem('is_first_bito_was')
 
         console.log(`ИНИТ ДЕКА !!!!!!!!!!!!!`, [])
 
@@ -309,17 +312,17 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[]){
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer'){
         
         const take_user_id = parseInt(localStorage.getItem('take_user_id') || '-1');
         let _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
-        localStorage.removeItem('is_first_bito_was')
         localStorage.removeItem('can_throw');
         localStorage.removeItem('_role');
         localStorage.removeItem('game_players');
         const game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
-        localStorage.setItem('_game_board', JSON.stringify([]));
+        if(type === 'basic')
+            localStorage.setItem('_game_board', JSON.stringify([]));
         
         setTimeout(() => {
             setTimers(
@@ -373,89 +376,92 @@ export default function GamePage(){
         }, 1200)
 
 
-        const _game_board = document.querySelectorAll('.game-desk-card > img');
-
-        const taking_cards : CardType[] = [];
-
-        for(let c of game_board){
-            taking_cards.push(c.lower)
-            if(c.upper) taking_cards.push(c.upper)
-        }
-
-        if(take_user_id !== -1){
-
-            if(_user_id !== take_user_id){
-                console.log(`[data-user-id="${take_user_id}"]`, document.querySelector(`[data-user-id="${take_user_id}"]`))
-                const _player_div = document.querySelector(`[data-user-id="${take_user_id}"]`)!;
-                const _rect = _player_div.getBoundingClientRect();
-
-                for(let i = 0; i < taking_cards.length; i++){
-                    _game_board[i].classList.add('taken-card');
-
-                    let _card_rect = _game_board[i].getBoundingClientRect();
-
-                    let _x = _rect.x - _card_rect.x;
-                    let _y = _rect.y - _card_rect.y;
-
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
-                }
-
-                setTimeout(()=>{
-                    setUsersCards((prev) => {
-                        return {
-                            ...prev,
-                            [take_user_id]: prev[take_user_id] + taking_cards.length
-                        }
-                    })
-                }, 500)
-            }
-            else {
-                const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
-
-                for(let i = 0; i < taking_cards.length; i++){
-                    _game_board[i].classList.add('taken-card-player');
-
-                    let _card_rect = _game_board[i].getBoundingClientRect();
-
-                    let _x = (_player_cards.x + _player_cards.width/2 - _card_rect.width/2) - _card_rect.x;
-                    let _y = _player_cards.y - _card_rect.y;
-
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
-                }
-
-                set_new_cards([]);
-            }
-            setTimeout(()=>{
-                setGameBoard([]);
-            }, 500)
-
-        } else {
-
-            const _width = document.documentElement.clientWidth;
-            const _height = document.documentElement.clientHeight / 2;
-
-            for(let i = 0; i < _game_board.length; i++){
-                if(_game_board[i]){
-                    _game_board[i].classList.add('to-bito');
-                    let to_bito_x = _width - _game_board[i].getBoundingClientRect().x;
-                    console.table({_width, rect: _game_board[i].getBoundingClientRect(), to_bito_x, i});
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${to_bito_x + 200}px`);
-                    (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-y', `${_height - _game_board[i].getBoundingClientRect().y - _game_board[i].getBoundingClientRect().height / 2}px`);
-                }
-            } 
-
-            set_bito_count(prev => prev + taking_cards.length);
-
-            if(taking_cards.length > 0){
-                localStorage.setItem('is_first_bito_was', 'true');
+        if(type === 'basic'){
+            const _game_board = document.querySelectorAll('.game-desk-card > img');
+    
+            const taking_cards : CardType[] = [];
+    
+            for(let c of game_board){
+                taking_cards.push(c.lower)
+                if(c.upper) taking_cards.push(c.upper)
             }
     
-            setTimeout(()=>{
-                setGameBoard([]);
-            }, 1100)
+            if(take_user_id !== -1){
+    
+                if(_user_id !== take_user_id){
+                    console.log(`[data-user-id="${take_user_id}"]`, document.querySelector(`[data-user-id="${take_user_id}"]`))
+                    const _player_div = document.querySelector(`[data-user-id="${take_user_id}"]`)!;
+                    const _rect = _player_div.getBoundingClientRect();
+    
+                    for(let i = 0; i < taking_cards.length; i++){
+                        _game_board[i].classList.add('taken-card');
+    
+                        let _card_rect = _game_board[i].getBoundingClientRect();
+    
+                        let _x = _rect.x - _card_rect.x;
+                        let _y = _rect.y - _card_rect.y;
+    
+                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
+                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+                    }
+    
+                    setTimeout(()=>{
+                        setUsersCards((prev) => {
+                            return {
+                                ...prev,
+                                [take_user_id]: prev[take_user_id] + taking_cards.length
+                            }
+                        })
+                    }, 500)
+                }
+                else {
+                    const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
+    
+                    for(let i = 0; i < taking_cards.length; i++){
+                        _game_board[i].classList.add('taken-card-player');
+    
+                        let _card_rect = _game_board[i].getBoundingClientRect();
+    
+                        let _x = (_player_cards.x + _player_cards.width/2 - _card_rect.width/2) - _card_rect.x;
+                        let _y = _player_cards.y - _card_rect.y;
+    
+                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
+                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+                    }
+    
+                    set_new_cards([]);
+                }
+                setTimeout(()=>{
+                    setGameBoard([]);
+                }, 500)
+    
+            } else {
+    
+                const _width = document.documentElement.clientWidth;
+                const _height = document.documentElement.clientHeight / 2;
+    
+                for(let i = 0; i < _game_board.length; i++){
+                    if(_game_board[i]){
+                        _game_board[i].classList.add('to-bito');
+                        let to_bito_x = _width - _game_board[i].getBoundingClientRect().x;
+                        console.table({_width, rect: _game_board[i].getBoundingClientRect(), to_bito_x, i});
+                        (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${to_bito_x + 200}px`);
+                        (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-y', `${_height - _game_board[i].getBoundingClientRect().y - _game_board[i].getBoundingClientRect().height / 2}px`);
+                    }
+                } 
+    
+                set_bito_count(prev => prev + taking_cards.length);
+    
+                if(taking_cards.length > 0){
+                    localStorage.setItem('is_first_bito_was', 'true');
+                }
+        
+                setTimeout(()=>{
+                    setGameBoard([]);
+                }, 1100)
+            }
         }
+
 
         console.log(`НОВЫЙ ХОД !!!!!!!!!!!!!!!!!`)
 
@@ -760,6 +766,34 @@ export default function GamePage(){
     useEffect(()=>{
         localStorage.setItem('game_messages', JSON.stringify(messages))
     }, [messages])
+
+    function on_transfer(card: CardType, player_id: number) {
+        console.log(`TRANSFER FROM ${player_id}`);
+        const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
+
+        const deck_rect = document.getElementById('game-desk')?.getBoundingClientRect() || {x: 0, width: 0, y: 0, height: 0};
+
+        const _card : CardType = {
+            ...card,
+            from_enemy: true
+        }
+
+        let _rect = player_box?.getBoundingClientRect() || {x: 0, width: 0, y: 0, height: 0};
+        _card.new = {
+            x: _rect.x - (deck_rect.x + deck_rect.width / 2),
+            y: _rect.y - deck_rect.y
+        }
+
+        setGameBoard(prev => {
+            let new_board = [...prev, {
+                lower: _card,
+            }]; 
+            
+            localStorage.setItem('_game_board', JSON.stringify(new_board));
+
+            return new_board
+        })
+    }
 
     // victim beated all cards or victim taking
 
