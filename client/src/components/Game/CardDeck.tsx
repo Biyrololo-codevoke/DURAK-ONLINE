@@ -71,12 +71,15 @@ export default function CardDeck(props: Props){
 
     return (
         <section id="card-deck">
-            <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
+            {
+                params[1] &&
+                <Typography variant="h5" component="span" id="card-deck-rest">{cards_count}</Typography>
+            }
             <div id="card-deck-container">
                 {
                     game_state === 2 && 
                     <img id="trump__suit"
-                    src={ICONS_BY_SUIT[trump_card.suit]}
+                    src={ICONS_BY_SUIT[params[2].suit]}
                     alt="trump suit"
                     />
                 }

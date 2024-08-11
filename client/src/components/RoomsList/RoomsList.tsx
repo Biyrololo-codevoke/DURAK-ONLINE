@@ -9,6 +9,7 @@ import {Api as Types} from 'types'
 import { useNavigate } from "react-router-dom";
 import handle_message from "features/RoomList/handleEvents";
 import joinRoom from "features/RoomList/JoiningRoom";
+import { Typography } from "@mui/material";
 
 export default function RoomsList(){
 
@@ -215,6 +216,19 @@ export default function RoomsList(){
                             onClick={handle_join_room}
                         />
                     )
+                )
+            }
+            {
+                filtered_rooms.length === 0 && (
+                    <center style={{margin: '25px 0 0 0'}}>
+                        <Typography
+                            variant="h6"
+                            component="span"
+                            sx={{ color: 'white'}}
+                        >
+                            Нет доступных комнат
+                        </Typography>
+                    </center>
                 )
             }
         </div>

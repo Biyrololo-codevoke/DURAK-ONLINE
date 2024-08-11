@@ -348,7 +348,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #player-cards .player-card.new_card{
-    animation: card_anim 2s forwards;
+    animation: card_anim 2s forwards !important;
 }
 
 @keyframes card_anim{
@@ -393,7 +393,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     }
 }
 
-#player-cards .player-card.taken-player-card{
+/* #player-cards .player-card.taken-player-card{
     animation: card_anim_taken 1s linear forwards !important;
 }
 
@@ -404,7 +404,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     to {
 
     }
-}
+} */
 
 #player-cards .player-card.taken-player-card > img{
     animation: none !important;
@@ -415,25 +415,15 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #player-cards .player-card.taken-player-card > img{
-    animation: player_take_card 1.5s ease-out forwards;
+    animation: player_take_card 1.5s ease-out forwards !important;
 }
 
 @keyframes player_take_card {
     0%{
-        top: calc(var(--taken-from-y) - var(--player-cards-container-y) - 50px );
-        left: calc(var(--taken-from-x) - var(--player-cards-container-x) + var(--offset));
-        rotate: 20deg;
-        scale: 0.5;
-        opacity: 1;
-    }
-    10%{
-        scale: 0.5;
-        opacity: 1;
-    }
-    60%{
+        z-index: 0;
         scale: 1;
         top: 0;
-        left: calc(var(--offset) - 120px);
+        left: calc(var(--offset-x) - 120px);
         opacity: 1;
     }
     100%{

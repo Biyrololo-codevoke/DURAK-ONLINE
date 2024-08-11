@@ -88,6 +88,12 @@ export default function GamePage(){
         'me': []
     })
 
+    useEffect(
+        ()=>{
+            localStorage.setItem('_users_cards', JSON.stringify(users_cards));
+        }, [users_cards]
+    )
+
     // enemis cards delta for anim
 
     const [enemy_cards_delta, set_enemy_cards_delta] = useState<EnemyCardDelta>({})
@@ -379,6 +385,7 @@ export default function GamePage(){
         if(take_user_id !== -1){
 
             if(_user_id !== take_user_id){
+                console.log(`[data-user-id="${take_user_id}"]`, document.querySelector(`[data-user-id="${take_user_id}"]`))
                 const _player_div = document.querySelector(`[data-user-id="${take_user_id}"]`)!;
                 const _rect = _player_div.getBoundingClientRect();
 
@@ -393,6 +400,15 @@ export default function GamePage(){
                     (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
                     (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
                 }
+
+                setTimeout(()=>{
+                    setUsersCards((prev) => {
+                        return {
+                            ...prev,
+                            [take_user_id]: prev[take_user_id] + taking_cards.length
+                        }
+                    })
+                }, 500)
             }
             else {
                 const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
@@ -465,6 +481,8 @@ export default function GamePage(){
         const _game_players : GamePlayers | null = JSON.parse(localStorage.getItem('game_players') || 'null');
 
         if(!_game_players) return;
+
+        console.log(`[data-user-id="${player_id}"]`, document.querySelector(`[data-user-id="${player_id}"]`))
 
         const player_box = document.querySelector(`[data-user-id="${player_id}"]`)!
 
@@ -625,39 +643,43 @@ export default function GamePage(){
             return
         }
 
+        let delta = 0;
+
+        setUsersCards(prev=>{
+            const new_cards = {...prev};
+            delta = cards_count - new_cards[player_id];
+            new_cards[player_id] = cards_count;
+            return new_cards
+        })
+
         setRoom(
             prev=>{
+                console.log(`Минус ${delta} карт. Новое количество карт: ${prev.cards_count - delta}`)
                 return {
                     ...prev,
-                    cards_count: prev.cards_count - cards_count
+                    cards_count: prev.cards_count - delta
                 }
             }
         )
 
-        setUsersCards(prev=>{
-            const new_cards = {...prev};
-            new_cards[player_id]+= cards_count;
-            return new_cards
-        })
-
         set_enemy_cards_delta(prev=>{
-            if(Math.floor(prev[player_id] / 10) === Math.floor(cards_count / 10)){
+            if(Math.floor(prev[player_id] / 10) === Math.floor(delta / 10)){
                 if(prev[player_id] % 10 === 9){
                     return {
                         ...prev,
-                        [player_id]: cards_count * 10
+                        [player_id]: delta * 10
                     }
                 }
                 else{
                     return {
                         ...prev,
-                        [player_id]: cards_count * 10 + 1
+                        [player_id]: delta * 10 + 1
                     }
                 }
             }
             return {
                 ...prev,
-                [player_id]: cards_count * 10
+                [player_id]: delta * 10
             }
         })
     }
@@ -666,6 +688,7 @@ export default function GamePage(){
 
         setRoom(
             prev=>{
+                console.log(`Минус ${cards.length} карт. Новое количество карт: ${prev.cards_count - cards.length}`)
                 return {
                     ...prev,
                     cards_count: prev.cards_count - cards.length
@@ -914,6 +937,7 @@ export default function GamePage(){
 
     useEffect(
         ()=>{
+            console.log('компонент монтируется, подрубаю сокет')
             const key = localStorage.getItem('_game_key');
             const room_id = localStorage.getItem('_room_id');
 
@@ -925,6 +949,7 @@ export default function GamePage(){
             }
 
             new_socket.onerror = () => {
+                console.log('айайай, ошибка, ошибка')
                 setSocket(null)
             }
     
@@ -933,6 +958,8 @@ export default function GamePage(){
             setSocket(new_socket);
 
             return () => {
+                console.log('Компонент размонтирован, вырубаю сокет')
+                console.log(`Сокет реди стейт: ${new_socket.readyState}`)
                 if(new_socket.readyState === 1){
                     new_socket.close();
                 }
@@ -1124,6 +1151,21 @@ export default function GamePage(){
         update_timers__bito_or_pass(game_players, parseInt(localStorage.getItem('user_id') || '-1'));
     }
 
+    function player_time_out_loose(){
+        console.log('PLAYER LOST ON TIME')
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return;
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: 'loose'
+                }
+            )
+        )
+    }
+
     return (
         <main id="game-page">
             <EndGameUI rewards={rewards}/>
@@ -1167,6 +1209,7 @@ export default function GamePage(){
                                     <GameFooter 
                                     handle_start_game={handle_start_game} 
                                     handle_action_button={handle_action_button}
+                                    handle_time_out_loose={player_time_out_loose}
                                     />
                                 </GamePlayersContext.Provider>
                             </RoomContext.Provider>
