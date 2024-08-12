@@ -101,7 +101,9 @@ class GameBoard:
         if any(self.slots_up):
             return False, "There is some beaten cards"
         
-        if len(set([card.value for card in self.slots_down])) != 1:
+        transfered_cards = [*self.slots_down, card]
+        
+        if len(set([card.value for card in transfered_cards if card])) != 1:
             return False, "Some cards have different values"
         
         if not self.has_free_slot():

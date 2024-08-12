@@ -138,12 +138,9 @@ class Game:
             self.make_game()
 
     def get_player(self, _id: int):
-        logger.info(f"try get_player: {_id}")
         for player in self.players:
             if player:
-                logger.info("player: " + str(player.id))
                 if int(player.id) == int(_id):
-                    logger.info("find player, return it")
                     return player
                 else:
                     logger.info(f"{player.id} != {_id}")

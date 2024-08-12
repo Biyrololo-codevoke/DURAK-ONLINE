@@ -484,7 +484,8 @@ def route_game_events(payload: dict, room_id: int, key: str):
 
     if game.is_end:
         game.is_end = False
-        
+        player_taked = False
+
         if not transfered:
             player_taked, cards = game.end()
             logger.info(f"time is end with effect: {'player taked' if player_taked else 'beat cards'}")
@@ -569,6 +570,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "walking_player": game.attacker_player.id,
                 "victim_player": game.victim_player.id,
                 "throwing_players": [player.id for player in game.throwing_players],
+                "decKeck": game.deck.__len__(),
                 "type": "basic" if not transfered else "transfer"
             })
             logger.info("next time")

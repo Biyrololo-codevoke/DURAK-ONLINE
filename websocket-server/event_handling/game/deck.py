@@ -12,9 +12,6 @@ class PlayerDeck:
 
     def find_card(self, card: Card) -> Card | None:
         for _card in self._cards:
-            logger.info(f"check card {_card}")
-            logger.info(f"value: {_card.value == card.value}, suit: {_card.suit == card.suit}")
-
             if _card.value == card.value and _card.suit == card.suit:
                 logger.info("card found")
                 return True
