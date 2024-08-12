@@ -77,75 +77,6 @@ export default function GameBoard({is_transfering}: Props) {
         localStorage.removeItem('card');
     }
 
-    useEffect(() => {
-        function handleTouchMove(e: TouchEvent) {
-            const touch = e.touches[0];
-            
-            if(!touch) return;
-
-            const card_width = parseFloat(localStorage.getItem('__player_cards_width') || '0');
-            const card_height = parseFloat(localStorage.getItem('__player_cards_height') || '0');
-
-            const padding_x = parseFloat(localStorage.getItem('padding_x') || '0');
-            const padding_y = parseFloat(localStorage.getItem('padding_y') || '0');
-
-            const element = document.elementFromPoint(touch.clientX, touch.clientY) ||
-                document.elementFromPoint(touch.clientX - padding_x, touch.clientY - padding_y) ||
-                document.elementFromPoint(touch.clientX - padding_x + card_width, touch.clientY - padding_y) ||
-                document.elementFromPoint(touch.clientX - padding_x + card_width, touch.clientY - padding_y + card_height) ||
-                document.elementFromPoint(touch.clientX - padding_x, touch.clientY - padding_y + card_height);
-
-            if(!element) return;
-
-            const cardIndex = element.getAttribute('data-index');
-
-            // console.log(cardIndex)
-
-            if(cardIndex === null) return
-
-            if(cardIndex === 'undefined') return;
-
-            if(cardIndex === 'player-cards') {
-                blurCard();
-                return
-            }
-
-            if(cardIndex === 'null'){
-                const rect = document.querySelector('.game-desk-card-transfering')!.getBoundingClientRect();
-                localStorage.setItem('card-rect-x', `${rect.left}`);
-                localStorage.setItem('card-rect-y', `${rect.top}`);
-                localStorage.setItem('card', 'null');
-            }
-            else{
-                let _role = localStorage.getItem('_role');
-
-                if(_role !== 'victim') return;
-                
-
-                const index = Number(cardIndex);
-                const card = cards[index];
-
-                if(card.upper) return
-
-                const drag_card : CardType | null = JSON.parse(localStorage.getItem('drag_card') || 'null');
-
-                if(drag_card === null) return
-
-                if(can_i_beat(card.lower, drag_card)){
-                    focusCard(card.lower, index);
-                }
-            }
-        }   
-
-        window.addEventListener('touchmove', handleTouchMove);
-
-        return () => {
-            window.removeEventListener('touchmove', handleTouchMove);
-        }
-    },
-    [cards]
-    )
-
     useEffect(()=>{
         function handleMouseMove(e: {clientX: number, clientY: number}){
             const drag_card : CardType | null = JSON.parse(localStorage.getItem('drag_card') || 'null');
@@ -173,7 +104,7 @@ export default function GameBoard({is_transfering}: Props) {
             let close_element = -1;
             let close_dist = 0;
 
-            if(transfer_card){
+            if(transfer_card && drag_card.value === cards[0].lower.value){
                 close_dist = element_point_dist(transfer_card, e);
             } else {
                 if(aviable_cards.length === 0){
@@ -231,7 +162,7 @@ export default function GameBoard({is_transfering}: Props) {
             window.removeEventListener('mousemove', handleMouseMove);
             window.removeEventListener('touchmove', handleTouchMove);
         }
-    })
+    }, [cards, game_players, board])
 
     return (
         <div id="game-desk-container">

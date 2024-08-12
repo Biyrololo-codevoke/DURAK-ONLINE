@@ -490,6 +490,8 @@ export default function GamePage(){
 
     function on_place_card(event: {slot: number; card: GameCard}, player_id: number){
 
+        console.warn('CURRENT GAME BOARD ON_PLACE_CARD ', localStorage.getItem('_game_board'));
+
         console.log('положил карту', {event})
 
         const _game_players : GamePlayers | null = JSON.parse(localStorage.getItem('game_players') || 'null');
@@ -541,7 +543,7 @@ export default function GamePage(){
                     lower: _card,
                 }];
 
-                console.log(`НОВАЯ КАРТА ОТ ПРОТИВНИКА !!!`, new_board)
+                console.warn('NEW GAME BOARD ON_PLACE_CARD ', new_board);
 
                 localStorage.setItem('_game_board', JSON.stringify(new_board));
 
@@ -653,6 +655,9 @@ export default function GamePage(){
     }
 
     function on_give_enemies_cards(player_id: number, cards_count: number){
+        
+        console.warn(`RECIEVED GIVE ENEMY CARDS`)
+        
         if(String(player_id) === localStorage.getItem('user_id')){
             return
         }
@@ -776,6 +781,7 @@ export default function GamePage(){
     }, [messages])
 
     function on_transfer(card: CardType, player_id: number) {
+        console.warn('CURRENT GAME BOARD ON_TRANSFER ', localStorage.getItem('_game_board'));
         console.log(`TRANSFER FROM ${player_id}`);
         const player_box = document.querySelector(`[data-user-id="${player_id}"]`)
 
@@ -797,6 +803,8 @@ export default function GamePage(){
                 lower: _card,
             }]; 
             
+            console.warn('NEW GAME BOARD FROM ON_TRANSFER ', new_board);
+
             localStorage.setItem('_game_board', JSON.stringify(new_board));
 
             return new_board
@@ -1024,6 +1032,8 @@ export default function GamePage(){
         socket_ref.current.send(
             JSON.stringify(data)
         )
+        
+        console.warn('CURRENT GAME BOARD PLAYER_THROW ', localStorage.getItem('_game_board'));
 
         const _game_board : GameBoardCard[] = JSON.parse(localStorage.getItem('_game_board') || '[]');
 
@@ -1107,6 +1117,8 @@ export default function GamePage(){
             )
         )
 
+        
+        console.warn('CURRENT GAME BOARD HANDLE_TRANSFER ', localStorage.getItem('_game_board'));
         localStorage.removeItem('_role');
         localStorage.removeItem('can_throw');
         set_timers_update(prev => prev + 1);
