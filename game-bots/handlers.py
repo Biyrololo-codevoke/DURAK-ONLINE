@@ -6,5 +6,3 @@ async def router (message: dict) -> None:
     match event:
         case "":
             ...
-    
-    

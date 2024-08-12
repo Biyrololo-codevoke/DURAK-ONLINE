@@ -207,7 +207,7 @@ class Game:
     def remove_player_from_deque(self, player_id):
         self.player_queue = deque(
             [player 
-             for player in self.player_queue 
+             for player in self.players_deque 
              if player.id != player_id
              ]
         )
