@@ -264,7 +264,10 @@ export default function GameScreen(props: Props){
         // console.log('новая карта', users_cards['me'][card_index], card_index, users_cards['me'])
 
         setGameBoard((prev)=>{
-            return [...prev, {lower: card}]
+            let new_board = [...prev, {lower: card}];
+            localStorage.setItem('_game_board', JSON.stringify(new_board));
+
+            return new_board
         })
 
         console.log('game board', game_board)

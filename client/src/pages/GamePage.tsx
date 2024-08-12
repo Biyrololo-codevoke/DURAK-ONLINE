@@ -312,8 +312,15 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer'){
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck : number){
         
+        setRoom(prev => {
+            return {
+                ...prev,
+                cards_count: decKeck
+            }
+        })
+
         const take_user_id = parseInt(localStorage.getItem('take_user_id') || '-1');
         let _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
@@ -658,15 +665,15 @@ export default function GamePage(){
             return new_cards
         })
 
-        setRoom(
-            prev=>{
-                console.log(`Минус ${delta} карт. Новое количество карт: ${prev.cards_count - delta}`)
-                return {
-                    ...prev,
-                    cards_count: prev.cards_count - delta
-                }
-            }
-        )
+        // setRoom(
+        //     prev=>{
+        //         console.log(`Минус ${delta} карт. Новое количество карт: ${prev.cards_count - delta}`)
+        //         return {
+        //             ...prev,
+        //             cards_count: prev.cards_count - delta
+        //         }
+        //     }
+        // )
 
         set_enemy_cards_delta(prev=>{
             if(Math.floor(prev[player_id] / 10) === Math.floor(delta / 10)){
@@ -692,15 +699,15 @@ export default function GamePage(){
 
     function on_give_player_cards(cards: CardType[]){
 
-        setRoom(
-            prev=>{
-                console.log(`Минус ${cards.length} карт. Новое количество карт: ${prev.cards_count - cards.length}`)
-                return {
-                    ...prev,
-                    cards_count: prev.cards_count - cards.length
-                }
-            }
-        )
+        // setRoom(
+        //     prev=>{
+        //         console.log(`Минус ${cards.length} карт. Новое количество карт: ${prev.cards_count - cards.length}`)
+        //         return {
+        //             ...prev,
+        //             cards_count: prev.cards_count - cards.length
+        //         }
+        //     }
+        // )
 
         set_new_cards(cards);
         setUsersCards(prev=>{
@@ -1098,6 +1105,10 @@ export default function GamePage(){
                 }
             )
         )
+
+        localStorage.removeItem('_role');
+        localStorage.removeItem('can_throw');
+        set_timers_update(prev => prev + 1);
 
         set_game_players(prev =>({...prev, victim: -1}))
     }
