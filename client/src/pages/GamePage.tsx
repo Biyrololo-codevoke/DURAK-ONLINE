@@ -467,12 +467,13 @@ export default function GamePage(){
                     setGameBoard([]);
                 }, 1100)
             }
+            localStorage.setItem('_game_board', JSON.stringify([]));
         }
 
 
         console.log(`НОВЫЙ ХОД !!!!!!!!!!!!!!!!!`)
 
-        localStorage.setItem('_game_board', JSON.stringify([]));
+        // localStorage.setItem('_game_board', JSON.stringify([]));
 
         localStorage.setItem('take_user_id', '-1');
     }
