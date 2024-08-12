@@ -173,6 +173,11 @@ export default function PlayerCards(props: Props) {
         const x = e.clientX - left;
         const y = e.clientY - top;
 
+        if(y >= player_cards_rect.y && isMobile){
+            localStorage.setItem('back_move', 'true');
+        } else if(isMobile){
+            localStorage.setItemI('back_move', 'false');
+        }
         
         if(y > player_cards_rect.y + player_cards_rect.height/3 && isMobile) {
             const cards = document.querySelectorAll('.player-card') as NodeListOf<HTMLElement>;
