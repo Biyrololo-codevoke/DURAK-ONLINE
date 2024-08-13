@@ -312,14 +312,15 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck : number){
-        
-        setRoom(prev => {
-            return {
-                ...prev,
-                cards_count: decKeck
-            }
-        })
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck?: number){
+        if(decKeck !== undefined){
+            setRoom(prev => {
+                return {
+                    ...prev,
+                    cards_count: decKeck
+                }
+            })
+        }
 
         const take_user_id = parseInt(localStorage.getItem('take_user_id') || '-1');
         let _user_id = parseInt(localStorage.getItem('user_id') || '-1');
