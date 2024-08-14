@@ -3,6 +3,6 @@
 git add .
 git commit -m "update"
 echo "codevoke"
-echo "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"
+echo "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"
 git pull origin main
 git push origin main
