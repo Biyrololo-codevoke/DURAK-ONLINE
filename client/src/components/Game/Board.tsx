@@ -156,11 +156,11 @@ export default function GameBoard({is_transfering}: Props) {
             handleMouseMove(e.touches[0]);
         }
         window.addEventListener('mousemove', handleMouseMove)
-        window.addEventListener('touchmove', handleTouchMove);
+        document.addEventListener('touchmove', handleTouchMove);
 
         return ()=> {
             window.removeEventListener('mousemove', handleMouseMove);
-            window.removeEventListener('touchmove', handleTouchMove);
+            document.removeEventListener('touchmove', handleTouchMove);
         }
     }, [cards, game_players, board])
 

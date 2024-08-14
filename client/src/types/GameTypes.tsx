@@ -98,7 +98,7 @@ type NextMove = {
     walking_player: number;
     throwing_players: number[];
     type: 'basic' | 'transfer';
-    decKeck: number;
+    decKeck?: number;
 }
 
 type PlaceCard = {
