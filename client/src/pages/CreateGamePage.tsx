@@ -30,6 +30,8 @@ export default function CreateGamePage() {
 
     const [password, setPassword] = useState<string | false>(false);
 
+    const [is_loading, set_is_loading] = useState(false);
+
     /**
      * Создание игры
      */
@@ -44,6 +46,8 @@ export default function CreateGamePage() {
             toast.error('Длина пароля должна быть от 4 до 6');
             return
         }
+
+        set_is_loading(true);
 
         const body : ApiTypes.CreateRoomRequestType = {
             reward: game_price,
@@ -74,6 +78,7 @@ export default function CreateGamePage() {
             err=>{
                 console.log(err);
                 toast.error('Ошибка при создании комнаты')
+                set_is_loading(false);
             }
         )
     }
@@ -117,6 +122,7 @@ export default function CreateGamePage() {
                 variant="text"
                 color="secondary"
                 onClick={handle_create_game}
+                disabled={is_loading}
                 style={
                     {
                         boxShadow: `rgba(0, 0, 0, 0.16) 0px 3px 6px, rgba(0, 0, 0, 0.23) 0px 3px 6px`,
