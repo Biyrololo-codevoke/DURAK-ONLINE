@@ -95,7 +95,10 @@ export default function PlayerCards(props: Props) {
             return
         }
 
-        if(localStorage.getItem('back_move') === 'true') return
+        if(localStorage.getItem('back_move') === 'true') {
+            localStorage.removeItem('drag_card');
+            return
+        }
 
         console.log('trying throw')
 
@@ -173,6 +176,13 @@ export default function PlayerCards(props: Props) {
         const x = e.clientX - left;
         const y = e.clientY - top;
 
+        if(isMobile){
+            if(y >= player_cards_rect.y + player_cards_rect.height / 10){
+                localStorage.setItem('back_move', 'true');
+            } else{
+                localStorage.setItem('back_move', 'false');
+            }
+        }
         
         if(y > player_cards_rect.y + player_cards_rect.height/3 && isMobile) {
             const cards = document.querySelectorAll('.player-card') as NodeListOf<HTMLElement>;
