@@ -468,8 +468,12 @@ def route_game_events(payload: dict, room_id: int, key: str):
             
             if status:
                 game.is_end = True
-                game.update_pl_hst(player)
                 transfered = True
+                # update move state
+                game.throw_players_in_time_id.append(player_id)
+                game.update_pl_hst(player)
+                # remove card and send event
+                player.deck.remove_card(card)
                 send_to_room(room_id, {
                     "event": "transfer_card",
                     "card": payload["card"],
@@ -561,7 +565,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
         if game.is_total_end():
             send_to_room(room_id, {
                 "event": "game_over",
-                "looser_id": game.players[0].id
+                "looser_id": game.rate[game.players_count]
             })
         else:
             game.next()

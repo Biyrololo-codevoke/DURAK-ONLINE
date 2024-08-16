@@ -64,6 +64,7 @@ class Game:
         self.throwing_players = []
         self.pl_hst = []
         self.place = 1
+        self.rate = {}
 
 
     def make_game(self):
@@ -196,6 +197,7 @@ class Game:
         for player in self.pl_hst:
             if player.deck.__len__() == 0 and len(self.deck) == 0:
                 winners.append((player, self.place, self.calc_rewards(self.place)))
+                self.rate[self.place] = player.id
                 self.remove_player_from_deque(player.id)
                 self.place += 1
 
