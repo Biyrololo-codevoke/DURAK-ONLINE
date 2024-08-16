@@ -11,13 +11,35 @@ import {isMobile} from 'react-device-detect';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer } from 'react-toastify';
 import Cookies from 'js-cookie';
-import { useEffect } from 'react';
+import { useEffect, useInsertionEffect } from 'react';
 import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
 import {Protected} from 'hocs';
+import { useState } from 'react';
+import getAllResources from 'features/getAllResources';
+import { LinearProgress, Typography } from '@mui/material';
 
 const LOGIN_PAGES_URLS = ['/login', '/register']
 
 function App() {
+
+  const [loaded_cnt, set_loaded_cnt] = useState(0);
+  
+  const sources = getAllResources();
+  
+  const is_loaded = loaded_cnt === sources.length;
+  useEffect(
+    ()=>{
+        for(let src of sources){
+          let img = new Image();
+          img.src = src;
+          img.onload = function (){
+            let full = false;
+            set_loaded_cnt(prev => prev + 1)
+          }
+        }
+    },
+    []
+  )
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
   axios.defaults.baseURL = '/api'; //https://codevoke.ru/api
@@ -82,6 +104,27 @@ function App() {
     },
     []
   )
+
+  
+  if(!is_loaded){
+    const value = Math.floor(loaded_cnt / sources.length * 100);
+    return (
+      <>
+        <BrowserRouter>
+          <Routes>
+            <Route path="*" element={
+              <div id="loading">
+                <Typography id="loading__title">
+                  DURAK ONLINE
+                </Typography>
+                <LinearProgress variant="determinate" value={value} color='secondary' sx={{width: '100%'}}/>
+              </div>
+            } />
+          </Routes>
+        </BrowserRouter>
+      </>
+    )
+  }
 
   return (
     <>
