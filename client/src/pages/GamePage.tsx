@@ -776,7 +776,7 @@ export default function GamePage(){
             ]
         })
 
-        setTimeout(end_game, 1000)
+        setTimeout(end_game, 5000)
     }
 
     function end_game(){
