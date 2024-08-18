@@ -420,7 +420,7 @@ export default function GamePage(){
                                 [take_user_id]: prev[take_user_id] + taking_cards.length
                             }
                         })
-                    }, 500)
+                    }, 700)
                 }
                 else {
                     const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
@@ -441,7 +441,7 @@ export default function GamePage(){
                 }
                 setTimeout(()=>{
                     setGameBoard([]);
-                }, 500)
+                }, 700)
     
             } else {
     
@@ -775,6 +775,16 @@ export default function GamePage(){
                 }
             ]
         })
+
+        setTimeout(end_game, 1000)
+    }
+
+    function end_game(){
+        setGameState(1);
+        setGameBoard([]);
+        setTimers([]);
+        set_timers_update(-1);
+        set_game_players({victim: -1, walking: -1, throwing_players: []});
     }
 
     useEffect(()=>{

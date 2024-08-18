@@ -569,13 +569,13 @@ body:not(#mobile-view) #trump__suit {
     position: absolute;
     top: 0;
     left: 0;
-    transition: rotate 0.3s ease-out;
+    transition: rotate 0.5s ease-out;
 }
 
 #game-desk .game-desk-card .dropped-now{
     left: var(--new-x);
     top: var(--new-y);
-    animation: putting-card 0.3s ease-out forwards;
+    animation: putting-card 0.5s ease-out forwards;
     --scale-anim: 2.2;
 }
 
@@ -605,7 +605,7 @@ body:not(#mobile-view) #trump__suit {
 #game-desk .game-desk-card .game-desk-card-upper.dropped-now{
     left: var(--drag-x);
     top: var(--drag-y);
-    animation: putting-card-upper 0.3s ease-out forwards;
+    animation: putting-card-upper 0.5s ease-out forwards;
 }
 
 #game-desk .game-desk-card .game-desk-card-upper.from-enemy{
@@ -912,7 +912,7 @@ body:not(#mobile-view) #trump__suit {
 
 .taken-card {
     position: absolute !important;
-    animation: taking-cards 0.5s linear forwards !important;
+    animation: taking-cards 0.7s linear forwards !important;
 }
 
 @keyframes taking-cards{
@@ -929,7 +929,7 @@ body:not(#mobile-view) #trump__suit {
 
 .taken-card-player{
     position: absolute !important;
-    animation: taking-cards-player 0.5s linear forwards !important;
+    animation: taking-cards-player 0.7s linear forwards !important;
 }
 
 @keyframes taking-cards-player{

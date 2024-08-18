@@ -1,6 +1,6 @@
 import { GameBoardContext, GamePlayersContext } from "contexts/game"
 import { getCardImage } from "features/GameFeatures";
-import { CSSProperties, useContext, useEffect, useMemo } from "react"
+import { CSSProperties, useContext, useEffect, useMemo, useState } from "react"
 import { CardType } from "types/GameTypes";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import can_i_beat from "features/GameFeatures/CardsInteraction/CanIBeat";
@@ -58,6 +58,21 @@ export default function GameBoard({is_transfering}: Props) {
         cards.length > 0 && cards.length < 6 &&
         cards.find((c) => c.upper !== undefined) === undefined;
     }, [cards, game_players, is_transfering, _users_id, board])
+
+    const [visual_show_transfer, set_visual_show_transfer] = useState(false);
+
+    useEffect(()=>{
+        const ts = setTimeout(
+            ()=>{
+                set_visual_show_transfer(show_transfer)
+            },
+            500
+        )
+
+        return ()=>{
+            clearTimeout(ts);
+        }
+    }, [show_transfer])
 
     function focusCard(card: CardType, index: number) {
         localStorage.setItem('card', JSON.stringify(card));
@@ -213,7 +228,7 @@ export default function GameBoard({is_transfering}: Props) {
                     ))
                 }
                 {
-                    show_transfer && 
+                    visual_show_transfer && 
                     <div className="game-desk-card game-desk-card-transfering"
                     style={
                         {
