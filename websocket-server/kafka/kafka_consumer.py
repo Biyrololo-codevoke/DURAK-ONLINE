@@ -34,11 +34,11 @@ def handle_message(message):
                 key=message["key"]
             )
 
-        if event_type == "update_room":  # { "event_type": "update_room", "room_id": 1, "room_count": 2 }
-            room_list.update_room(message["room_id"], message["room_count"])
+        # if event_type == "update_room":  # { "event_type": "update_room", "room_id": 1, "room_count": 2 }
+        #     room_list.update_room(message["room_id"], message["room_count"])
             
-        if event_type == "remove_room":  # { "event_type": "remove_room", "room_id": 1 }
-            room_list.remove_room(message["room_id"])
+        # if event_type == "remove_room":  # { "event_type": "remove_room", "room_id": 1 }
+        #     room_list.remove_room(message["room_id"])
 
 
 async def start_consumer() -> None:

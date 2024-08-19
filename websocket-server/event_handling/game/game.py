@@ -65,7 +65,17 @@ class Game:
         self.pl_hst = []
         self.place = 1
         self.rate = {}
-
+        
+    def get_config(self):
+        return {
+            "reward": self.reward,
+            "players_count": self.players_count,
+            "cards_count": self.deck_size,
+            "speed": self.speed,
+            "game_mode": self.game_mode,
+            "throw_mode": self.throw_mode,
+            "win_type": self.win_type,
+        }
 
     def make_game(self):
         self.beaten_cards = []

@@ -576,6 +576,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 "event": "game_over",
                 "looser_id": game.rate[game.players_count]
             })
+            make_new_room(room_id)
         else:
             game.next()
             send_to_room(room_id, {
@@ -592,5 +593,25 @@ def route_game_events(payload: dict, room_id: int, key: str):
             room.save()
     else:
         pass
+
+
+def make_new_room(room_id: int, game: Game):
+    global room_list
+    
+    config = game.get_config()
+    current_db_room = RoomModel.get_by_id(room_id)
+    players_id = current_db_room.user_ids
+    config.update({
+        "private": current_db_room.private,
+        "password": current_db_room.password,
+        "game_state": "open"
+    })
+    new_db_room = RoomModel(**config)
+    room_list.add_room(new_db_room.id, 0)
+    
+    for player_id in players_id:
+        password = new_db_room.password
+        key = room_list.join_to_room(new_db_room.id, player_id, password)
+        
 
 room_list = RoomListObserver()
