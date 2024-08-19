@@ -1,4 +1,4 @@
-from .db import db, BaseModel
+from .db import db, BaseModel, retry_on_exception
 
 
 class VerifyExceptions(Exception):
@@ -15,6 +15,7 @@ class VerifyCodeModel(BaseModel):
     code = db.Column(db.String(6))
 
     @classmethod
+    @retry_on_exception(max_retries=3, delay=0.05)
     def verify(cls, user_id: int, code: str) -> bool:
         global logger
         user_verify = cls.query.filter_by(user_id=user_id).first()

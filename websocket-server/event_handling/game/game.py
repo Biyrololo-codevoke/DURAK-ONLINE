@@ -266,7 +266,8 @@ class Game:
                 "throwing_players": [player.serialize() for player in self.throwing_players],
                 "passed_players": self.passed_players,
                 "pl_hst": [player.serialize() for player in self.pl_hst],
-                "place": self.place
+                "place": self.place,
+                "rate": self.rate
             }
         })
         
@@ -320,5 +321,6 @@ class Game:
             Player.deserialize(player, game) 
             for player in states.get("pl_hst", [])
         ] if states.get("pl_hst") else []
+        game.rate = states.get("rate")
         
         return game

@@ -6,7 +6,7 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from .user_model import UserModel
 from .enum_types import Room
-from .db import Base, session
+from .db import retry_on_exception, BaseModel, session
 
 
 class RoomExceptions:
@@ -17,7 +17,7 @@ class RoomExceptions:
         pass
 
 
-class RoomModel(Base):
+class RoomModel(BaseModel):
     __tablename__ = "room"
 
     id = Column(Integer, primary_key=True)
@@ -138,11 +138,3 @@ class RoomModel(Base):
     @win_type.setter
     def win_type(self, value: Room.WinType) -> None:
         self._win_type = Room.WinType(value)
-    
-    def save(self) -> None:
-        session.add(self)
-        session.commit()
-
-    def delete(self) -> None:
-        session.delete(self)
-        session.commit()

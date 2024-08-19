@@ -3,11 +3,12 @@ import asyncio
 from websockets import WebSocketServerProtocol as WebSocket
 from websocket_logger import logger
 
-from .utils import serialize, handle_path
+from .utils import serialize, handle_path, handle_socket_closing
 from .event_handlers import handle_list, handle_room
 from .data import key_identity
 
 
+@handle_socket_closing
 async def router(path: str, payload: dict, socket: WebSocket):
     endpoint, data = handle_path(path)
 

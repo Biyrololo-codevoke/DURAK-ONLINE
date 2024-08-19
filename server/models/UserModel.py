@@ -2,19 +2,19 @@ from __future__ import annotations
 
 from passlib.hash import pbkdf2_sha256
 
-from .db import db, BaseModel
+from .db import db, BaseModel, retry_on_exception, CustomDBException
 from .VerifyCodeModel import VerifyCodeModel
 
 
 class UserExceptions:
-    class AlreadyExists(Exception):
-        pass
+    class AlreadyExists(CustomDBException):
+        message = "User with this email or username already exists"
     
-    class NotFound(Exception):
-        pass
+    class NotFound(CustomDBException):
+        message = "User obj not found in db"
 
-    class IncorrectPassword(Exception):
-        pass
+    class IncorrectPassword(CustomDBException):
+        message = "Incorrect password"
 
 
 class UserModel(BaseModel):  # type: ignore
@@ -37,20 +37,20 @@ class UserModel(BaseModel):  # type: ignore
             "image_id": self.image_id
         }
     
+    @retry_on_exception(max_retries=3, delay=0.05)
     def __init__(self, email: str, username: str, password: str) -> None:
-        try:
-            self.email = email
-            self.username = username
-            self.password = password
-            self.save()
-        except UserExceptions.AlreadyExists as e:
-            raise UserExceptions from e
+        self.email = email
+        self.username = username
+        self.password = password
+        self.save()
 
+    @retry_on_exception(max_retries=3, delay=0.05)
     def verify_user(self, code: str) -> None:
         user_verify = VerifyCodeModel.verify(self.id, code)
         self.set_verified(user_verify)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def username(self) -> str:
         return self._username
 
@@ -63,6 +63,7 @@ class UserModel(BaseModel):  # type: ignore
             self._username = username
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.05)
     def password(self) -> str:
         return str(self._password)
 
@@ -71,6 +72,7 @@ class UserModel(BaseModel):  # type: ignore
         self._password = pbkdf2_sha256.hash(password)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def email(self) -> str:
         return str(self._email)
 
@@ -83,6 +85,7 @@ class UserModel(BaseModel):  # type: ignore
             self._email = email
 
     @classmethod
+    @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_id(cls, _id: int) -> UserModel:
         user = cls.query.filter_by(id=_id).first()
         if not user:
@@ -90,6 +93,7 @@ class UserModel(BaseModel):  # type: ignore
         return user
 
     @classmethod
+    @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_email(cls, email: str) -> UserModel:
         user = cls.query.filter_by(_email=email).first()
         if not user:
@@ -97,6 +101,7 @@ class UserModel(BaseModel):  # type: ignore
         return user
 
     @classmethod
+    @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_username(cls, username: str) -> UserModel:
         user = cls.query.filter_by(_username=username).first()
         if not user:
@@ -104,6 +109,7 @@ class UserModel(BaseModel):  # type: ignore
         return user
 
     @classmethod
+    @retry_on_exception(max_retries=3, delay=0.05)
     def auth(cls, email: str, password: str) -> UserModel:
         user = cls.get_by_email(email)
         if pbkdf2_sha256.verify(password, user.password):
@@ -111,6 +117,7 @@ class UserModel(BaseModel):  # type: ignore
         else:
             raise UserExceptions.IncorrectPassword
 
+    @retry_on_exception(max_retries=3, delay=0.05)
     def set_verified(self, verified: bool) -> None:
         self.verified = verified
         self.save()

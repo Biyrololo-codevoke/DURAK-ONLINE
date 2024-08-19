@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from .UserModel import UserModel
-from .db import db, BaseModel
+from .db import db, BaseModel, retry_on_exception
 from .enum_types import Room
 
 
@@ -47,12 +47,14 @@ class RoomModel(BaseModel):  # type: ignore
         }
 
     @classmethod
+    @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_id(cls, room_id: int) -> RoomModel:  # type: ignore
         room = cls.query.filter_by(id=room_id).first()
         if not room:
             raise RoomExceptions.NotFound
         return room
 
+    @retry_on_exception(max_retries=3, delay=0.05)
     def add_player(self, user_id: int) -> None:
         if self.user_ids is None:
             self.user_ids = []
@@ -62,6 +64,7 @@ class RoomModel(BaseModel):  # type: ignore
 
         self.user_ids.append(user_id)
 
+    @retry_on_exception(max_retries=1, delay=0.01)
     def check_password(self, password: str) -> bool:
         return self.password == password
 
@@ -77,6 +80,7 @@ class RoomModel(BaseModel):  # type: ignore
         return ", ".join(names)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def user_ids(self) -> list[int]:
         return self._user_ids
 
@@ -89,6 +93,7 @@ class RoomModel(BaseModel):  # type: ignore
         self._user_ids = value
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def players_count(self) -> int:
         return self._players_count
 
@@ -99,6 +104,7 @@ class RoomModel(BaseModel):  # type: ignore
         self._players_count = value
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def cards_count(self) -> int:
         return self._cards_count.value
 
@@ -107,6 +113,7 @@ class RoomModel(BaseModel):  # type: ignore
         self._cards_count = Room.CardsCount(value)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def speed(self) -> int:
         return self._speed.value
 
@@ -115,6 +122,7 @@ class RoomModel(BaseModel):  # type: ignore
         self._speed = Room.Speed(value)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def game_type(self) -> str:
         return self._game_type.value
 
@@ -123,6 +131,7 @@ class RoomModel(BaseModel):  # type: ignore
         self._game_type = Room.GameType(value)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def throw_type(self) -> str:
         return self._throw_type.value
 
@@ -131,6 +140,7 @@ class RoomModel(BaseModel):  # type: ignore
         self._throw_type = Room.ThrowType(value)
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def win_type(self) -> str:
         return self._win_type.value
 

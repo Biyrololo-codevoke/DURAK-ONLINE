@@ -9,6 +9,7 @@ from models import RoomModel, UserModel, Exceptions
 from websocket_logger import logger
 
 from .game import Game, Player, Card
+from .utils import handle_socket_closing
 
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
@@ -55,6 +56,7 @@ class RoomListObserver:
 
         self.notify()
 
+    @handle_socket_closing
     def join_to_room(self, room_id, player_id, password=None) -> tuple[bool, str]:
         try:
             room = RoomModel.get_by_id(room_id)
@@ -106,6 +108,7 @@ class RoomListObserver:
         except Exceptions.Room.NotFound:
             return False, "Room not found"
 
+    @handle_socket_closing
     def connect_to_room(self, room_id: int, key: str) -> tuple[bool, str]:
         room_connections = self._rooms_join_keys.get(room_id)
         player_connection = list(filter(lambda x: x["key"] == key, room_connections))[0]
@@ -158,6 +161,7 @@ class RoomListObserver:
         })
         self.remove_room(room_id)
         
+    @handle_socket_closing
     def accept_start(self, room_id: int, key: int):
         player_id = int(key.split('_')[-1])
         player_socket = key_identity[key]
@@ -277,6 +281,7 @@ def send_to_player(player_id: int, payload: dict):
     )
 
 
+@handle_socket_closing
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
     room = RoomModel.get_by_id(room_id)
@@ -479,6 +484,10 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "card": payload["card"],
                     "player_id": player_id
                 }, socket_id)
+                
+                s_game = game.serialize()
+                room.game_obj = s_game
+                room.save()
             
         case _:
             send_to_player(player_id, {
