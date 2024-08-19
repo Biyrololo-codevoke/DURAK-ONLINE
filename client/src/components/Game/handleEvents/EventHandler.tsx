@@ -21,6 +21,7 @@ type Props = {
     on_player_win: (player_id: number, money: number) => void;
     on_game_over: (looser_id: number) => void;
     on_transfer: (card: CardType, player_id: number) => void;
+    on_room_redirect: (room_id: number, key: string) => void
 }
 
 export default function handle_event(props: Props){
@@ -142,6 +143,11 @@ export default function handle_event(props: Props){
         ) {
             const c_card = convert_card(data.card)
             props.on_transfer(c_card, data.player_id)
+        }
+        else if(
+            data.event === 'room_redirect'
+        ) {
+            props.on_room_redirect(data.new_room_id, data.key)
         }
     }
 }
