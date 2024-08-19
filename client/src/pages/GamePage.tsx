@@ -39,6 +39,9 @@ export default function GamePage(){
         }
     }, []);
 
+    const [room_key, setRoomKey] = useState<string>(localStorage.getItem('_game_key') || 'no_room_key');
+    const [room_id, setRoomId] = useState<string>(localStorage.getItem('_room_id') || '-1');
+
     const [gameState, setGameState] = useState<GameStateType>(0); 
 
     const [room, setRoom] = useState<RoomResponseType>(
@@ -203,7 +206,8 @@ export default function GamePage(){
                 on_player_took,
                 on_player_win,
                 on_game_over,
-                on_transfer
+                on_transfer,
+                on_room_redirect
             }
         )
     }
@@ -780,7 +784,7 @@ export default function GamePage(){
     }
 
     function end_game(){
-        setGameState(1);
+        setGameState(0);
         setGameBoard([]);
         setTimers([]);
         set_timers_update(-1);
@@ -999,8 +1003,11 @@ export default function GamePage(){
     useEffect(
         ()=>{
             console.log('компонент монтируется, подрубаю сокет')
-            const key = localStorage.getItem('_game_key');
-            const room_id = localStorage.getItem('_room_id');
+            // const key = localStorage.getItem('_game_key');
+            // const room_id = localStorage.getItem('_room_id');
+            const key = room_key;
+
+            console.warn(`WS URL: ${gameWS(key, room_id)}`)
 
             const new_socket = new WebSocket(gameWS(key, room_id));
 
@@ -1025,8 +1032,14 @@ export default function GamePage(){
                     new_socket.close();
                 }
             }
-        }, []
+        }, [room_key, room_id]
     )
+
+    function on_room_redirect(_room_id: number, _key: string){
+
+        setRoomKey(_key);
+        setRoomId(String(_room_id));
+    }
 
     // player throw card
     function player_throw(data: PlaceCard){
