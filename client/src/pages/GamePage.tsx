@@ -851,6 +851,14 @@ export default function GamePage(){
 
             return new_board
         })
+
+        setUsersCards(prev => {
+            const cards = {...prev};
+
+            cards[player_id]--;
+
+            return cards;
+        })
     }
 
     // victim beated all cards or victim taking
