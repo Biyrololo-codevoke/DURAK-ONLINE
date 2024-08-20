@@ -4,6 +4,7 @@ from typing import List, Dict, Literal
 import json
 
 from .card import Card
+from .game_logger import logger
 
 
 class GameBoard:
@@ -33,9 +34,12 @@ class GameBoard:
         Returns:
             bool: True if the card was added successfully, False otherwise.
         """
+        logger.info("try to add card. Curent state:\n " + str(self))
         if self.slots_down[slot_id-1] is not None:
+            logger.info("Slot is not empty: " + str(self.slots_down[slot_id-1]))
             return False
         else:
+            logger.info("Slote is empty: " + str(self.slots_down[slot_id-1]))
             self.slots_down[slot_id-1] = card
             return True
 
@@ -50,13 +54,17 @@ class GameBoard:
         Returns:
             bool: True if the card was beaten successfully, False otherwise.
         """
+        logger.info("try to beat card. Curent state:\n " + str(self))
         if self.slots_up[slot_id-1] is not None:
+            logger.info("already beated")
             return False
         else:
             if self.slots_down[slot_id-1] is None:
+                logger.info("there is empty. can not beat empty slot")
                 return False
             else:
-                self.slots_down[slot_id-1] = beat_card
+                logger.info("successfully beat")
+                self.slots_up[slot_id-1] = beat_card
                 return True
 
     def take_all(self) -> List[Card]:

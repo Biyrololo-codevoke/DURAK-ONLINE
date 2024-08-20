@@ -297,19 +297,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
     player_id = int(key.split('_')[-1])
     socket_id = id(key_identity[key])
 
-    logger.info("find player with id %d" % player_id)
     player = game.get_player(player_id)
-    logger.info("get player: %d" % player.id)
-
-
-    logger.info("GameLog\n\nPlayers:")
-    for _player in game.players:
-        logger.info(str(_player))
-    logger.info("")    
-    logger.info(f"deck: {[str(card) for card in game.deck]}")
-    logger.info(f"bito: {[str(card) for card in game.beaten_cards]}")
-    logger.info("")
-    logger.info(f"board: {str(game.board)}")
     
     transfered = False
 
@@ -323,10 +311,19 @@ def route_game_events(payload: dict, room_id: int, key: str):
             )
             logger.info(f"player[{player_id}] place card {str(card)}")
             logger.info(f"player[{player.id}] deck: {str(player.deck)}")
+            logger.info(str(game.board))
             if not player.has_card(card):
                 send_to_player(player_id, {
                     "status": "error",
                     "message": "карты нету такой!"
+                })
+                return
+            
+            available_cards_count = len(game.victim_player.deck)
+            if available_cards_count == 0:
+                send_to_player(player_id, {
+                    "status": "error",
+                    "message": "ТЫ ЕБЛАН? ЧЕЛУ НЕЧЕМ ОТБИТЬСЯ"
                 })
                 return
 
@@ -574,9 +571,9 @@ def route_game_events(payload: dict, room_id: int, key: str):
         if game.is_total_end():
             send_to_room(room_id, {
                 "event": "game_over",
-                "looser_id": game.rate[game.players_count]
+                "looser_id": (set([player.id for player in game.players]) - set(game.rate.values())).pop()
             })
-            make_new_room(room_id)
+            make_new_room(room_id, game)
         else:
             game.next()
             send_to_room(room_id, {
@@ -600,18 +597,30 @@ def make_new_room(room_id: int, game: Game):
     
     config = game.get_config()
     current_db_room = RoomModel.get_by_id(room_id)
+    
     players_id = current_db_room.user_ids
     config.update({
         "private": current_db_room.private,
         "password": current_db_room.password,
-        "game_state": "open"
+        "game_state": "open",
+        "game_type": config["game_mode"],
+        "throw_type": config["throw_mode"],
     })
+    del config["game_mode"]
+    del config["throw_mode"]
+    
     new_db_room = RoomModel(**config)
-    room_list.add_room(new_db_room.id, 0)
+    new_db_room.save()
+    room_list.add_room(new_db_room.id, room_count=0)
     
     for player_id in players_id:
         password = new_db_room.password
-        key = room_list.join_to_room(new_db_room.id, player_id, password)
-        
+        status, key = room_list.join_to_room(new_db_room.id, player_id, password)
+        send_to_player(player_id, {
+            "event": "room_redirect",
+            "key": key,
+            "new_room_id": new_db_room.id
+        })
+
 
 room_list = RoomListObserver()
