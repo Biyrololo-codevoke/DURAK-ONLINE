@@ -594,6 +594,8 @@ def route_game_events(payload: dict, room_id: int, key: str):
 
 def make_new_room(room_id: int, game: Game):
     global room_list
+
+    asyncio.create_task(wait_before_new_game())
     
     config = game.get_config()
     current_db_room = RoomModel.get_by_id(room_id)
@@ -621,6 +623,10 @@ def make_new_room(room_id: int, game: Game):
             "key": key,
             "new_room_id": new_db_room.id
         })
+
+
+async def wait_before_new_game():
+    await asyncio.sleep(10)
 
 
 room_list = RoomListObserver()
