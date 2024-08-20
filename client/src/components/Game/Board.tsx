@@ -55,18 +55,24 @@ export default function GameBoard({is_transfering}: Props) {
 
         return is_transfering && transfer_flag &&
         game_players.victim === _users_id &&
-        cards.length > 0 && cards.length < 6 &&
+        cards.length > 0 && cards.length < 4 &&
         cards.find((c) => c.upper !== undefined) === undefined;
     }, [cards, game_players, is_transfering, _users_id, board])
 
     const [visual_show_transfer, set_visual_show_transfer] = useState(false);
 
     useEffect(()=>{
+
+        if(!show_transfer) {
+            set_visual_show_transfer(false);
+            return;
+        }
+
         const ts = setTimeout(
             ()=>{
                 set_visual_show_transfer(show_transfer)
             },
-            500
+            300
         )
 
         return ()=>{

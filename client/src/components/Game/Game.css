@@ -319,6 +319,7 @@
     transition: all 0.3s ease;
     bottom: 0;
     z-index: 2;
+    max-width: 225px;
 }
 
 #player-cards > .player-card:last-of-type{
@@ -425,6 +426,9 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
         top: 0;
         left: calc(var(--offset-x) - 120px);
         opacity: 1;
+    }
+    70% {
+        z-index: inherit;
     }
     100%{
         scale: 1;

@@ -175,10 +175,16 @@ type Transfer = {
     card: GameCard
 }
 
+type RoomRedirect = {
+    event: 'room_redirect';
+    new_room_id: number;
+    key: string
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
     (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard |
-    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver | (Transfer & PlayerId)
+    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver | (Transfer & PlayerId) | RoomRedirect
 
 export type {GameEvent}
 

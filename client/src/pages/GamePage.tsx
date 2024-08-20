@@ -39,6 +39,9 @@ export default function GamePage(){
         }
     }, []);
 
+    const [room_key, setRoomKey] = useState<string>(localStorage.getItem('_game_key') || 'no_room_key');
+    const [room_id, setRoomId] = useState<string>(localStorage.getItem('_room_id') || '-1');
+
     const [gameState, setGameState] = useState<GameStateType>(0); 
 
     const [room, setRoom] = useState<RoomResponseType>(
@@ -204,7 +207,8 @@ export default function GamePage(){
                 on_player_took,
                 on_player_win,
                 on_game_over,
-                on_transfer
+                on_transfer,
+                on_room_redirect
             }
         )
     }
@@ -780,10 +784,37 @@ export default function GamePage(){
     }
 
     function end_game(){
-        setGameState(1);
+
+        localStorage.removeItem('game_messages');
+        localStorage.removeItem('can_throw');
+        localStorage.removeItem('_role');
+        localStorage.removeItem('game_players');
+        localStorage.removeItem('_game_board');
+        localStorage.removeItem('_users_cards');
+        localStorage.removeItem('take_user_id');
+
+        setGameState(0);
         setGameBoard([]);
         setTimers([]);
         set_timers_update(-1);
+        setUsersCards(prev => {
+            const new_cards : UserCards = {
+                'me': []
+            };
+
+            for(let k in prev){
+                if(k === 'me'){
+                    continue
+                }
+
+                new_cards[k] = 0;
+            }
+
+            return new_cards
+        })
+        set_bito_count(0);
+        set_new_cards([]);
+        set_enemy_cards_delta({});
         set_game_players({victim: -1, walking: -1, throwing_players: []});
     }
 
@@ -1007,8 +1038,11 @@ export default function GamePage(){
     useEffect(
         ()=>{
             console.log('компонент монтируется, подрубаю сокет')
-            const key = localStorage.getItem('_game_key');
-            const room_id = localStorage.getItem('_room_id');
+            // const key = localStorage.getItem('_game_key');
+            // const room_id = localStorage.getItem('_room_id');
+            const key = room_key;
+
+            console.warn(`WS URL: ${gameWS(key, room_id)}`)
 
             const new_socket = new WebSocket(gameWS(key, room_id));
 
@@ -1033,8 +1067,18 @@ export default function GamePage(){
                     new_socket.close();
                 }
             }
-        }, []
+        }, [room_key, room_id]
     )
+
+    function on_room_redirect(_room_id: number, _key: string){
+
+        set_rewards([]);
+        set_messages([]);
+        set_timers_update(prev => prev + 1);
+        setTimers([]);
+        setRoomKey(_key);
+        setRoomId(String(_room_id));
+    }
 
     // player throw card
     function player_throw(data: PlaceCard){
