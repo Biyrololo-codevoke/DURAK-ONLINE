@@ -784,10 +784,37 @@ export default function GamePage(){
     }
 
     function end_game(){
+
+        localStorage.removeItem('game_messages');
+        localStorage.removeItem('can_throw');
+        localStorage.removeItem('_role');
+        localStorage.removeItem('game_players');
+        localStorage.removeItem('_game_board');
+        localStorage.removeItem('_users_cards');
+        localStorage.removeItem('take_user_id');
+
         setGameState(0);
         setGameBoard([]);
         setTimers([]);
         set_timers_update(-1);
+        setUsersCards(prev => {
+            const new_cards : UserCards = {
+                'me': []
+            };
+
+            for(let k in prev){
+                if(k === 'me'){
+                    continue
+                }
+
+                new_cards[k] = 0;
+            }
+
+            return new_cards
+        })
+        set_bito_count(0);
+        set_new_cards([]);
+        set_enemy_cards_delta({});
         set_game_players({victim: -1, walking: -1, throwing_players: []});
     }
 
@@ -1037,6 +1064,10 @@ export default function GamePage(){
 
     function on_room_redirect(_room_id: number, _key: string){
 
+        set_rewards([]);
+        set_messages([]);
+        set_timers_update(prev => prev + 1);
+        setTimers([]);
         setRoomKey(_key);
         setRoomId(String(_room_id));
     }

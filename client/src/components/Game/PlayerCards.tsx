@@ -92,6 +92,7 @@ export default function PlayerCards(props: Props) {
 
         if(!can_throw_card) {
             console.log('ошибка ошбика tryThrow')
+            localStorage.removeItem('drag_card');
             return
         }
 
@@ -120,7 +121,7 @@ export default function PlayerCards(props: Props) {
         const gameScreen = document.getElementById('game-screen')!;
         const {left, top} = gameScreen.getBoundingClientRect();
 
-        console.log(drag_x, drag_y, card_rect_x, card_rect_y)
+        // console.log(drag_x, drag_y, card_rect_x, card_rect_y)
 
         document.body.style.setProperty('--drag-x', `${drag_x - (card_rect_x - left)}px`)
         document.body.style.setProperty('--drag-y', `${drag_y - (card_rect_y - top)}px`)
@@ -134,7 +135,7 @@ export default function PlayerCards(props: Props) {
         
         if(card === -1) {
             if(is_victim) return
-            console.log(drag_card)
+            // console.log(drag_card)
             props.throw_new_card(drag_card);
             localStorage.removeItem('card');
             localStorage.removeItem('drag_index');
@@ -383,7 +384,7 @@ export default function PlayerCards(props: Props) {
                                     offset_taken = `${(0.5 - index / (props.cards!.length)) * box_size}px`
                                 }
 
-                                console.table({offset_taken, taken: card.taken})
+                                // console.table({offset_taken, taken: card.taken})
 
                                 // _style = {
                                 //     '--taken-from-x': `${card.taken.x}px`,
