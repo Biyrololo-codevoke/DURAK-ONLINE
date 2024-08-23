@@ -1,7 +1,7 @@
 from enum import Enum
 
 
-class Room:
+class RoomTypes:
     class CardsCount(Enum):
         SMALL = 24
         MEDIUM = 36

@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from websockets import WebSocketServerProtocol as WS
 
-from models import RoomModel, UserModel, Exceptions
+from models import RoomModel, UserModel, RoomTypes, Exceptions
 from websocket_logger import logger
 
 from .game import Game, Player, Card
@@ -476,10 +476,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 game.update_pl_hst(player)
                 # remove card and send event
                 player.deck.remove_card(card)
+                
+                new_victim_player = game.players_deque[-2]
                 send_to_room(room_id, {
                     "event": "transfer_card",
                     "card": payload["card"],
-                    "player_id": player_id
+                    "player_id": player_id,
+                    "target_id": new_victim_player.id
                 }, socket_id)
                 
                 s_game = game.serialize()
@@ -612,12 +615,13 @@ def make_new_room(room_id: int, game: Game):
     del config["throw_mode"]
     
     new_db_room = RoomModel(**config)
+    new_db_room.game_state = RoomTypes.RoomState.OPEN 
     new_db_room.save()
     room_list.add_room(new_db_room.id, room_count=0)
     
     for player_id in players_id:
         password = new_db_room.password
-        status, key = room_list.join_to_room(new_db_room.id, player_id, password)
+        _, key = room_list.join_to_room(new_db_room.id, player_id, password)
         send_to_player(player_id, {
             "event": "room_redirect",
             "key": key,
@@ -626,7 +630,9 @@ def make_new_room(room_id: int, game: Game):
 
 
 async def wait_before_new_game():
+    logger.info("wait before new game: " + str(int(time.time())))
     await asyncio.sleep(10)
+    logger.info("time after waiting: " + str(int(time.time())))
 
 
 room_list = RoomListObserver()
