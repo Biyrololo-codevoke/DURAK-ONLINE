@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import './Main.css';
 import axios from 'axios';
-import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage } from 'pages';
+import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage, FriendsPage, SearchFriendPage } from 'pages';
 import {SettingsPage, ConfirmEmailPage} from 'pages';
 import { GamePage, ConnectingPage } from 'pages';
 import { GameFiltersPage, PrivateGamesPage } from 'pages';
@@ -176,6 +176,16 @@ function App() {
           <Route path="/confirm-email" element={
             <Protected>
               <ConfirmEmailPage/>
+            </Protected>
+          } />
+          <Route path="/friends" element={
+            <Protected>
+              <FriendsPage />
+            </Protected>
+          } />
+          <Route path="/search-friends" element={
+            <Protected>
+              <SearchFriendPage />
             </Protected>
           } />
         </Routes>

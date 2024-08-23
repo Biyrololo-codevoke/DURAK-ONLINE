@@ -115,7 +115,7 @@
 }
 
 .enemy-cards .enemy-card > img.new_card{
-    animation: enemy_card_distribution 1.5s ease-out forwards;
+    animation: enemy_card_distribution 0.5s linear forwards;
 }
 
 @keyframes enemy_card_distribution{
@@ -349,15 +349,11 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #player-cards .player-card.new_card{
-    animation: card_anim 2s forwards !important;
+    animation: card_anim 0.6s forwards !important;
 }
 
 @keyframes card_anim{
     0%{
-        z-index: 0;
-        width: 0px;
-    }
-    50%{
         width: 0px;
     }
     100%{
@@ -366,7 +362,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #player-cards .player-card.new_card > img{
-    animation: player_recieve_card 1.5s ease-out forwards;
+    animation: player_recieve_card 0.5s ease-out forwards;
 }
 
 @keyframes player_recieve_card {
@@ -379,12 +375,6 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     }
     10%{
         scale: 0.5;
-        opacity: 1;
-    }
-    60%{
-        scale: 1;
-        top: 0;
-        left: calc(var(--offset) - 120px);
         opacity: 1;
     }
     100%{
@@ -412,10 +402,10 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 }
 
 #player-cards .player-card.taken-player-card{
-    animation: card_anim 1s forwards;
+    animation: card_anim 0.5s linear forwards;
 }
 
-#player-cards .player-card.taken-player-card > img{
+/* #player-cards .player-card.taken-player-card > img{
     animation: player_take_card 1.5s ease-out forwards !important;
 }
 
@@ -427,15 +417,15 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
         left: calc(var(--offset-x) - 120px);
         opacity: 1;
     }
-    70% {
-        z-index: inherit;
+    50% {
+        scale: 1;
     }
     100%{
         scale: 1;
         left: 0;
         opacity: 1;
     }
-}
+} */
 
 #mobile-view #player-cards{
     height: 130px;
@@ -573,13 +563,13 @@ body:not(#mobile-view) #trump__suit {
     position: absolute;
     top: 0;
     left: 0;
-    transition: rotate 0.5s ease-out;
+    transition: rotate 0.3s ease-out;
 }
 
 #game-desk .game-desk-card .dropped-now{
     left: var(--new-x);
     top: var(--new-y);
-    animation: putting-card 0.5s ease-out forwards;
+    animation: putting-card 0.3s ease-out forwards;
     --scale-anim: 2.2;
 }
 
@@ -609,7 +599,7 @@ body:not(#mobile-view) #trump__suit {
 #game-desk .game-desk-card .game-desk-card-upper.dropped-now{
     left: var(--drag-x);
     top: var(--drag-y);
-    animation: putting-card-upper 0.5s ease-out forwards;
+    animation: putting-card-upper 0.3s ease-out forwards;
 }
 
 #game-desk .game-desk-card .game-desk-card-upper.from-enemy{
@@ -863,7 +853,7 @@ body:not(#mobile-view) #trump__suit {
     -moz-tap-highlight-color: transparent; /* Для Firefox */
     -ms-tap-highlight-color: transparent; /* Для IE */
     tap-highlight-color: transparent; /* Общий вариант */
-    animation: bito-putting 1s ease;
+    animation: bito-putting 0.5s ease;
 }
 
 @keyframes bito-putting{
@@ -899,7 +889,7 @@ body:not(#mobile-view) #trump__suit {
 
 .to-bito{
     position: absolute !important;
-    animation: board-to-bito 1s linear forwards !important;
+    animation: board-to-bito 0.5s linear forwards !important;
 }   
 
 @keyframes board-to-bito{
@@ -916,7 +906,7 @@ body:not(#mobile-view) #trump__suit {
 
 .taken-card {
     position: absolute !important;
-    animation: taking-cards 0.7s linear forwards !important;
+    animation: taking-cards 0.4s linear forwards !important;
 }
 
 @keyframes taking-cards{
@@ -933,7 +923,7 @@ body:not(#mobile-view) #trump__suit {
 
 .taken-card-player{
     position: absolute !important;
-    animation: taking-cards-player 0.7s linear forwards !important;
+    animation: taking-cards-player 0.4s linear forwards !important;
 }
 
 @keyframes taking-cards-player{

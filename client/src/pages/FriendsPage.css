@@ -1,0 +1,56 @@
+#friends-title {
+    width: 100%;
+    background: white;
+    padding: 13px 0;
+    position: relative;
+}
+
+#friends-list-loading{
+    margin-top: 30px;
+}
+
+.friend-item{
+    height: 80px !important;
+    padding: 10px 15px !important;
+    display: flex;
+    align-items: flex-start !important;
+    gap: 10px
+}
+
+.friend-avatar{
+    width: 50px;
+    aspect-ratio: 1;
+    border: 3px solid rgb(212, 212, 212);
+    border-radius: 10px;
+}
+
+.friend-name{
+    color: white !important;
+    flex-grow: 1;
+}
+
+.friend-close-button{
+    background: rgba(255, 255, 255, 0.15) !important;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 10px !important;
+}
+
+.friend-close-container{
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
+
+.search-friend{
+    position: absolute !important;
+    right: 20px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    z-index: 1;
+    color: red !important;
+}
+
+#friends-search-container{
+    width: 100%;
+    box-sizing: border-box;
+    padding: 40px 60px 30px 0;
+}

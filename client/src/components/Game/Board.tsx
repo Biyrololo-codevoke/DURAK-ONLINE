@@ -1,7 +1,7 @@
 import { GameBoardContext, GamePlayersContext } from "contexts/game"
 import { getCardImage } from "features/GameFeatures";
 import { CSSProperties, useContext, useEffect, useMemo, useState } from "react"
-import { CardType } from "types/GameTypes";
+import { CardType, UserCards } from "types/GameTypes";
 import RefreshIcon from '@mui/icons-material/Refresh';
 import can_i_beat from "features/GameFeatures/CardsInteraction/CanIBeat";
 
@@ -34,6 +34,8 @@ export default function GameBoard({is_transfering}: Props) {
 
     const _users_id = parseInt(localStorage.getItem('user_id') || '-1');
 
+    const _users_cards : UserCards = JSON.parse(localStorage.getItem('_users_cards') || '{}');
+
     const {cards, setCards} = board;
 
     const show_transfer = useMemo(()=>{
@@ -53,11 +55,14 @@ export default function GameBoard({is_transfering}: Props) {
             }
         }
 
+        let victim_cards_count = _users_cards[game_players.victim] || 0;
+
         return is_transfering && transfer_flag &&
         game_players.victim === _users_id &&
         cards.length > 0 && cards.length < 4 &&
-        cards.find((c) => c.upper !== undefined) === undefined;
-    }, [cards, game_players, is_transfering, _users_id, board])
+        cards.find((c) => c.upper !== undefined) === undefined &&
+        victim_cards_count > cards.length;
+    }, [cards, game_players, is_transfering, _users_id, board, _users_cards])
 
     const [visual_show_transfer, set_visual_show_transfer] = useState(false);
 
