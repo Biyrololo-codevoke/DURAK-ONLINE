@@ -50,8 +50,9 @@ export default function UserAvatar(props: Props) {
 
     function on_time_out(){
         // TODO
-        console.log('time out')
+        console.log(`time out for ${user_id}`)
         if(props.on_time_out && show_action && gameState === 2){
+            console.log(`doing props.on_time_out`)
             props.on_time_out();
         }
     }
@@ -121,6 +122,11 @@ export default function UserAvatar(props: Props) {
                     setUsername(prev => data.user.username || prev);
 
                     setPhoto(prev => data.user.image_id || prev)
+                }
+            )
+            .catch(
+                err=>{
+                    console.log(err)
                 }
             )
 
