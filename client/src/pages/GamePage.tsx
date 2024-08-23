@@ -14,6 +14,7 @@ import {handle_event} from 'components/Game/handleEvents'
 import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS, MESSAGES_CONFIGS } from "constants/GameParams";
 import { convert_card } from "features/GameFeatures";
 import EndGameUI from "components/Game/EndGameUI";
+import {useNavigate} from 'react-router-dom'
 
 type UserIdType = number | 'me'
 
@@ -29,6 +30,8 @@ type EnemyCardDelta = {
 
 export default function GamePage(){
 
+    const navigate = useNavigate();
+
     // set className in-game
     useEffect(()=>{
         window.scrollTo(0, 0);
@@ -36,6 +39,20 @@ export default function GamePage(){
 
         return ()=>{
             document.body.classList.remove('in-game');
+        }
+    }, []);
+
+    useEffect(()=>{
+        function handle_quit_game(e: KeyboardEvent){
+            if(e.key === 'Escape'){
+                navigate('/');
+            }
+        }
+
+        window.addEventListener('keyup', handle_quit_game);
+
+        return ()=>{
+            window.removeEventListener('keyup', handle_quit_game);
         }
     }, []);
 
@@ -316,7 +333,10 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck?: number){
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck?: number, target?: number){
+
+        localStorage.setItem('transfer_target', String(target));
+
         if(decKeck !== undefined){
             setRoom(prev => {
                 return {
@@ -337,30 +357,59 @@ export default function GamePage(){
             localStorage.setItem('_game_board', JSON.stringify([]));
         
         setTimeout(() => {
-            setTimers(
-                [
-                    {
-                        id: walking,
-                        color: 'red',
-                        from_start: true,
-                        is_active: true
-                    },
-                    {
-                        id: victim,
-                        color: 'green',
-                        from_start: true,
-                        is_active: false
-                    },
-                    ...throwing_players.map((id) => {
-                        return {
-                            id,
-                            color: 'red' as 'red' | 'green',
+
+            if(type === 'basic'){
+                setTimers(
+                    [
+                        {
+                            id: walking,
+                            color: 'red',
+                            from_start: true,
+                            is_active: true
+                        },
+                        {
+                            id: victim,
+                            color: 'green',
                             from_start: true,
                             is_active: false
-                        }
-                    })
-                ]
-            )
+                        },
+                        ...throwing_players.map((id) => {
+                            return {
+                                id,
+                                color: 'red' as 'red' | 'green',
+                                from_start: true,
+                                is_active: false
+                            }
+                        })
+                    ]
+                )
+            } else {
+                setTimers(
+                    [
+                        {
+                            id: walking,
+                            color: 'red',
+                            from_start: true,
+                            is_active: false
+                        },
+                        {
+                            id: victim,
+                            color: 'green',
+                            from_start: true,
+                            is_active: true
+                        },
+                        ...throwing_players.map((id) => {
+                            return {
+                                id,
+                                color: 'red' as 'red' | 'green',
+                                from_start: true,
+                                is_active: false
+                            }
+                        })
+                    ]
+                )
+            }
+
     
             set_messages([]);
     
@@ -424,7 +473,7 @@ export default function GamePage(){
                                 [take_user_id]: prev[take_user_id] + taking_cards.length
                             }
                         })
-                    }, 700)
+                    }, 400)
                 }
                 else {
                     const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
@@ -445,7 +494,7 @@ export default function GamePage(){
                 }
                 setTimeout(()=>{
                     setGameBoard([]);
-                }, 700)
+                }, 400)
     
             } else {
     
@@ -470,7 +519,7 @@ export default function GamePage(){
         
                 setTimeout(()=>{
                     setGameBoard([]);
-                }, 1100)
+                }, 500)
             }
             localStorage.setItem('_game_board', JSON.stringify([]));
         }
@@ -757,7 +806,7 @@ export default function GamePage(){
                     [player_id]: prev[player_id] + cards_count
                 }
             })   
-        }, 1000)
+        }, 400)
     }
 
     function on_game_over(looser_id: number){

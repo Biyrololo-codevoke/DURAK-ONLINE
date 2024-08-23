@@ -99,6 +99,7 @@ type NextMove = {
     throwing_players: number[];
     type: 'basic' | 'transfer';
     decKeck?: number;
+    target: number
 }
 
 type PlaceCard = {
