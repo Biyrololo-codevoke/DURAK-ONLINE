@@ -833,6 +833,8 @@ export default function GamePage(){
             ]
         })
 
+        setGameBoard([]);
+
         setTimeout(end_game, 5000)
     }
 
