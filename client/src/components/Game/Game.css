@@ -398,7 +398,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 } */
 
 #player-cards .player-card.taken-player-card > img{
-    animation: none !important;
+    animation: player_take_card 0.3s ease-out forwards !important;
 }
 
 #player-cards .player-card.taken-player-card{
@@ -408,24 +408,21 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
 /* #player-cards .player-card.taken-player-card > img{
     animation: player_take_card 1.5s ease-out forwards !important;
 }
+*/
 
 @keyframes player_take_card {
     0%{
-        z-index: 0;
         scale: 1;
         top: 0;
         left: calc(var(--offset-x) - 120px);
         opacity: 1;
-    }
-    50% {
-        scale: 1;
     }
     100%{
         scale: 1;
         left: 0;
         opacity: 1;
     }
-} */
+}
 
 #mobile-view #player-cards{
     height: 130px;

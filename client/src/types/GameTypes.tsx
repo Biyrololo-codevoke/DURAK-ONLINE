@@ -97,7 +97,7 @@ type NextMove = {
     victim_player: number;
     walking_player: number;
     throwing_players: number[];
-    type: 'basic' | 'transfer';
+    type?: 'basic' | 'transfer';
     decKeck?: number;
     target: number
 }
