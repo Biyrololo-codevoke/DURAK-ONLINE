@@ -182,10 +182,15 @@ type RoomRedirect = {
     key: string
 }
 
+type Leave = {
+    event: 'leave';
+}
+
 type GameEvent = PlayerConnected | MakeStart | Accept | StartGame |
     InitGame | InitDeck | NextMove | (PlaceCard & {player_id: number}) | CardBeat |
     (Bito & PlayerId) | (Take & PlayerId) | (Pass & PlayerId) | ThrowCard |
-    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver | (Transfer & PlayerId) | RoomRedirect
+    Surprise | GiveCards | GetCards | PlayerTaked | PlayerWin | GameOver | (Transfer & PlayerId) | RoomRedirect | 
+    (Leave & PlayerId)
 
 export type {GameEvent}
 

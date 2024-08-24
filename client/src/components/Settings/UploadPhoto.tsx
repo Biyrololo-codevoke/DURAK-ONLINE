@@ -75,7 +75,13 @@ export default function UploadPhoto(){
             )
             .catch(
                 err => {
-                    toast.error('Не удалось загрузить фото');
+
+                    if(err.response?.status === 500){
+                        toast.error('Проблемы с обработкой данных, повторите запрос');
+                    } else {
+                        toast.error('Не удалось загрузить фото');
+                    }
+
                     console.log(err);
                 }
             )

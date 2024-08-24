@@ -86,7 +86,7 @@ export default function UserData() {
                             error_message = 'Пользователь с такой почтой уже существует';
                             break;
                         case 500:
-                            error_message = 'Серверная ошибка';
+                            error_message = 'Проблемы с обработкой данных, повторите запрос';
                             break;
                     }
                 }

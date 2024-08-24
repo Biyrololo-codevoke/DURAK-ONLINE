@@ -3,6 +3,7 @@ import { Room } from "types/Room";
 
 import {getRoomInfo} from "constants/ApiUrls";
 import { CreateRoomRequestType } from "types/ApiTypes";
+import { toast } from "react-toastify";
 
 export function handleAddRoom(room_id : number, setter : React.Dispatch<React.SetStateAction<Room[]>>, are_open_games = true) {
     const url = getRoomInfo(room_id);
@@ -51,6 +52,10 @@ export function handleAddRoom(room_id : number, setter : React.Dispatch<React.Se
         })
         .catch((error) => {
             console.error(error);
+
+            if(error.response?.status === 500){
+                toast.error('Проблемы с обработкой данных, повторите запрос')
+            }
         });
 }
 
