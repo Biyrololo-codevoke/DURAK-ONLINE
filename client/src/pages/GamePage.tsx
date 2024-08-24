@@ -15,6 +15,8 @@ import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS, MESSAGES_CONFIGS } from 
 import { convert_card } from "features/GameFeatures";
 import EndGameUI from "components/Game/EndGameUI";
 import {useNavigate} from 'react-router-dom'
+import { IconButton } from "@mui/material";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 type UserIdType = number | 'me'
 
@@ -45,7 +47,7 @@ export default function GamePage(){
     useEffect(()=>{
         function handle_quit_game(e: KeyboardEvent){
             if(e.key === 'Escape'){
-                navigate('/');
+                handle_leave_game();
             }
         }
 
@@ -89,6 +91,8 @@ export default function GamePage(){
     const [users_ids, setUsersIds] = useState<UserIdType[]>(
         ['me']
     );
+
+    const [left_users_ids, setLeftUsersIds] = useState<number[]>([]);
 
     // REWARDS in end game
 
@@ -228,9 +232,15 @@ export default function GamePage(){
                 on_player_win,
                 on_game_over,
                 on_transfer,
-                on_room_redirect
+                on_room_redirect,
+                on_player_leave,
+                on_player_reconnect
             }
         )
+    }
+
+    function on_player_reconnect(player_id: number){
+        setLeftUsersIds(prev => prev.filter(id => id !== player_id));
     }
 
     // on player accept start
@@ -1360,11 +1370,34 @@ export default function GamePage(){
         )
     }
 
+    function handle_leave_game(){
+
+        console.log('выхожу из игры')
+
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return;
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: 'leave'
+                }
+            )
+        )
+
+        navigate('/');
+    }
+
+    function on_player_leave(player_id: number){
+        setLeftUsersIds(prev => [...prev, player_id]);
+    }
+
     return (
         <main id="game-page">
             <EndGameUI rewards={rewards}/>
             <TimerContext.Provider
-            value={{timer_update: timers_update, timers}}
+            value={{timer_update: timers_update, timers, left_players: left_users_ids}}
             >
                 <GameMessagesContext.Provider value={messages}>
                     <AcceptedContext.Provider
@@ -1379,6 +1412,11 @@ export default function GamePage(){
                                 <GamePlayersContext.Provider
                                 value={game_players}
                                 >
+                                    <div id="leave_game_btn__container">
+                                        <IconButton onClick={handle_leave_game} style={{background: 'rgba(255, 255, 255, 0.08)'}}>
+                                            <ExitToAppIcon style={{color: 'white'}} fontSize="large"/>
+                                        </IconButton>
+                                    </div>
                                     <GameInfo />
                                     <GameScreen
                                     game_board={game_board}
