@@ -482,7 +482,7 @@ def route_game_events(payload: dict, room_id: int, key: str):
                     "event": "transfer_card",
                     "card": payload["card"],
                     "player_id": player_id,
-                    "target_id": new_victim_player.id
+                    "target": new_victim_player.id
                 }, socket_id)
                 
                 s_game = game.serialize()

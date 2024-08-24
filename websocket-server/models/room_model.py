@@ -5,7 +5,7 @@ from sqlalchemy import Column, Integer, String, Boolean, Enum, ARRAY
 from sqlalchemy.orm.exc import NoResultFound
 
 from .user_model import UserModel
-from .enum_types import Room
+from .enum_types import RoomTypes
 from .db import retry_on_exception, BaseModel, session
 
 
@@ -23,12 +23,12 @@ class RoomModel(BaseModel):
     id = Column(Integer, primary_key=True)
     reward = Column(Integer, default=100)
     _players_count = Column(Integer, default=2)
-    _cards_count = Column(Enum(Room.CardsCount), default=Room.CardsCount.SMALL)
-    _speed = Column(Enum(Room.Speed), default=Room.Speed.MEDIUM)
-    _game_type = Column(Enum(Room.GameType), default=Room.GameType.THROW)
-    _throw_type = Column(Enum(Room.ThrowType), default=Room.ThrowType.ALL)
-    _win_type = Column(Enum(Room.WinType), default=Room.WinType.CLASSIC)
-    _game_state = Column(Enum(Room.RoomState), default=Room.RoomState, nullable=True)
+    _cards_count = Column(Enum(RoomTypes.CardsCount), default=RoomTypes.CardsCount.SMALL)
+    _speed = Column(Enum(RoomTypes.Speed), default=RoomTypes.Speed.MEDIUM)
+    _game_type = Column(Enum(RoomTypes.GameType), default=RoomTypes.GameType.THROW)
+    _throw_type = Column(Enum(RoomTypes.ThrowType), default=RoomTypes.ThrowType.ALL)
+    _win_type = Column(Enum(RoomTypes.WinType), default=RoomTypes.WinType.CLASSIC)
+    _game_state = Column(Enum(RoomTypes.RoomState), default=RoomTypes.RoomState, nullable=True)
     private = Column(Boolean, default=False)
     password = Column(String, nullable=True)
     game_obj = Column(String, nullable=True)
@@ -38,7 +38,7 @@ class RoomModel(BaseModel):
     def current_list(cls) -> dict[int, list[int]]:
         data = dict()
 
-        for room in session.query(cls).filter_by(game_state=Room.RoomState.OPEN).all():
+        for room in session.query(cls).filter_by(game_state=RoomTypes.RoomState.OPEN).all():
             data[room.id] = room.user_ids
 
         return data
@@ -95,32 +95,32 @@ class RoomModel(BaseModel):
         return self._cards_count.value
 
     @cards_count.setter
-    def cards_count(self, value: Room.CardsCount) -> None:
-        self._cards_count = Room.CardsCount(value)
+    def cards_count(self, value: RoomTypes.CardsCount) -> None:
+        self._cards_count = RoomTypes.CardsCount(value)
 
     @property
     def speed(self) -> int:
         return self._speed.value
 
     @speed.setter
-    def speed(self, value: Room.Speed) -> None:
-        self._speed = Room.Speed(value)
+    def speed(self, value: RoomTypes.Speed) -> None:
+        self._speed = RoomTypes.Speed(value)
 
     @property
     def game_type(self) -> str:
         return self._game_type.value
 
     @game_type.setter
-    def game_type(self, value: Room.GameType) -> None:
-        self._game_type = Room.GameType(value)
+    def game_type(self, value: RoomTypes.GameType) -> None:
+        self._game_type = RoomTypes.GameType(value)
         
     @property
     def game_state(self) -> str:
         return self._game_state.value
     
     @game_state.setter
-    def game_state(self, value: Room.RoomState) -> None:
-        self._game_state = Room.RoomState(value)
+    def game_state(self, value: RoomTypes.RoomState) -> None:
+        self._game_state = RoomTypes.RoomState(value)
         self.save()
 
     @property
@@ -128,13 +128,13 @@ class RoomModel(BaseModel):
         return self._throw_type.value
 
     @throw_type.setter
-    def throw_type(self, value: Room.ThrowType) -> None:
-        self._throw_type = Room.ThrowType(value)
+    def throw_type(self, value: RoomTypes.ThrowType) -> None:
+        self._throw_type = RoomTypes.ThrowType(value)
 
     @property
     def win_type(self) -> str:
         return self._win_type.value
 
     @win_type.setter
-    def win_type(self, value: Room.WinType) -> None:
-        self._win_type = Room.WinType(value)
+    def win_type(self, value: RoomTypes.WinType) -> None:
+        self._win_type = RoomTypes.WinType(value)
