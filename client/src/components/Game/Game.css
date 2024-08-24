@@ -801,6 +801,10 @@ body:not(#mobile-view) #trump__suit {
     z-index: 10;
 }
 
+.game_user_message__bottom{
+    bottom: -20px !important;
+}
+
 .game__user_message__shadow{
     background: var(--game_msg_bg, white);
     box-shadow: rgba(0, 0, 0, 0.05) 0px 6px 24px 0px, rgba(0, 0, 0, 0.08) 0px 0px 0px 1px;
@@ -997,4 +1001,12 @@ body:not(#mobile-view) #trump__suit {
         left: var(--reward-x);
         transform: translate(0, 0);
     }
+}
+
+/* leave game btn */
+
+#leave_game_btn__container{
+    position: absolute;
+    top: 10px;
+    left: 10px;
 }

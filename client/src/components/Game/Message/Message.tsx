@@ -1,4 +1,5 @@
 import Accept from "./Accept";
+import Disconnect from "./Disconnect";
 import TextMessage from "./TextMessage";
 
 type Props = {
@@ -7,6 +8,8 @@ type Props = {
     color: 'white' | 'yellow'
 } | {
     type: 'accept'
+} | {
+    type: 'disconnect'
 }
 
 export default function Message(props: Props){
@@ -27,6 +30,12 @@ export default function Message(props: Props){
             <>
                 <Accept />
             </>
+        )
+    }
+
+    if(props.type === 'disconnect'){
+        return (
+            <Disconnect />
         )
     }
 

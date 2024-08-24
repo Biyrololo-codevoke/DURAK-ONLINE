@@ -96,7 +96,7 @@ export default function LoginPage(){
                             error_message = 'Пользователь не найден';
                             break;
                         case 500:
-                            error_message = 'Ошибка сервера';
+                            error_message = 'Проблемы с обработкой данных, повторите запрос';
                             break;
                     }
                 }

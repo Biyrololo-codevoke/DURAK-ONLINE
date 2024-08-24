@@ -37,6 +37,16 @@ export default function UserAvatar(props: Props) {
     const gameState = useContext(GameStateContext);
 
     const timers = useContext(TimerContext);
+
+    const is_disconnect = timers.left_players.includes(
+        (
+            ()=>{
+                if(user_id === undefined) return -1;
+
+                return Number(user_id);
+            }
+        )()
+    );
     
     const show_action = timers.timers.find((e) => e.id === user_id);
 
@@ -169,6 +179,12 @@ export default function UserAvatar(props: Props) {
                 type="text"
                 color={message.color}
                 message={message.text}
+                />
+            }
+            {
+                is_disconnect &&
+                <Message
+                type="disconnect"
                 />
             }
             <img 
