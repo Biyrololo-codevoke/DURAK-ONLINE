@@ -55,7 +55,7 @@ services:
          max-file: "5"
 
   postgres:
-    image: 'postgres:latest'
+    image: 'postgres:15'
     ports:
       - '5432:5432'
     environment:
