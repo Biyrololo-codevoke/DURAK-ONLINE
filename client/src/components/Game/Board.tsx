@@ -39,6 +39,9 @@ export default function GameBoard({is_transfering}: Props) {
     const {cards, setCards} = board;
 
     const show_transfer = useMemo(()=>{
+
+        const transfer_target = localStorage.getItem('transfer_target');
+
         let transfer_flag = true;
 
         for(let card of cards){
@@ -55,7 +58,11 @@ export default function GameBoard({is_transfering}: Props) {
             }
         }
 
-        let victim_cards_count = _users_cards[game_players.victim] || 0;
+        let victim_cards_count = _users_cards[parseInt(transfer_target || '-1')];
+
+        if(victim_cards_count === undefined){
+            victim_cards_count = 90;
+        }
 
         return is_transfering && transfer_flag &&
         game_players.victim === _users_id &&

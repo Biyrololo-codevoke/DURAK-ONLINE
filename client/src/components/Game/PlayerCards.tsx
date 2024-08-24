@@ -399,7 +399,7 @@ export default function PlayerCards(props: Props) {
                                         ...calculateCardStyles(index, props.cards!.length),
                                         opacity: draggin_card === index ? 0.3 : 1,
                                         '--offset': offset,
-                                        animationDelay: `${(props.cards!.length - 1 - index)*0.3}s`,
+                                        animationDelay: `${(props.cards!.length - 1 - index)*0.1}s`,
                                         ..._style
                                     } as CSSProperties
                                 }

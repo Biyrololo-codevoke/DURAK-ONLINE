@@ -76,6 +76,8 @@ export default function GamePage(){
         }
     )
 
+    const [room_count_cards, setRoomCountCards] = useState<number>(24);
+
     const [bito_count, set_bito_count] = useState<number>(0);
 
     /**
@@ -139,6 +141,8 @@ export default function GamePage(){
         .then(
             res=>{
                 setRoom(res.data.room);
+
+                setRoomCountCards(res.data.room.cards_count);
 
                 const data : RoomResponseType = res.data.room;
 
@@ -333,7 +337,7 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck?: number, target?: number){
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, target?: number){
 
         localStorage.setItem('transfer_target', String(target));
 
@@ -358,7 +362,7 @@ export default function GamePage(){
         
         setTimeout(() => {
 
-            if(type === 'basic'){
+            if(type === 'basic' || type === undefined){
                 setTimers(
                     [
                         {
@@ -829,6 +833,8 @@ export default function GamePage(){
             ]
         })
 
+        setGameBoard([]);
+
         setTimeout(end_game, 5000)
     }
 
@@ -1127,6 +1133,13 @@ export default function GamePage(){
         setTimers([]);
         setRoomKey(_key);
         setRoomId(String(_room_id));
+        setRoom(prev => {
+            return {
+                ...prev,
+                cards_count: room_count_cards
+            }
+        })
+        set_accepted_start([]);
     }
 
     // player throw card
@@ -1155,12 +1168,21 @@ export default function GamePage(){
 
         const _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
+        let is_beaten_all = true;
+
+        for(let card of _game_board){
+            if(!card.upper){
+                is_beaten_all = false;
+                break
+            }
+        }
+
         setTimers(prev => {
             const new_timers : Timer[] = [];
 
             for(let id of _users_ids){
 
-                if(_game_board[data.slot - 1].upper){
+                if(is_beaten_all){
 
                     if(id === _game_players.victim){
                         new_timers.push({
