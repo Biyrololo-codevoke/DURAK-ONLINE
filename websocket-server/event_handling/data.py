@@ -227,11 +227,14 @@ class RoomListObserver:
             }
             send_to_player(player.id, payload)
             
+        players_queue = game.players_deque
+            
         send_to_room(room_id, {
             "event": "next",
             "walking_player": game.attacker_player.id,
             "victim_player": game.victim_player.id,
-            "throwing_players": [player.id for player in game.throwing_players]
+            "throwing_players": [player.id for player in game.throwing_players],
+            "players_queue": [player.id for player in list(players_queue)]
         })
 
     def update_room(self, room_id: int, room_count: int):
@@ -474,15 +477,13 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 # update move state
                 game.throw_players_in_time_id.append(player_id)
                 game.update_pl_hst(player)
+                
                 # remove card and send event
                 player.deck.remove_card(card)
-                
-                new_victim_player = game.players_deque[-2]
                 send_to_room(room_id, {
                     "event": "transfer_card",
                     "card": payload["card"],
                     "player_id": player_id,
-                    "target": new_victim_player.id
                 }, socket_id)
                 
                 s_game = game.serialize()

@@ -6,14 +6,14 @@ from sqlalchemy.orm.exc import NoResultFound
 
 from .user_model import UserModel
 from .enum_types import RoomTypes
-from .db import retry_on_exception, BaseModel, session
+from .db import retry_on_exception, BaseModel, session, CustomDBException
 
 
 class RoomExceptions:
-    class NotFound(Exception):
+    class NotFound(CustomDBException):
         pass
 
-    class IsFull(Exception):
+    class IsFull(CustomDBException):
         pass
 
 
@@ -35,6 +35,7 @@ class RoomModel(BaseModel):
     _user_ids = Column(ARRAY(Integer), default=[])
     
     @classmethod
+    @retry_on_exception(max_retries=2, delay=0.01)
     def current_list(cls) -> dict[int, list[int]]:
         data = dict()
 
@@ -44,12 +45,14 @@ class RoomModel(BaseModel):
         return data
 
     @classmethod
+    @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_id(cls, room_id: int) -> Type[RoomModel]:
         try:
             return session.query(cls).filter_by(id=room_id).one()
         except NoResultFound as e:
             raise RoomExceptions.NotFound from e
 
+    @retry_on_exception(max_retries=3, delay=0.05)
     def add_player(self, user_id: int) -> None:
         if self.user_ids is None:
             self.user_ids = []
@@ -61,9 +64,11 @@ class RoomModel(BaseModel):
         self.user_ids = new_user_ids
         self.save()
 
+    @retry_on_exception(max_retries=1, delay=0.01)
     def check_password(self, password: str) -> bool:
         return self.password == password
 
+    @retry_on_exception(max_retries=3, delay=0.05)
     def check_available(self) -> bool:
         return len(self.user_ids) < self._players_count
 
@@ -72,6 +77,7 @@ class RoomModel(BaseModel):
         return self._user_ids
 
     @user_ids.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def user_ids(self, value: list[int]) -> None:
         for user_id in value:
             user = UserModel.get_by_id(user_id)
@@ -85,6 +91,7 @@ class RoomModel(BaseModel):
         return self._players_count
 
     @players_count.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def players_count(self, value: int) -> None:
         if not (2 <= value <= 6):
             raise ValueError("players count must be in range [2, 6]")
@@ -95,6 +102,7 @@ class RoomModel(BaseModel):
         return self._cards_count.value
 
     @cards_count.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def cards_count(self, value: RoomTypes.CardsCount) -> None:
         self._cards_count = RoomTypes.CardsCount(value)
 
@@ -103,6 +111,7 @@ class RoomModel(BaseModel):
         return self._speed.value
 
     @speed.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def speed(self, value: RoomTypes.Speed) -> None:
         self._speed = RoomTypes.Speed(value)
 
@@ -111,6 +120,7 @@ class RoomModel(BaseModel):
         return self._game_type.value
 
     @game_type.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def game_type(self, value: RoomTypes.GameType) -> None:
         self._game_type = RoomTypes.GameType(value)
         
@@ -119,6 +129,7 @@ class RoomModel(BaseModel):
         return self._game_state.value
     
     @game_state.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def game_state(self, value: RoomTypes.RoomState) -> None:
         self._game_state = RoomTypes.RoomState(value)
         self.save()
@@ -128,6 +139,7 @@ class RoomModel(BaseModel):
         return self._throw_type.value
 
     @throw_type.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def throw_type(self, value: RoomTypes.ThrowType) -> None:
         self._throw_type = RoomTypes.ThrowType(value)
 
@@ -136,5 +148,6 @@ class RoomModel(BaseModel):
         return self._win_type.value
 
     @win_type.setter
+    @retry_on_exception(max_retries=1, delay=0.01)
     def win_type(self, value: RoomTypes.WinType) -> None:
         self._win_type = RoomTypes.WinType(value)

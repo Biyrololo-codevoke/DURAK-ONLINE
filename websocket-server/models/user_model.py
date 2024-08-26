@@ -2,20 +2,20 @@ from __future__ import annotations
 
 from typing import Type
 
-from sqlalchemy import Column, Integer, String, Boolean, Enum, ARRAY
+from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.exc import NoResultFound
 
-from .db import Base, session
+from .db import Base, session, retry_on_exception, CustomDBException
 
 
 class UserExceptions:
-    class AlreadyExists(Exception):
+    class AlreadyExists(CustomDBException):
         pass
 
-    class NotFound(Exception):
+    class NotFound(CustomDBException):
         pass
 
-    class IncorrectPassword(Exception):
+    class IncorrectPassword(CustomDBException):
         pass
 
 
@@ -31,6 +31,7 @@ class UserModel(Base):  # type: ignore
     image_id = Column(String, default=None, nullable=True)
 
     @classmethod
+    @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_id(cls, user_id: int) -> Type[UserModel]:
         try:
             return session.query(cls).filter_by(id=user_id).one()
@@ -38,5 +39,6 @@ class UserModel(Base):  # type: ignore
             raise UserExceptions.NotFound
 
     @property
+    @retry_on_exception(max_retries=1, delay=0.01)
     def username(self) -> str:
         return self._username
