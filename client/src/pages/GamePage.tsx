@@ -544,9 +544,10 @@ export default function GamePage(){
                 y: _rect.y - deck_rect.y
             }
             setGameBoard(prev => {
-                let new_board = [...prev, {
+                let new_board = [...prev];
+                new_board[slot] = {
                     lower: _card,
-                }];
+                };
 
                 console.warn('NEW GAME BOARD ON_PLACE_CARD ', new_board);
 
@@ -657,6 +658,8 @@ export default function GamePage(){
                 return ts;
             })
         }
+
+        set_timers_update(prev => prev + 1);
     }
 
     function on_give_enemies_cards(player_id: number, cards_count: number){

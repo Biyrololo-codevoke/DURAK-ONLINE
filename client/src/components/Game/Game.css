@@ -460,6 +460,7 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     display: none;
     cursor: grab;
     pointer-events: none;
+    user-select: none;
 }
 
 #card-deck{
