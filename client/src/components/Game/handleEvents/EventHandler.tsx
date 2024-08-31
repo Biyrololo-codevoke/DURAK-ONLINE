@@ -11,7 +11,7 @@ type Props = {
     on_start_game: () => void;
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
-    on_next_move: (victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck?: number) => void;
+    on_next_move: (victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, players_queue?: number[]) => void;
     on_place_card: (event: {slot: number; card: GameCard}, player_id: number) => void;
     on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void;
     on_give_enemies_cards: (player_id: number, cards_count: number) => void;
@@ -21,7 +21,9 @@ type Props = {
     on_player_win: (player_id: number, money: number) => void;
     on_game_over: (looser_id: number) => void;
     on_transfer: (card: CardType, player_id: number) => void;
-    on_room_redirect: (room_id: number, key: string) => void
+    on_room_redirect: (room_id: number, key: string) => void;
+    on_player_leave: (player_id: number) => void;
+    on_player_reconnect: (player_id: number) => void;
 }
 
 export default function handle_event(props: Props){
@@ -39,7 +41,15 @@ export default function handle_event(props: Props){
 
             if(String(new_id) === localStorage.getItem('user_id')) return
 
+            let is_reconnect = false;
+
             setUsersIds(prev=>{
+
+                if(prev.includes(new_id)){
+                    is_reconnect = true;
+                    return prev
+                }
+
                 console.log('updating ids')
                 const n_ids = [...prev];
                 for(let i = 0; i < prev.length; ++i){
@@ -53,6 +63,10 @@ export default function handle_event(props: Props){
 
                 return n_ids
             })
+
+            if(is_reconnect){
+                props.on_player_reconnect(new_id);
+            }
         }
 
         else if(
@@ -88,7 +102,7 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'next'
         ) {
-            props.on_next_move(data.victim_player, data.walking_player, data.throwing_players, data.type, data.decKeck);
+            props.on_next_move(data.victim_player, data.walking_player, data.throwing_players, data.type, data.decKeck, data.players_queue);
         }
 
         else if(
@@ -147,7 +161,13 @@ export default function handle_event(props: Props){
         else if(
             data.event === 'room_redirect'
         ) {
-            props.on_room_redirect(data.new_room_id, data.key)
+            setTimeout(()=>{
+                props.on_room_redirect(data.new_room_id, data.key)
+            }, 5000)
+        } else if(
+            data.event === 'leave'
+        ) {
+            props.on_player_leave(data.player_id)
         }
     }
 }

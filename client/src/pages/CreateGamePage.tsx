@@ -77,7 +77,13 @@ export default function CreateGamePage() {
         .catch(
             err=>{
                 console.log(err);
-                toast.error('Ошибка при создании комнаты')
+
+                if(err.response?.status === 500) {
+                    toast.error('Проблемы с обработкой данных, повторите запрос')
+                } else {
+                    toast.error('Ошибка при создании комнаты')
+                }
+
                 set_is_loading(false);
             }
         )

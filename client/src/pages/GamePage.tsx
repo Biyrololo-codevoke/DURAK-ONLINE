@@ -14,6 +14,9 @@ import {handle_event} from 'components/Game/handleEvents'
 import { CARDS_SUITS_BY_SYMBOL, CARDS_SYMBOBS_BY_SUITS, MESSAGES_CONFIGS } from "constants/GameParams";
 import { convert_card } from "features/GameFeatures";
 import EndGameUI from "components/Game/EndGameUI";
+import {useNavigate} from 'react-router-dom'
+import { IconButton } from "@mui/material";
+import ExitToAppIcon from '@mui/icons-material/ExitToApp';
 
 type UserIdType = number | 'me'
 
@@ -29,6 +32,8 @@ type EnemyCardDelta = {
 
 export default function GamePage(){
 
+    const navigate = useNavigate();
+
     // set className in-game
     useEffect(()=>{
         window.scrollTo(0, 0);
@@ -36,6 +41,20 @@ export default function GamePage(){
 
         return ()=>{
             document.body.classList.remove('in-game');
+        }
+    }, []);
+
+    useEffect(()=>{
+        function handle_quit_game(e: KeyboardEvent){
+            if(e.key === 'Escape'){
+                handle_leave_game();
+            }
+        }
+
+        window.addEventListener('keyup', handle_quit_game);
+
+        return ()=>{
+            window.removeEventListener('keyup', handle_quit_game);
         }
     }, []);
 
@@ -60,6 +79,8 @@ export default function GamePage(){
         }
     )
 
+    const [room_count_cards, setRoomCountCards] = useState<number>(24);
+
     const [bito_count, set_bito_count] = useState<number>(0);
 
     /**
@@ -71,6 +92,8 @@ export default function GamePage(){
     const [users_ids, setUsersIds] = useState<UserIdType[]>(
         ['me']
     );
+
+    const [left_users_ids, setLeftUsersIds] = useState<number[]>([]);
 
     // REWARDS in end game
 
@@ -123,6 +146,8 @@ export default function GamePage(){
         .then(
             res=>{
                 setRoom(res.data.room);
+
+                setRoomCountCards(res.data.room.cards_count);
 
                 const data : RoomResponseType = res.data.room;
 
@@ -208,9 +233,15 @@ export default function GamePage(){
                 on_player_win,
                 on_game_over,
                 on_transfer,
-                on_room_redirect
+                on_room_redirect,
+                on_player_leave,
+                on_player_reconnect
             }
         )
+    }
+
+    function on_player_reconnect(player_id: number){
+        setLeftUsersIds(prev => prev.filter(id => id !== player_id));
     }
 
     // on player accept start
@@ -316,7 +347,16 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[], type: 'basic' | 'transfer', decKeck?: number){
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, players_queue?: number[]){
+
+        if(players_queue !== undefined){
+            localStorage.setItem('players_queue', String(players_queue));
+        } else {
+            const queue = JSON.parse(localStorage.getItem('players_queue') || '[]');
+            const transfer_target = queue[(queue.indexOf(victim) + 1) % queue.length];
+            localStorage.setItem('transfer_target', String(transfer_target));
+        }
+
         if(decKeck !== undefined){
             setRoom(prev => {
                 return {
@@ -337,30 +377,59 @@ export default function GamePage(){
             localStorage.setItem('_game_board', JSON.stringify([]));
         
         setTimeout(() => {
-            setTimers(
-                [
-                    {
-                        id: walking,
-                        color: 'red',
-                        from_start: true,
-                        is_active: true
-                    },
-                    {
-                        id: victim,
-                        color: 'green',
-                        from_start: true,
-                        is_active: false
-                    },
-                    ...throwing_players.map((id) => {
-                        return {
-                            id,
-                            color: 'red' as 'red' | 'green',
+
+            if(type === 'basic' || type === undefined){
+                setTimers(
+                    [
+                        {
+                            id: walking,
+                            color: 'red',
+                            from_start: true,
+                            is_active: true
+                        },
+                        {
+                            id: victim,
+                            color: 'green',
                             from_start: true,
                             is_active: false
-                        }
-                    })
-                ]
-            )
+                        },
+                        ...throwing_players.map((id) => {
+                            return {
+                                id,
+                                color: 'red' as 'red' | 'green',
+                                from_start: true,
+                                is_active: false
+                            }
+                        })
+                    ]
+                )
+            } else {
+                setTimers(
+                    [
+                        {
+                            id: walking,
+                            color: 'red',
+                            from_start: true,
+                            is_active: false
+                        },
+                        {
+                            id: victim,
+                            color: 'green',
+                            from_start: true,
+                            is_active: true
+                        },
+                        ...throwing_players.map((id) => {
+                            return {
+                                id,
+                                color: 'red' as 'red' | 'green',
+                                from_start: true,
+                                is_active: false
+                            }
+                        })
+                    ]
+                )
+            }
+
     
             set_messages([]);
     
@@ -424,7 +493,7 @@ export default function GamePage(){
                                 [take_user_id]: prev[take_user_id] + taking_cards.length
                             }
                         })
-                    }, 700)
+                    }, 400)
                 }
                 else {
                     const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
@@ -445,7 +514,7 @@ export default function GamePage(){
                 }
                 setTimeout(()=>{
                     setGameBoard([]);
-                }, 700)
+                }, 400)
     
             } else {
     
@@ -470,7 +539,7 @@ export default function GamePage(){
         
                 setTimeout(()=>{
                     setGameBoard([]);
-                }, 1100)
+                }, 500)
             }
             localStorage.setItem('_game_board', JSON.stringify([]));
         }
@@ -760,7 +829,7 @@ export default function GamePage(){
                     [player_id]: prev[player_id] + cards_count
                 }
             })   
-        }, 1000)
+        }, 400)
     }
 
     function on_game_over(looser_id: number){
@@ -782,6 +851,8 @@ export default function GamePage(){
                 }
             ]
         })
+
+        setGameBoard([]);
 
         setTimeout(end_game, 5000)
     }
@@ -1081,6 +1152,13 @@ export default function GamePage(){
         setTimers([]);
         setRoomKey(_key);
         setRoomId(String(_room_id));
+        setRoom(prev => {
+            return {
+                ...prev,
+                cards_count: room_count_cards
+            }
+        })
+        set_accepted_start([]);
     }
 
     // player throw card
@@ -1109,12 +1187,21 @@ export default function GamePage(){
 
         const _user_id = parseInt(localStorage.getItem('user_id') || '-1');
 
+        let is_beaten_all = true;
+
+        for(let card of _game_board){
+            if(!card.upper){
+                is_beaten_all = false;
+                break
+            }
+        }
+
         setTimers(prev => {
             const new_timers : Timer[] = [];
 
             for(let id of _users_ids){
 
-                if(_game_board[data.slot - 1].upper){
+                if(is_beaten_all){
 
                     if(id === _game_players.victim){
                         new_timers.push({
@@ -1292,11 +1379,34 @@ export default function GamePage(){
         )
     }
 
+    function handle_leave_game(){
+
+        console.log('выхожу из игры')
+
+        const _socket = socket || socket_ref.current;
+
+        if(!_socket) return;
+
+        _socket.send(
+            JSON.stringify(
+                {
+                    event: 'leave'
+                }
+            )
+        )
+
+        navigate('/');
+    }
+
+    function on_player_leave(player_id: number){
+        setLeftUsersIds(prev => [...prev, player_id]);
+    }
+
     return (
         <main id="game-page">
             <EndGameUI rewards={rewards}/>
             <TimerContext.Provider
-            value={{timer_update: timers_update, timers}}
+            value={{timer_update: timers_update, timers, left_players: left_users_ids}}
             >
                 <GameMessagesContext.Provider value={messages}>
                     <AcceptedContext.Provider
@@ -1311,6 +1421,11 @@ export default function GamePage(){
                                 <GamePlayersContext.Provider
                                 value={game_players}
                                 >
+                                    <div id="leave_game_btn__container">
+                                        <IconButton onClick={handle_leave_game} style={{background: 'rgba(255, 255, 255, 0.08)'}}>
+                                            <ExitToAppIcon style={{color: 'white'}} fontSize="large"/>
+                                        </IconButton>
+                                    </div>
                                     <GameInfo />
                                     <GameScreen
                                     game_board={game_board}

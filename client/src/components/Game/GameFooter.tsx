@@ -120,20 +120,24 @@ export default function GameFooter({handle_start_game, handle_action_button, han
 
     }, [timers.timer_update, messages])
 
-    function handle_time_out(){
-        if(is_pass){
-            console.log('PASS')
-            handle_action_button('pass')
+    const handle_time_out = useMemo(() => {
+
+        return function(){
+            console.log(`Player time out!`)
+            if(is_pass){
+                console.log('PASS')
+                handle_action_button('pass')
+            }
+            else if(is_bito){
+                console.log('BITO')
+                handle_action_button('bito')
+            }
+            else if(is_taking){
+                console.log('IS TAKING')
+                handle_time_out_loose();
+            }
         }
-        else if(is_bito){
-            console.log('BITO')
-            handle_action_button('bito')
-        }
-        else if(is_taking){
-            console.log('IS TAKING')
-            handle_time_out_loose();
-        }
-    }
+    }, [is_pass, is_bito, is_taking])
 
     return (
         <div id="game-footer">

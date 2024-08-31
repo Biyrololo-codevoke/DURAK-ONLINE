@@ -3,6 +3,7 @@ import { useState } from "react";
 import CheckIcon from '@mui/icons-material/Check';
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export default function UsernameInput(){
 
@@ -26,6 +27,10 @@ export default function UsernameInput(){
         .catch(
             err => {
                 console.log(err);
+
+                if(err.response?.status === 500){
+                    toast.error('Проблемы с обработкой данных, повторите запрос');
+                }
             }
         )
     }

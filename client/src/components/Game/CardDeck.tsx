@@ -11,8 +11,8 @@ type Props = {
 }
 
 const ICONS_BY_SUIT = {
-    1: '/static/serdce.png',
-    2: '/static/chervi.png',
+    1: '/static/chervi.png',
+    2: '/static/serdce.png',
     3: '/static/tref.png',
     4: '/static/ruby.png'
 }

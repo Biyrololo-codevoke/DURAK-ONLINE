@@ -37,6 +37,16 @@ export default function UserAvatar(props: Props) {
     const gameState = useContext(GameStateContext);
 
     const timers = useContext(TimerContext);
+
+    const is_disconnect = timers.left_players.includes(
+        (
+            ()=>{
+                if(user_id === undefined) return -1;
+
+                return Number(user_id);
+            }
+        )()
+    );
     
     const show_action = timers.timers.find((e) => e.id === user_id);
 
@@ -50,8 +60,9 @@ export default function UserAvatar(props: Props) {
 
     function on_time_out(){
         // TODO
-        console.log('time out')
+        console.log(`time out for ${user_id}`)
         if(props.on_time_out && show_action && gameState === 2){
+            console.log(`doing props.on_time_out`)
             props.on_time_out();
         }
     }
@@ -123,6 +134,11 @@ export default function UserAvatar(props: Props) {
                     setPhoto(prev => data.user.image_id || prev)
                 }
             )
+            .catch(
+                err=>{
+                    console.log(err)
+                }
+            )
 
         },
         [user_id]
@@ -163,6 +179,12 @@ export default function UserAvatar(props: Props) {
                 type="text"
                 color={message.color}
                 message={message.text}
+                />
+            }
+            {
+                is_disconnect &&
+                <Message
+                type="disconnect"
                 />
             }
             <img 
