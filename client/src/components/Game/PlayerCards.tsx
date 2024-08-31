@@ -434,11 +434,12 @@ export default function PlayerCards(props: Props) {
             </section>
             <div id="dragging-card" ref={draggin_card_ref}
             onContextMenu={(e) => e.preventDefault()}
+            onDragStart={e => e.preventDefault()}
             >
                 {
                     draggin_card !== -1 && 
                     <img src={getCardImage(props.cards[draggin_card])} alt="card"
-                    style={{width: '100%', height: '100%'}} 
+                    style={{width: '100%', height: '100%', userSelect: 'none'}} 
                     onContextMenu={(e) => e.preventDefault()}
                     onDragStart={(e) => e.preventDefault()}
                     />
