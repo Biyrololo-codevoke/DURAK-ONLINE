@@ -6,6 +6,10 @@ import { GameBoardCard, GamePlayers } from "types/GameTypes";
 import { MESSAGES_CONFIGS } from "constants/GameParams";
 import MoneyShortName from "features/MoneyShortName";
 import Money from "components/Money/MoneyIcon";
+import {Button} from '@mui/material'
+import AddIcon from '@mui/icons-material/Add';
+import InviteFriends from 'components/Game/InviteFriends';
+import GroupAddIcon from '@mui/icons-material/GroupAdd';
 
 type Props = {
     handle_start_game: () => void;
@@ -139,33 +143,48 @@ export default function GameFooter({handle_start_game, handle_action_button, han
         }
     }, [is_pass, is_bito, is_taking])
 
+    const [is_open, set_is_open] = useState(false);
+
     return (
-        <div id="game-footer">
-            {
-                gameState === 1 && show_action &&
-                <ActionButton onClick={handle_start_game} label="Старт"/>
-            }
-            {
-                is_taking &&
-                <ActionButton onClick={()=>{handle_action_button('take')}} label="Беру"/>
-            }
-            {
-                is_bito &&
-                <ActionButton onClick={()=>{handle_action_button('bito')}} label="Бито"/>
-            }
-            {
-                is_pass &&
-                <ActionButton onClick={()=>{handle_action_button('pass')}} label="Пас"/>
-            }
-            {
-                is_my_turn && !is_bito &&
-                <ActionButton text={true} onClick={()=>{}} label="Ваш ход"/>
-            }
-            <UserAvatar user_id={user_id ? parseInt(user_id) : undefined} on_time_out={handle_time_out}/>
-            <div id="game-footer-money">
-                {MoneyShortName(parseInt(localStorage.getItem('player_money') || '0'))}
-                <Money size="small"/>
+        <>
+            <InviteFriends is_open={is_open} on_close={()=>{set_is_open(false)}}/>
+            <div id="game-footer">
+                {
+                    gameState === 1 && show_action &&
+                    <ActionButton onClick={handle_start_game} label="Старт"/>
+                }
+                {
+                    is_taking &&
+                    <ActionButton onClick={()=>{handle_action_button('take')}} label="Беру"/>
+                }
+                {
+                    is_bito &&
+                    <ActionButton onClick={()=>{handle_action_button('bito')}} label="Бито"/>
+                }
+                {
+                    is_pass &&
+                    <ActionButton onClick={()=>{handle_action_button('pass')}} label="Пас"/>
+                }
+                {
+                    is_my_turn && !is_bito &&
+                    <ActionButton text={true} onClick={()=>{}} label="Ваш ход"/>
+                }
+                {
+                    gameState === 0 && <div id="invite_player">
+                        <Button style={{color: 'white', display: 'flex', 'alignItems': 'center'}} onClick={()=>{set_is_open(true)}}
+                            variant="outlined"
+                        >
+                            Пригласить друзей
+                            <GroupAddIcon style={{color: 'white'}}/>
+                        </Button>
+                    </div>
+                }
+                <UserAvatar user_id={user_id ? parseInt(user_id) : undefined} on_time_out={handle_time_out}/>
+                <div id="game-footer-money">
+                    {MoneyShortName(parseInt(localStorage.getItem('player_money') || '0'))}
+                    <Money size="small"/>
+                </div>
             </div>
-        </div>
+        </>
     )
 }
