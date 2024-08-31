@@ -10,7 +10,8 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError, Pe
 
 Base = declarative_base()
 engine = create_engine(os.getenv("DATABASE_URI"))
-session = sessionmaker(bind=engine)
+SessionMaker = sessionmaker(bind=engine)
+session = SessionMaker()
 
 
 db_logger = getLogger("db")

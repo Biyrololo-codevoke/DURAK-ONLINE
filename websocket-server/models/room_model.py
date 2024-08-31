@@ -47,10 +47,7 @@ class RoomModel(BaseModel):
     @classmethod
     @retry_on_exception(max_retries=1, delay=0.01)
     def get_by_id(cls, room_id: int) -> Type[RoomModel]:
-        try:
-            return session.query(cls).filter_by(id=room_id).one()
-        except NoResultFound as e:
-            raise RoomExceptions.NotFound from e
+        return session.query(cls).filter_by(id=room_id).one()
 
     @retry_on_exception(max_retries=3, delay=0.05)
     def add_player(self, user_id: int) -> None:
