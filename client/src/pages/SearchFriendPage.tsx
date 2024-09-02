@@ -11,17 +11,45 @@ export default function SearchFriendPage() {
     const [find_value, setFindValue] = useState('');
 
     useEffect(() => {
+
+        const cancelToken = axios.CancelToken.source();
+
         const delayRequest = setTimeout(() => {
-            // axios request
+            axios.get(
+                `/users?nickname=${find_value}&offset=${0}&limit=${999}`,
+                {
+                    cancelToken: cancelToken.token
+                }
+            )
+            .then(
+                res => {
+                    setUsers(res.data.users);
+                }
+            )
+            .catch(
+                console.error
+            )
         }, 1000);
 
-        return () => clearTimeout(delayRequest);
+        return () => {
+            clearTimeout(delayRequest);
+            cancelToken.cancel();
+        }
 
     }, [find_value]);
 
     function handle_add_friend(friend_id : number) {
-        // TODO
-        // axios request
+        const url = `/friendship/offer?friend_id=${friend_id}`
+
+        axios.post(url)
+        .then(
+            () => {
+                console.log('отправил в др')
+            }
+        )
+        .catch(
+            console.error
+        )
     }
 
     return (

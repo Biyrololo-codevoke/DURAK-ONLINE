@@ -221,3 +221,11 @@ type Reward = {
 }
 
 export type {Reward}
+
+type FriendOffer = {
+    id: number;
+    sender_id: number;
+    receiver_id: number;
+}
+
+export type {FriendOffer}

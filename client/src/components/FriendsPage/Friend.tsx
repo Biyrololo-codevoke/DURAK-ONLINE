@@ -25,6 +25,8 @@ export default function Friends({
 
     const [user, set_user] = useState<User | null>(null);
 
+    const [is_pressed, set_is_pressed] = useState(false);
+
     useEffect(
         ()=>{
             const cancelToken = axios.CancelToken.source();
@@ -52,6 +54,7 @@ export default function Friends({
     function handle_click(){
         if(!onClick) return;
 
+        set_is_pressed(true);
         onClick(user_id);
     }
 
@@ -66,7 +69,7 @@ export default function Friends({
             </ListItemAvatar>
             <Typography variant="h6" className="friend-name">{user?.username}</Typography>
             <div className="friend-close-container">
-                <IconButton className="friend-close-button" disabled={is_loading} onClick={handle_click}>
+                <IconButton className="friend-close-button" disabled={is_loading || is_pressed} onClick={handle_click}>
                     {
                         icon_type === 'add' ? <AddIcon /> : <CloseIcon />
                     }
