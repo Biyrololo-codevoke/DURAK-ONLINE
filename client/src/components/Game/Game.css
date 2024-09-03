@@ -1011,3 +1011,14 @@ body:not(#mobile-view) #trump__suit {
     top: 10px;
     left: 10px;
 }
+
+/* invite friends */
+
+#invite_player{
+    position: absolute;
+    top: -20px;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px dotted white;
+    border-radius: 10px;
+}

@@ -15,9 +15,9 @@ export default function FriendsPage(){
         const cancelToken = axios.CancelToken.source();
 
         axios
-        .get('get-user-friends', {cancelToken: cancelToken.token})
+        .get('/api/friendship/friends', {cancelToken: cancelToken.token})
         .then((response) => {
-            setFriends(response.data);
+            setFriends(response.data.friends);
             setIsLoading(false);
         })
         .catch((error) => {

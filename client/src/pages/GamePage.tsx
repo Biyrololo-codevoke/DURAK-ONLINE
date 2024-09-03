@@ -350,7 +350,7 @@ export default function GamePage(){
     function on_next_move(victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, players_queue?: number[]){
 
         if(players_queue !== undefined){
-            localStorage.setItem('players_queue', String(players_queue));
+            localStorage.setItem('players_queue', JSON.stringify(players_queue));
         } else {
             const queue = JSON.parse(localStorage.getItem('players_queue') || '[]');
             const transfer_target = queue[(queue.indexOf(victim) + 1) % queue.length];
