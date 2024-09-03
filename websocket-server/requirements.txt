@@ -4,3 +4,4 @@ confluent_kafka
 aiokafka
 sqlalchemy
 psycopg2-binary
+sqlalchemy-utils

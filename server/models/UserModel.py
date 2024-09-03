@@ -36,6 +36,21 @@ class UserModel(BaseModel):  # type: ignore
             "money": self.money,
             "image_id": self.image_id
         }
+        
+    @classmethod
+    @retry_on_exception(max_retries=3, delay=0.05)
+    def search(cls, username, limit, offset) -> list[UserModel]:
+        # name_variants = gen_name_variants(username)
+        # users: list[UserModel] = []
+        # for name in name_variants:
+        #     users.extend(cls.query.filter(cls._username.like(f"%{name}%")).limit(limit).offset(offset).all())
+        
+        users = cls.query.filter(cls._username.match(f"%{username}%")).limit(limit).offset(offset).all()
+        
+        if not users:
+            raise UserExceptions.NotFound
+
+        return users
     
     @retry_on_exception(max_retries=3, delay=0.05)
     def __init__(self, email: str, username: str, password: str) -> None:
@@ -121,3 +136,7 @@ class UserModel(BaseModel):  # type: ignore
     def set_verified(self, verified: bool) -> None:
         self.verified = verified
         self.save()
+
+
+# def gen_name_variants(name: str) -> list[str]:
+#     return [name, name.lower(), name.title(), name.upper()]  # TODO: include indetive char replacing like 0 -> 'o'

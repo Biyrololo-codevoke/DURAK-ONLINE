@@ -19,9 +19,20 @@ class User(BaseResource):
     @classmethod
     def get(cls) -> tuple[dict, HTTPStatus]:
         user_id = request.args.get("id")
+        nickname = request.args.get("nickname", "")
+        offset = request.args.get("offset", 0)
+        limit = request.args.get("limit", 25)
+        
         try:
-            user = UserModel.get_by_id(user_id)
-            return {"user": user.json()}, HTTPStatus.OK
+            if user_id:
+                # simple get user by id
+                user = UserModel.get_by_id(user_id)
+                return {"user": user.json()}, HTTPStatus.OK
+            else:
+                # get list of users with pagination and filtering
+                    
+                users = UserModel.search(nickname, offset, limit)
+                return {"users": [user.id for user in users]}, HTTPStatus.OK
 
         except exc.User.NotFound:
             return {"error": "user not found"}, HTTPStatus.NOT_FOUND

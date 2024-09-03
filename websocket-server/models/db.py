@@ -9,7 +9,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError, Pe
 
 
 Base = declarative_base()
-engine = create_engine(os.getenv("DATABASE_URI"))
+engine = create_engine(os.getenv("DATABASE_URI"), pool_size=20, max_overflow=0)
 SessionMaker = sessionmaker(bind=engine)
 session = SessionMaker()
 
