@@ -121,6 +121,7 @@ export default function FriendsPage(){
                                 user_id={offer.sender_id}
                                 offer_id={offer.id}
                                 />
+                                <Divider />
                             </>
                         ))
                     }
