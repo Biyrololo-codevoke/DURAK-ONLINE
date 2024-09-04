@@ -6,7 +6,7 @@ from websockets import WebSocketServerProtocol as WebSocket
 from websocket_logger import logger
 
 from .data import room_list, user_socket, socket_identity, route_game_events
-from .utils import serialize
+from .utils import serialize, handle_socket_closing
 
 
 async def send_to_socket(socket: WebSocket, payload: dict):
@@ -29,7 +29,8 @@ async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = N
             await send_to_socket(socket, payload)
 
 
-async def handle_room(payload: dict, socket: WebSocket):
+@handle_socket_closing(scope="handle_room")
+def handle_room(payload: dict, socket: WebSocket):
 
     event = payload["event"]
     room_id = int(payload["req"]["room_id"])
@@ -77,6 +78,7 @@ async def handle_room(payload: dict, socket: WebSocket):
             route_game_events(payload, room_id, key)
 
 
+@handle_socket_closing(scope="d list")
 async def handle_list(socket: WebSocket, payload: dict):
     key = payload.get("key")
     if key:

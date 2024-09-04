@@ -25,12 +25,10 @@ class RoomListObserver:
             self.load_from_db()
         )
         self._room_connections = dict()
-        
+
         self.expired_join_keys = []
         self._rooms_join_keys = dict()
-        
         self._room_accepts = dict()
-        
         self._followers = followers or list()
         self.notify()
 
@@ -56,15 +54,14 @@ class RoomListObserver:
 
         self.notify()
 
-    @handle_socket_closing
+    @handle_socket_closing(scope="join to room", async_mode=False)
     def join_to_room(self, room_id, player_id, password=None) -> tuple[bool, str]:
         try:
             room = RoomModel.get_by_id(room_id)
-            player = UserModel.get_by_id(player_id)
-            
+            player = UserModel.get_by_id(player)
             if not room.check_password(password):
                 return False, "Incorrect password"
-            
+
             if room.reward > player.money:
                 return False, "Not enough money"
 
@@ -108,7 +105,7 @@ class RoomListObserver:
         except Exceptions.Room.NotFound:
             return False, "Room not found"
 
-    @handle_socket_closing
+    @handle_socket_closing(scope="connect to rom", async_mode=False)
     def connect_to_room(self, room_id: int, key: str) -> tuple[bool, str]:
         room_connections = self._rooms_join_keys.get(room_id)
         player_connection = list(filter(lambda x: x["key"] == key, room_connections))[0]
@@ -122,7 +119,7 @@ class RoomListObserver:
 
         try:
             player_id = int(key.split('_')[-1])
-            
+
             room = RoomModel.get_by_id(room_id)             # add to db
             room.add_player(player_id)
 
@@ -161,7 +158,7 @@ class RoomListObserver:
         })
         self.remove_room(room_id)
         
-    @handle_socket_closing
+    @handle_socket_closing(scope="accept start", async_mode=False)
     def accept_start(self, room_id: int, key: int):
         player_id = int(key.split('_')[-1])
         player_socket = key_identity[key]
@@ -284,7 +281,7 @@ def send_to_player(player_id: int, payload: dict):
     )
 
 
-@handle_socket_closing
+@handle_socket_closing(scope="route game events",async_mode=False)
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
     room = RoomModel.get_by_id(room_id)

@@ -7,8 +7,10 @@ from websocket_logger import logger
 
 from event_handling.data import socket_identity, user_socket
 from event_handling import serialize, deserialize, router, auth_socket
+from event_handling.utils import handle_socket_closing
 
 
+@handle_socket_closing(scope="main")
 async def socket_listener(socket: WebSocket, path: str):
     socket_id = id(socket)
     auth = False

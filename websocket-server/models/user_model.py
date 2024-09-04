@@ -4,7 +4,6 @@ from typing import Type
 
 from sqlalchemy import Column, Integer, String, Boolean
 from sqlalchemy.exc import NoResultFound
-from sqlalchemy_utils.functions import retry_on_db_errors
 
 from .db import Base, session, retry_on_exception, CustomDBException
 
@@ -33,7 +32,6 @@ class UserModel(Base):  # type: ignore
 
     @classmethod
     @retry_on_exception(max_retries=1, delay=0.01)
-    @retry_on_db_errors
     def get_by_id(cls, user_id: int) -> Type[UserModel]:
         try:
             return session.query(cls).filter_by(id=user_id).one()
@@ -42,6 +40,5 @@ class UserModel(Base):  # type: ignore
 
     @property
     @retry_on_exception(max_retries=1, delay=0.01)
-    @retry_on_db_errors
     def username(self) -> str:
         return self._username

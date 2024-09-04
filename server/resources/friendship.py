@@ -1,12 +1,12 @@
 from http import HTTPStatus
 
-from .api import BaseModel
+from .api import BaseResource
 from ..models import FriendshipOfferModel, UserFriendsModel
 
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 
-class Friendship(BaseModel):
+class Friendship(BaseResource):
     path = "/friendship/offer"
     
     @classmethod
@@ -57,7 +57,7 @@ class Friendship(BaseModel):
             )
             return {"message": "create friendship"}, HTPStatus.CREATED        
 
-class Friends(BaseModel):
+class Friends(BaseResource):
     path = "/friendship/friends"
     
     @classmethod
