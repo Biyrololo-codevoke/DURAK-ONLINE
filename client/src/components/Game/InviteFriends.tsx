@@ -51,7 +51,7 @@ export default function InviteFriends({is_open, on_close} : Props){
                 width: '100%',
                 height: '100%',
                 boxSizing: 'border-box',
-                padding: 14%
+                padding: '14%'
             }
         }
         >
