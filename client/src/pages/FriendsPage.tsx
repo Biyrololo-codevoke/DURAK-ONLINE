@@ -2,14 +2,38 @@ import { CircularProgress, Divider, IconButton, List, Typography } from "@mui/ma
 import { useState, useEffect } from "react";
 import axios from 'axios'
 import './FriendsPage.css'
-import Friend from "components/FriendsPage/Friend";
+import Friend, {FriendOfferC} from "components/FriendsPage/Friend";
 import SearchIcon from '@mui/icons-material/Search';
 import { Link } from "react-router-dom";
+import { FriendOffer } from "types/GameTypes";
 
 export default function FriendsPage(){
 
     const [friends, setFriends] = useState<number[]>([]);
     const [is_loading, setIsLoading] = useState(true);
+
+    const [offers, set_offers] = useState<FriendOffer[]>([]);
+
+    useEffect(()=>{
+        const url = '/api/friendship/offer';
+
+        const cancelToken = axios.CancelToken.source();
+
+        axios
+        .get(url, {cancelToken: cancelToken.token})
+        .then((response) => {
+            set_offers(response.data.offers);
+        })
+        .catch((error) => {
+            if (axios.isCancel(error)) {
+                return;
+            }
+        })
+
+        return () => {
+            cancelToken.cancel();
+        }
+    }, [])
 
     useEffect(() => {
         const cancelToken = axios.CancelToken.source();
@@ -39,6 +63,40 @@ export default function FriendsPage(){
         setFriends(friends.filter((id) => id !== friend_id));
     }
 
+    function reject_offer(offer_id: number){
+        const url = `/api/friendship/offer`
+
+        const data = {
+            offer_id,
+            status: 'rejected'
+        }
+
+        axios.patch(url, data)
+        .then(
+            ()=> {
+                set_offers(prev => prev.filter(c => c.id !== offer_id))
+            }
+        )
+        .catch(console.error)
+    }
+
+    function accept_offer(offer_id: number){
+        const url = `/api/friendship/offer`
+
+        const data = {
+            offer_id,
+            status: 'accepted'
+        }
+
+        axios.patch(url, data)
+        .then(
+            ()=> {
+                set_offers(prev => prev.filter(c => c.id !== offer_id))
+            }
+        )
+        .catch(console.error)
+    }
+
     return (
         <main>
             <section id="friends-title">
@@ -49,7 +107,26 @@ export default function FriendsPage(){
                     </Link>
                 </IconButton>
             </section>
-            
+            {
+                offers.length > 0 &&
+                <List>
+                    {
+                        offers.map((offer) => (
+                            <>
+                                <FriendOfferC 
+                                key={offer.id}
+                                icon_type="add"
+                                on_reject={reject_offer}
+                                on_accept={accept_offer}
+                                user_id={offer.sender_id}
+                                offer_id={offer.id}
+                                />
+                                <Divider />
+                            </>
+                        ))
+                    }
+                </List>
+            }
             {
                 is_loading && <center id="friends-list-loading">
                     <CircularProgress size={50} />
