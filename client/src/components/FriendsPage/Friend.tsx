@@ -12,6 +12,7 @@ type Props = {
     user_id: number;
     icon_type: 'add' | 'remove';
     onClick?: (user_id: number) => void;
+    color?: 'black' | 'white'
 }
 
 type User = {
@@ -20,7 +21,9 @@ type User = {
 }
 
 export default function Friend({
-    user_id, icon_type, onClick} : Props) {
+    user_id, icon_type, onClick, color} : Props) {
+
+    const col = color || 'white';
 
     const [is_loading, setIsLoading] = useState(true);
 
@@ -43,6 +46,8 @@ export default function Friend({
                         username: data.user.username,
                         image: data.user.image_id || EMPTY_USER_PHOTO_URL
                     })
+
+                    setIsLoading(false);
                 }
             )
             .catch(console.error)
@@ -65,15 +70,18 @@ export default function Friend({
                 {user && <img src={user.image} alt={user.username} className="friend-avatar"
                 />}
                 {
-                    is_loading && <CircularProgress />
+                    is_loading && 
+                    <div style={{position: 'absolute', left: '20px', top: '50%', transform: 'translateY(-50%)'}}>
+                        <CircularProgress color='error'/>
+                    </div>
                 }
             </ListItemAvatar>
-            <Typography variant="h6" className="friend-name">{user?.username}</Typography>
+            <Typography variant="h6" style={{color: col, flexGrow: '1'}}>{user?.username}</Typography>
             <div className="friend-close-container">
                 <IconButton className="friend-close-button" disabled={is_loading || is_pressed} onClick={handle_click}
                 sx={is_loading || is_pressed ? {opacity: 0.5}: {}}>
                     {
-                        icon_type === 'add' ? <AddIcon /> : <CloseIcon />
+                        icon_type === 'add' ? <AddIcon style={col === 'black' ? {color: 'red'} : {}} /> : <CloseIcon style={col === 'black' ? {color: 'red'} : {}}/>
                     }
                 </IconButton>
             </div>

@@ -16,7 +16,7 @@ export default function SearchFriendPage() {
 
         const delayRequest = setTimeout(() => {
             axios.get(
-                `/users?nickname=${find_value}&offset=${0}&limit=${999}`,
+                `/user?nickname=${find_value}&offset=${0}&limit=${999}`,
                 {
                     cancelToken: cancelToken.token
                 }
@@ -27,7 +27,10 @@ export default function SearchFriendPage() {
                 }
             )
             .catch(
-                console.error
+                err => {
+                    console.error(err);
+                    setUsers([]);
+                }
             )
         }, 1000);
 
@@ -87,6 +90,10 @@ export default function SearchFriendPage() {
                     <Friend key={id} user_id={id} icon_type="add" onClick={handle_add_friend}/>
                 ))}
             </List>
+            {
+                users.length === 0 && 
+                <Typography variant='h5' style={{color: 'white', textAlign: 'center'}}>Никого не нашлось</Typography>
+            }
         </main>
     )
 }

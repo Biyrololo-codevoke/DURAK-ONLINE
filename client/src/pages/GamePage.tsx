@@ -278,9 +278,26 @@ export default function GamePage(){
         setGameState(1);
     }
 
+    useEffect(()=>{
+        if(!localStorage.getItem('room_id__')) return;
+
+        // RECONNECTING TO ROOM
+        // TODO
+
+    }, [])
+
+    useEffect(()=>{
+        return () => {
+            if(gameState === 2) return; 
+            console.log('айайай, удаляю рум ид')
+            localStorage.removeItem('room_id__');
+        }
+    }, [])
+
     // START GAME !!!
     function on_start_game(){
         setGameState(2);
+        localStorage.setItem('room_id__', `${room_id}`);
         setTimers([]);
         set_timers_update(prev => prev + 1);
     }
