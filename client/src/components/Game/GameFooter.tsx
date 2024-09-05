@@ -186,7 +186,7 @@ export default function GameFooter({handle_start_game, handle_action_button, han
                         <Button style={{color: 'white', display: 'flex', 'alignItems': 'center'}} onClick={()=>{set_is_open(true)}}
                             variant="outlined"
                         >
-                            Пригласить друзей
+                            Пригласить друзей &nbsp;
                             <GroupAddIcon style={{color: 'white'}}/>
                         </Button>
                     </div>

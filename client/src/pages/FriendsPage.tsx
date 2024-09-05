@@ -41,7 +41,7 @@ export default function FriendsPage(){
         axios
         .get('/friendship/friends', {cancelToken: cancelToken.token})
         .then((response) => {
-            setFriends(response.data.friends);
+            setFriends(response.data?.friends || []);
             setIsLoading(false);
         })
         .catch((error) => {

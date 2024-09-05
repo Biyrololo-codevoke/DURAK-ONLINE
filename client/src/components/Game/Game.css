@@ -1016,7 +1016,7 @@ body:not(#mobile-view) #trump__suit {
 
 #invite_player{
     position: absolute;
-    top: -20px;
+    top: -50px;
     left: 50%;
     transform: translateX(-50%);
     border: 1px dotted white;
