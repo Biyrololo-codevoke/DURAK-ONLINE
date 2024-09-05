@@ -39,7 +39,7 @@ export default function SearchFriendPage() {
     }, [find_value]);
 
     function handle_add_friend(friend_id : number) {
-        const url = `/api/friendship/offer`
+        const url = `/friendship/offer`
 
         axios.post(url, {
             friend_id
