@@ -19,9 +19,9 @@ export default function InviteFriends({is_open, on_close} : Props){
         const cancelToken = axios.CancelToken.source();
 
         axios
-        .get('get-user-friends', {cancelToken: cancelToken.token})
+        .get('/friendship/friends', {cancelToken: cancelToken.token})
         .then((response) => {
-            setFriends(response.data);
+            setFriends(response.data?.friends || []);
             setIsLoading(false);
         })
         .catch((error) => {
@@ -58,7 +58,15 @@ export default function InviteFriends({is_open, on_close} : Props){
             <section
             style={
                 {
-                    overflow: 'auto'
+                    overflow: 'auto',
+                    background: 'white',
+                    height: '100%',
+                    borderRadius: '15px',
+                    boxSizing: 'border-box',
+                    padding: '15px',
+                    zIndex: 50,
+                    position: 'relative',
+                    boxShadow: 'rgba(100, 100, 111, 0.2) 0px 7px 29px 0px'
                 }
             }
             >
@@ -70,15 +78,17 @@ export default function InviteFriends({is_open, on_close} : Props){
                         alignItems: 'center'
                     }
                 }>
-                    <IconButton style={{color: 'white'}} onClick={on_close}>
-                        <CloseIcon style={{color: 'white'}}/>
+                    <IconButton style={{color: 'red', border: '0.1px solid red'}} onClick={on_close}>
+                        <CloseIcon style={{color: 'red'}}/>
                     </IconButton>
                 </div>
                 <List id="friends-list">
                     {
                         friends.map((friend_id, index) => (
                             <>
-                                <Friend key={friend_id} user_id={friend_id} icon_type="add" onClick={handle_invite_friend}/>
+                                <Friend key={friend_id} user_id={friend_id} icon_type="add" onClick={handle_invite_friend}
+                                color="black"
+                                />
                                 <Divider />
                             </>
                         ))
