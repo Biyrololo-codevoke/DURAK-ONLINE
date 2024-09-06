@@ -1,11 +1,17 @@
 from functools import wraps
 from logging import getLogger, StreamHandler as LoggingStreamHandler, DEBUG as LoggingLevelDebug
+import logging
 import time
 
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError, OperationalError, PendingRollbackError
 
 from flask.typing import AppOrBlueprintKey
+
+
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
+
 
 
 db = SQLAlchemy()

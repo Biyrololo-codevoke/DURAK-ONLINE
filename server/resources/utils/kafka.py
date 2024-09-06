@@ -17,9 +17,6 @@ config = {
     "client.id": "python-producer",
 }
 
-logger.info("waiting 40s for kafka to be ready")
-time.sleep(40)
-
 # try to establish connection
 logger.info(f"try to establish connection with kafka by uri: {KAFKA_URI}")
 producer = Producer(config)

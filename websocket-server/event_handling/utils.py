@@ -49,7 +49,7 @@ def deserialize(str_json: str) -> dict:  # deserializes string json to dict
 
 
 def handle_socket_closing(scope: str, async_mode=True) -> Any:
-    def decorator(func: Coroutine):
+    def decorator(func):
         async def async_wrapper(*args, **kwargs):
             try:
                 return asyncio.run(
@@ -68,35 +68,36 @@ def handle_socket_closing(scope: str, async_mode=True) -> Any:
             return async_wrapper
         else:
             return wrapper
+    return decorator
 
-def handler_error(e):
+def handler_error(e: ConnectionClosed, scope: str):
     logger.info(f"Connection closed: {scope=} code={e.code}, reason='{e.reason}'")
-        match e.code:
-            case 1000:
-                logger.info("Connection closed normally")
-            case 1001:
-                logger.info("пиздюк свалил куда-то")
-            case 1002:
-                logger.info("пиздюк нарушил протокол")
-            case 1003:
-                logger.info("пиздюк не по русски базарит")
-            case 1004:
-                logger.info("зарезервировано нахуй")
-            case 1005:
-                logger.info("пиздюк свалил без подтверждения")
-            case 1006:
-                logger.info("у пиздюка проблемы с инетом")
-            case 1007:
-                logger.info("пиздюк напиздел")
-            case 1008:
-                logger.info("пиздюк оказался хохлом")
-            case 1009:
-                logger.info("пиздюк слишком много и долго болтает")
-            case 1010:
-                logger.info("пиздюк ждал ксиву")
-            case 1011:
-                logger.info("ПИЗДЕЦ НА КОРАБЛЕ")
-            case 1015:
-                logger.info("пиздюк не защищается")
-            case _:
-                logger.info(f"Connection closed with unknown code: {e.code}")
+    match e.code:
+        case 1000:
+            logger.info("Connection closed normally")
+        case 1001:
+            logger.info("пиздюк свалил куда-то")
+        case 1002:
+            logger.info("пиздюк нарушил протокол")
+        case 1003:
+            logger.info("пиздюк не по русски базарит")
+        case 1004:
+            logger.info("зарезервировано нахуй")
+        case 1005:
+            logger.info("пиздюк свалил без подтверждения")
+        case 1006:
+            logger.info("у пиздюка проблемы с инетом")
+        case 1007:
+            logger.info("пиздюк напиздел")
+        case 1008:
+            logger.info("пиздюк оказался хохлом")
+        case 1009:
+            logger.info("пиздюк слишком много и долго болтает")
+        case 1010:
+            logger.info("пиздюк ждал ксиву")
+        case 1011:
+            logger.info("ПИЗДЕЦ НА КОРАБЛЕ")
+        case 1015:
+            logger.info("пиздюк не защищается")
+        case _:
+            logger.info(f"Connection closed with unknown code: {e.code}")

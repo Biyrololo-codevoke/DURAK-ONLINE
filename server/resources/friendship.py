@@ -3,6 +3,7 @@ from http import HTTPStatus
 from .api import BaseResource
 from ..models import FriendshipOfferModel, UserFriendsModel
 
+from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 
@@ -12,14 +13,14 @@ class Friendship(BaseResource):
     @classmethod
     @jwt_required()
     def get(cls):
-        user_id: int = int(get_jwt_identity())
+        user_id: int = int(get_jwt_identity()["id"])
         offers = FriendshipOfferModel.find_by_receiver_id(user_id)
         return {"offers": [offer.json() for offer in offers]}, HTTPStatus.OK
     
     @classmethod
     @jwt_required()
     def post(cls):
-        sender_id: int = int(get_jwt_identity())
+        sender_id: int = int(get_jwt_identity()["id"])
         receiver_id: int = request.json.get("friend_id")
         
         if not receiver_id:
@@ -35,13 +36,13 @@ class Friendship(BaseResource):
     @classmethod
     @jwt_required()
     def patch(cls):
-        user_id = int(get_jwt_identity())
+        user_id = int(get_jwt_identity()["id"])
         offer_id = request.json.get("offer_id")
         status = request.json.get("status")
         if not offer_id or status not in ("accepted", "rejected"):
             return {"message": "idi nahuy argi zabyl"}, HTTPStatus.BAD_REQUEST
         
-        offer = riendshipOfferModel.get_by_id(offer_id)
+        offer = FriendshipOfferModel.get_by_id(offer_id)
         if not offer:
             return {"404":"404"}, HTTPStatus.NOT_FOUND
             
@@ -55,7 +56,7 @@ class Friendship(BaseResource):
             UserFriendsModel.make_friendship(
                 offer.sender_id, offer.receiver_id
             )
-            return {"message": "create friendship"}, HTPStatus.CREATED        
+            return {"message": "create friendship"}, HTTPStatus.CREATED        
 
 class Friends(BaseResource):
     path = "/friendship/friends"
@@ -63,5 +64,5 @@ class Friends(BaseResource):
     @classmethod
     @jwt_required()
     def get(cls):
-        user_id: int = int(get_jwt_identity())
+        user_id: int = int(get_jwt_identity()["id"])
         return UserFriendsModel.get_user_friends(user_id)

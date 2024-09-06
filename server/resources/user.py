@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from ..models import UserModel, Exceptions as exc
 
 from .api import BaseResource
+from .api_logger import logger
 from .utils import (
     validate_username, validate_email,
     parser_factory, String,
@@ -19,20 +20,12 @@ class User(BaseResource):
     @classmethod
     def get(cls) -> tuple[dict, HTTPStatus]:
         user_id = request.args.get("id")
-        nickname = request.args.get("nickname", "")
-        offset = request.args.get("offset", 0)
-        limit = request.args.get("limit", 25)
-        
         try:
             if user_id:
-                # simple get user by id
                 user = UserModel.get_by_id(user_id)
                 return {"user": user.json()}, HTTPStatus.OK
             else:
-                # get list of users with pagination and filtering
-                    
-                users = UserModel.search(nickname, offset, limit)
-                return {"users": [user.id for user in users]}, HTTPStatus.OK
+                return {"message": "user_id required arg"}, HTTPStatus.BAD_REQUEST
 
         except exc.User.NotFound:
             return {"error": "user not found"}, HTTPStatus.NOT_FOUND

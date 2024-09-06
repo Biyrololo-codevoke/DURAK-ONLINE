@@ -18,6 +18,9 @@ user_socket = dict()
 key_identity = dict()
 
 
+logger.info(str(type(handle_socket_closing)))
+
+
 class RoomListObserver:
     def __init__(self, rooms: dict[int, int] = None, followers: list = None):
         self._rooms = rooms or dict()
@@ -54,7 +57,6 @@ class RoomListObserver:
 
         self.notify()
 
-    @handle_socket_closing(scope="join to room", async_mode=False)
     def join_to_room(self, room_id, player_id, password=None) -> tuple[bool, str]:
         try:
             room = RoomModel.get_by_id(room_id)
