@@ -19,7 +19,7 @@ export default function InviteFriends({is_open, on_close} : Props){
         const cancelToken = axios.CancelToken.source();
 
         axios
-        .get('/friendship/friends', {cancelToken: cancelToken.token})
+        .get('/friend/list', {cancelToken: cancelToken.token})
         .then((response) => {
             setFriends(response.data?.friends || []);
             setIsLoading(false);

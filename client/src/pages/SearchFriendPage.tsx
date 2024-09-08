@@ -3,10 +3,11 @@ import { List, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Friend from 'components/FriendsPage/Friend';
 import axios from 'axios';
+import { UserType } from 'types/ApiTypes';
 
 export default function SearchFriendPage() {
 
-    const [users, setUsers] = useState<number[]>([]);
+    const [users, setUsers] = useState<UserType[]>([]);
 
     const [find_value, setFindValue] = useState('');
 
@@ -16,14 +17,15 @@ export default function SearchFriendPage() {
 
         const delayRequest = setTimeout(() => {
             axios.get(
-                `/user?nickname=${find_value}&offset=${0}&limit=${999}`,
+                `/user?username=${find_value}&offset=${0}&limit=${999}`,
                 {
                     cancelToken: cancelToken.token
                 }
             )
             .then(
                 res => {
-                    setUsers(res.data.users);
+                    const data : UserType[] = res.data.users;
+                    setUsers(data);
                 }
             )
             .catch(
@@ -42,7 +44,7 @@ export default function SearchFriendPage() {
     }, [find_value]);
 
     function handle_add_friend(friend_id : number) {
-        const url = `/friendship/offer`
+        const url = `/friend/offer`
 
         axios.post(url, {
             friend_id
@@ -87,7 +89,9 @@ export default function SearchFriendPage() {
             </div>
             <List id="friends-list">
                 {users.map((id) => (
-                    <Friend key={id} user_id={id} icon_type="add" onClick={handle_add_friend}/>
+                    <Friend key={id.id} user_id={id.id} icon_type="add" onClick={handle_add_friend}
+                    user={id}
+                    />
                 ))}
             </List>
             {
