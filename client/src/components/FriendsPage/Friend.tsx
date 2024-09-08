@@ -28,7 +28,7 @@ export default function Friend({
 
     const [is_loading, setIsLoading] = useState(imp ? false : true);
 
-    const [user, set_user] = useState<User | null>(imp ? {username: imp.username, image: imp.image_id} : null);
+    const [user, set_user] = useState<User | null>(imp ? {username: imp.username, image: imp.image_id || EMPTY_USER_PHOTO_URL} : null);
 
     const [is_pressed, set_is_pressed] = useState(false);
 
@@ -115,6 +115,8 @@ function FriendOfferC({
                         username: data.user.username,
                         image: data.user.image_id || EMPTY_USER_PHOTO_URL
                     })
+
+                    setIsLoading(false);
                 }
             )
             .catch(console.error)
