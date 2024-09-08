@@ -22,4 +22,4 @@ def get_users(username: str, offset: int, limit: int) -> list[tuple[int, str]]:
 
     except Exception as e:
         db_logger.error(f"Ошибка: {e}")
-        return None
+        return None 
