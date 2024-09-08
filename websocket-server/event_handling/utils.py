@@ -49,25 +49,24 @@ def deserialize(str_json: str) -> dict:  # deserializes string json to dict
 
 
 def handle_socket_closing(scope: str, async_mode=True) -> Any:
+    logger.info(f"\ndecorator {scope=} {async_mode=}\n")
     def decorator(func):
-        async def async_wrapper(*args, **kwargs):
-            try:
-                return asyncio.run(
-                    func(*args, **kwargs)
-                )
-            except ConnectionClosed as e:
-                handle_error(e)
+        if func is None:
+            return
 
-        def wrapper(*args, **kwargs):
+        logger.info(f"func: {str(func)}")
+        def async_wrapper(*args, **kwargs):
             try:
-                func(*args, **kwargs)
-            except ConnectionClosed as e:
-                handle_error(e)
-
-        if async_mode:
-            return async_wrapper
-        else:
-            return wrapper
+                coro = func(*args, **kwargs)
+                task = asyncio.create_task(coro)
+                
+                if not task.cancelled():
+                    exc = task.exception()
+                    if exc:
+                        logger.indo(f"some exc in task: {str(exc)}")
+            except Exception as e:
+                logger.info(f"SOME EXCEPTION INTO DECORATOR: {str(e)}")
+        return async_wrapper
     return decorator
 
 def handler_error(e: ConnectionClosed, scope: str):

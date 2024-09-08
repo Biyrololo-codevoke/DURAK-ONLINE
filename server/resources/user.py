@@ -3,7 +3,7 @@ from http import HTTPStatus
 from flask import request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
-from ..models import UserModel, Exceptions as exc
+from ..models import UserModel, Exceptions as exc, get_users
 
 from .api import BaseResource
 from .api_logger import logger
@@ -20,12 +20,21 @@ class User(BaseResource):
     @classmethod
     def get(cls) -> tuple[dict, HTTPStatus]:
         user_id = request.args.get("id")
+        username = request.args.get("username")
+        offset = request.args.get("offset", 0)
+        limit = request.args.get("limit", 25)
         try:
             if user_id:
                 user = UserModel.get_by_id(user_id)
                 return {"user": user.json()}, HTTPStatus.OK
+            elif username:
+                users = get_users(username, offset, limit)
+                if users:
+                    return {"users": users}, HTTPStatus.OK
+                else:
+                    return {"users": []}, HTTPStatus.NOT_FOUND
             else:
-                return {"message": "user_id required arg"}, HTTPStatus.BAD_REQUEST
+                return {"message": "id required arg"}, HTTPStatus.BAD_REQUEST
 
         except exc.User.NotFound:
             return {"error": "user not found"}, HTTPStatus.NOT_FOUND

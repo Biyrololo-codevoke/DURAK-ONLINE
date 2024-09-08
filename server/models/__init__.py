@@ -9,3 +9,4 @@ from .FriendshipOfferModel import FriendshipOfferModel
 from .UserFriendsModel import UserFriendsModel
 
 from .enum_types import *
+from .raw_utils import get_users

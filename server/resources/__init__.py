@@ -4,4 +4,4 @@ from .register import Register
 from .room import Room
 from .user import User
 from .confirm_email import ConfirmEmail
-from .friendship import Friendship, Friends
+from .friendship import Friend, FriendList

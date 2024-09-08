@@ -1,5 +1,5 @@
 from functools import wraps
-from logging import getLogger, StreamHandler as LoggingStreamHandler, DEBUG as LoggingLevelDebug
+from logging import getLogger, StreamHandler as LoggingStreamHandler, INFO
 import logging
 import time
 
@@ -19,7 +19,7 @@ db = SQLAlchemy()
 db_logger = getLogger("db")
 # set up logging
 console_handler = LoggingStreamHandler()  # console logger
-console_handler.setLevel(LoggingLevelDebug)
+console_handler.setLevel(INFO)
 db_logger.addHandler(console_handler)
 
 

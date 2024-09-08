@@ -60,7 +60,7 @@ class RoomListObserver:
     def join_to_room(self, room_id, player_id, password=None) -> tuple[bool, str]:
         try:
             room = RoomModel.get_by_id(room_id)
-            player = UserModel.get_by_id(player)
+            player = UserModel.get_by_id(player_id)
             if not room.check_password(password):
                 return False, "Incorrect password"
 

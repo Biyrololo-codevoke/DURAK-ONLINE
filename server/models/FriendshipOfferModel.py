@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from .db import db, BaseModel
+from .db import db, BaseModel, retry_on_exception
 
 
 class FriendshipOfferModel(BaseModel):
@@ -16,7 +16,13 @@ class FriendshipOfferModel(BaseModel):
             "sender_id": self.sender_id,
             "receiver_id": self.receiver_id
         }
+
+    @classmethod
+    @retry_on_exception()
+    def get_by_id(cls, _id):
+        return cls.query.filter_by(id=_id).first()
         
     @classmethod
+    @retry_on_exception()
     def find_by_receiver_id(cls, receiver_id: int) -> list[FriendshipOfferModel]:
         return cls.query.filter_by(receiver_id=receiver_id).all()
