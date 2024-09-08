@@ -12,7 +12,7 @@ def get_users(username: str, offset: int, limit: int) -> list[tuple[int, str]]:
         offset {offset} limit {limit};
         """
         )
-        results = db.session.execute(sql_query, {"username": "%ле%"}).fetchall()
+        results = db.session.execute(sql_query, {"username": f"%{username.replace('%','')}%"}).fetchall()
 
         return [{
             "id": data[0],
