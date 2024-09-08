@@ -6,6 +6,8 @@ type UserType = {
     money: number;
 }
 
+export type {UserType};
+
 // Login user
 
 type LoginRequestType = {

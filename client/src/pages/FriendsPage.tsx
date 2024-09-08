@@ -15,7 +15,7 @@ export default function FriendsPage(){
     const [offers, set_offers] = useState<FriendOffer[]>([]);
 
     useEffect(()=>{
-        const url = '/friendship/offer';
+        const url = '/friend/offer';
 
         const cancelToken = axios.CancelToken.source();
 
@@ -39,7 +39,7 @@ export default function FriendsPage(){
         const cancelToken = axios.CancelToken.source();
 
         axios
-        .get('/friendship/friends', {cancelToken: cancelToken.token})
+        .get('/friend/list', {cancelToken: cancelToken.token})
         .then((response) => {
             setFriends(response.data?.friends || []);
             setIsLoading(false);
@@ -64,7 +64,7 @@ export default function FriendsPage(){
     }
 
     function reject_offer(offer_id: number){
-        const url = `/friendship/offer`
+        const url = `/friend/offer`
 
         const data = {
             offer_id,
@@ -81,7 +81,7 @@ export default function FriendsPage(){
     }
 
     function accept_offer(offer_id: number){
-        const url = `/friendship/offer`
+        const url = `/friend/offer`
 
         const data = {
             offer_id,

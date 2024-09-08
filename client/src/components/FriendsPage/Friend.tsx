@@ -2,7 +2,7 @@ import { CircularProgress, Divider, IconButton, ListItem, ListItemAvatar, ListIt
 import axios from 'axios';
 import { getUser } from 'constants/ApiUrls';
 import { useState, useEffect } from 'react';
-import { GetUserPhotoResponseType, GetUserResponseType } from 'types/ApiTypes';
+import { GetUserPhotoResponseType, GetUserResponseType, UserType } from 'types/ApiTypes';
 import CloseIcon from '@mui/icons-material/Close';
 import {EMPTY_USER_PHOTO_URL} from 'constants/StatisPhoto';
 import AddIcon from '@mui/icons-material/Add';
@@ -12,7 +12,8 @@ type Props = {
     user_id: number;
     icon_type: 'add' | 'remove';
     onClick?: (user_id: number) => void;
-    color?: 'black' | 'white'
+    color?: 'black' | 'white';
+    user?: UserType
 }
 
 type User = {
@@ -21,18 +22,19 @@ type User = {
 }
 
 export default function Friend({
-    user_id, icon_type, onClick, color} : Props) {
+    user_id, icon_type, onClick, color, user: imp} : Props) {
 
     const col = color || 'white';
 
-    const [is_loading, setIsLoading] = useState(true);
+    const [is_loading, setIsLoading] = useState(imp ? false : true);
 
-    const [user, set_user] = useState<User | null>(null);
+    const [user, set_user] = useState<User | null>(imp ? {username: imp.username, image: imp.image_id} : null);
 
     const [is_pressed, set_is_pressed] = useState(false);
 
     useEffect(
         ()=>{
+            if(user) return;
             const cancelToken = axios.CancelToken.source();
 
             axios.get(getUser(user_id), {
