@@ -58,9 +58,24 @@ export default function FriendsPage(){
 
     function handle_delete_friend(friend_id : number) {
 
-        // axios request
+        const url = '/friend/list';
 
-        setFriends(friends.filter((id) => id !== friend_id));
+        const body = {
+            friend_id
+        }
+
+        axios.post(url, body)
+        .then(
+            () => {
+                setFriends(friends.filter((id) => id !== friend_id));
+            }
+        )
+        .catch(
+            err => {
+                console.error(err);
+            }
+        )
+
     }
 
     function reject_offer(offer_id: number){
@@ -91,7 +106,14 @@ export default function FriendsPage(){
         axios.patch(url, data)
         .then(
             ()=> {
-                set_offers(prev => prev.filter(c => c.id !== offer_id))
+                let sender_id : undefined | number = undefined;
+                set_offers(prev => {
+                    sender_id = prev.find(c => c.id === offer_id)?.sender_id;
+                    return prev.filter(c => c.id !== offer_id)
+                });
+                if(sender_id !== undefined){
+                    setFriends(prev => [...prev, sender_id as number]);
+                }
             }
         )
         .catch(console.error)
