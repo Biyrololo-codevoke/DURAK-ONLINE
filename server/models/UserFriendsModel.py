@@ -21,12 +21,14 @@ class UserFriendsModel(BaseModel):
             return [d.friend_id for d in data]
         
     @classmethod
-    def make_friendship(cls, user_id: int, friend_id: int):
-        f1 = cls(user_id=user_id, friend_id=friend_id)
-        f2 = cls(user_id=friend_id, friend_id=user_id)
-        cls.save((f1, f2))
-        
-    @classmethod
-    def save(cls, objs: Iterable[UserFriendsModel]):
-        db.session.add_all(objs)
+    def remove(cls, user_id: int, friend_id: int):
+        cls.query.filter_by(user_id=user_id, friend_id=friend_id).delete()
+        cls.query.filter_by(user_id=friend_id, friend_id=user_id).delete()
         db.session.commit()
+
+
+def make_friendship(user_id: int, friend_id: int):
+    f1 = UserFriendsModel(user_id=user_id, friend_id=friend_id)
+    f2 = UserFriendsModel(user_id=friend_id, friend_id=user_id)
+    f1.save()
+    f2.save()

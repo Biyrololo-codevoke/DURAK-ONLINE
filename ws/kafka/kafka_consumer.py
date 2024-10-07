@@ -3,7 +3,7 @@ import json
 
 from aiokafka import AIOKafkaConsumer, errors as kafka_errors
 
-from event_handling import send_to_user, send_to_room, room_list
+from handlers.Room import Room, RoomConfig
 from websocket_logger import logger
 
 
@@ -14,31 +14,22 @@ consumer = None
 
 
 def handle_message(message):
-    destination_type = message.get("dest_type")  # "room" or "user" or "list"
-
-    recipient_id = message.get("dest_id")
-
-    if destination_type == "room":
-        send_to_room(recipient_id, message)
-
-    elif destination_type == "user":
-        send_to_user(recipient_id, message)
-        
-    elif destination_type == "list":
-        event_type = message["event_type"]
-        
-        if event_type == "create_room":  # { "event_type": "new_room", "room_id": 1 }
-            room_list.add_room(
-                message["room_id"],          
-                author_id=message["author_id"],
-                key=message["key"]
-            )
-
-        # if event_type == "update_room":  # { "event_type": "update_room", "room_id": 1, "room_count": 2 }
-        #     room_list.update_room(message["room_id"], message["room_count"])
+    event = message["event"]
+    
+    match event:
+        case "create_room":  # { "event_type": "new_room", "room_id": 1 }
+            id = message["room_id"],          
+            author_id = message["author_id"],
+            key = message["key"]
+            config = message["config"]
             
-        # if event_type == "remove_room":  # { "event_type": "remove_room", "room_id": 1 }
-        #     room_list.remove_room(message["room_id"])
+            room_config = RoomConfig(
+                **config  # TODO: cast to RoomConfig
+            )
+            room = Room(id, author_id, config.private, room_config)
+            
+        case _:
+            logger.error(f"unknown kafka event: {event}")
 
 
 async def start_consumer() -> None:

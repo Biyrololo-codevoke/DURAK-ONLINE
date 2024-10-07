@@ -8,13 +8,12 @@ from .event_handlers import handle_list, handle_room
 from .data import key_identity
 
 
-@handle_socket_closing(scope='router')
 async def router(path: str, payload: dict, socket: WebSocket):
     endpoint, data = handle_path(path)
 
     match endpoint:
         case "/room-list":
-            await handle_list(socket, payload)
+            asyncio.create_task(handle_list(socket, payload))
 
         case "/room":
             # pre-handling shit requests

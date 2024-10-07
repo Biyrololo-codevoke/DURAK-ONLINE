@@ -2,7 +2,7 @@ from http import HTTPStatus
 
 from .api import BaseResource
 from .api_logger import logger
-from ..models import FriendshipOfferModel, UserFriendsModel
+from ..models import FriendshipOfferModel, UserFriendsModel, make_friendship
 
 from flask import request
 from flask_jwt_extended import get_jwt_identity, jwt_required, verify_jwt_in_request
@@ -60,17 +60,31 @@ class Friend(BaseResource):
             offer.delete()
             return {"message": "successfully rejected"}, HTTPStatus.OK
         else:
-            UserFriendsModel.make_friendship(
+            make_friendship(
                 offer.sender_id, offer.receiver_id
             )
-            return {"message": "create friendship"}, HTTPStatus.CREATED        
+            offer.delete()
+            return {"message": "create friendship"}, HTTPStatus.CREATED
 
 
-class FriendList(BaseResource):
+class FriendList2(BaseResource):
     path = "/friend/list"
     
     @classmethod
     @jwt_required()
     def get(cls):
         user_id: int = int(get_jwt_identity()["id"])
-        return UserFriendsModel.get_user_friends(user_id)
+        return {"friends": UserFriendsModel.get_user_friends(user_id)}, HTTPStatus.OK
+
+    @classmethod
+    @jwt_required()
+    def post(cls):
+        user_id = int(get_jwt_identity()["id"])
+        friend_id = request.json.get("friend_id")
+        
+        if not friend_id:
+            return {"missed 'friend_id' arg"}, HTTPStatus.BAD_REQUEST
+        
+        friend_id = int(friend_id)
+        UserFriendsModel.remove(user_id, friend_id)
+        return {"message": "deleted"}, HTTPStatus.OK

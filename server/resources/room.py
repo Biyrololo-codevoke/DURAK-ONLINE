@@ -64,9 +64,9 @@ class Room(BaseResource):
             room.game_state = RoomType.RoomState.OPEN
             room.save()
 
-            key = "athr" + uuid4().hex + "_" + str(author_id)
+            key = "athr" + uuid4().hex
 
-            send_new_room(room.id, author_id, key)
+            send_new_room(room.id, author_id, key, room.json())
 
             return {
                 "room": room.json(),

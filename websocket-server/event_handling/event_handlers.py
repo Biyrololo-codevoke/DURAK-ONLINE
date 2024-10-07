@@ -6,17 +6,23 @@ from websockets import WebSocketServerProtocol as WebSocket
 from websocket_logger import logger
 
 from .data import room_list, user_socket, socket_identity, route_game_events
-from .utils import serialize, handle_socket_closing
+from .utils import serialize
 
 
 async def send_to_socket(socket: WebSocket, payload: dict):
-    await socket.send(serialize(payload))
+    if not socket.closed:
+        await socket.send(serialize(payload))
+    else:
+        logger.error("socket closed (send_to_socket)")
 
 
 async def send_to_user(user_id: int, payload: dict):
     socket = user_socket[user_id]
-    logger.info(f"send_to_user[{user_id}] event {payload.get('event')}: -> {payload}")
-    await send_to_socket(socket, payload)
+    if not socket.closed:
+        logger.info(f"send_to_user[{user_id}] event {payload.get('event')}: -> {payload}")
+        await send_to_socket(socket, payload)
+    else:
+        logger.error("socket closed (send_to_user)")
 
 
 async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = None):
@@ -24,12 +30,16 @@ async def send_to_room(room_id: int, payload: dict, broadcast_socket_id: int = N
     if room_sockets:
         logger.info(f"send_to_room[{room_id}] event: {payload.get('event')}")
         for socket in room_sockets:
+            if socket.closed:
+                room_sockets.remove(socket)
+                await handle_socket_closing(room_id, socket)
+                continue
+            
             if broadcast_socket_id == id(socket):
                 continue
             await send_to_socket(socket, payload)
 
 
-@handle_socket_closing(scope="handle_room")
 def handle_room(payload: dict, socket: WebSocket):
 
     event = payload["event"]
@@ -78,7 +88,6 @@ def handle_room(payload: dict, socket: WebSocket):
             route_game_events(payload, room_id, key)
 
 
-@handle_socket_closing(scope="d list")
 async def handle_list(socket: WebSocket, payload: dict):
     key = payload.get("key")
     if key:
@@ -87,7 +96,7 @@ async def handle_list(socket: WebSocket, payload: dict):
     
     if "event" not in payload.keys():
         current_room_list = room_list.get_rooms()
-        await send_to_socket(socket, current_room_list)
+        asyncio.create_task(send_m(socket, current_room_list))
         # subscribe for future updates
         room_list.subscribe(socket)
     else:
@@ -95,7 +104,7 @@ async def handle_list(socket: WebSocket, payload: dict):
         match event:
             case "join_room":
                 if payload.get("room_id") is None:
-                    await send_to_socket(socket, {"status": "error", "message": "room_id is missed"})
+                    asyncio.create_task(send_m(socket, {"status": "error", "message": "room_id is missed"}))
 
                 room_id = payload.get("room_id")
                 passsword = payload.get("password")  # nullable
@@ -104,10 +113,23 @@ async def handle_list(socket: WebSocket, payload: dict):
                 status, message = room_list.join_to_room(room_id, player_id, passsword)
 
                 if status:
-                    await send_to_socket(socket, {"status": "success", "key": message})
+                    asyncio.create_task(send_m(socket, {"status": "success", "key": message}))
                 else:
-                    await send_to_socket(socket, {"status": "error", "message": message})
+                    asyncio.create_task(send_m(socket, {"status": "error", "message": message}))
 
             case _:
-                await send_to_socket(socket, {"status": "error", "message": f"{event=} not found"})
+                await send_m(socket, {"status": "error", "message": f"{event=} not found"})
     return 0
+
+
+async def send_m(socket: WebSocket, payload: dict):
+    if socket.closed:
+        logger.error(f"CLOSED, code: {socket.close_code}")
+    else:
+        asyncio.create_task(
+            send_to_socket(socket, payload)
+        )
+
+async def handle_socket_closing(room_id: int, socket: WebSocket):
+    user_id = socket_identity.get(id(socket), -1)
+    await send_to_room(room_id, {"event": "leave_room", "user_id": user_id })

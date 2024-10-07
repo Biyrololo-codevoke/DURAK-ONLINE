@@ -9,16 +9,12 @@ from models import RoomModel, UserModel, RoomTypes, Exceptions
 from websocket_logger import logger
 
 from .game import Game, Player, Card
-from .utils import handle_socket_closing
 
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
 socket_identity = dict()
 user_socket = dict()
 key_identity = dict()
-
-
-logger.info(str(type(handle_socket_closing)))
 
 
 class RoomListObserver:
@@ -107,7 +103,6 @@ class RoomListObserver:
         except Exceptions.Room.NotFound:
             return False, "Room not found"
 
-    @handle_socket_closing(scope="connect to rom", async_mode=False)
     def connect_to_room(self, room_id: int, key: str) -> tuple[bool, str]:
         room_connections = self._rooms_join_keys.get(room_id)
         player_connection = list(filter(lambda x: x["key"] == key, room_connections))[0]
@@ -160,7 +155,7 @@ class RoomListObserver:
         })
         self.remove_room(room_id)
         
-    @handle_socket_closing(scope="accept start", async_mode=False)
+
     def accept_start(self, room_id: int, key: int):
         player_id = int(key.split('_')[-1])
         player_socket = key_identity[key]
@@ -266,7 +261,10 @@ class RoomListObserver:
 
 async def send_data(socket, payload):
     serialized = json.dumps(payload)
-    await socket.send(serialized)
+    if not socket.closed:
+        await socket.send(serialized)
+    else:
+        logger.error("socket was closed. can not send")
 
 
 def send_to_room(room_id: int, payload: dict, socket_id: int = None):
@@ -283,7 +281,6 @@ def send_to_player(player_id: int, payload: dict):
     )
 
 
-@handle_socket_closing(scope="route game events",async_mode=False)
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
     room = RoomModel.get_by_id(room_id)

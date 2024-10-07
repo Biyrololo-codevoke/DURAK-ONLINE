@@ -156,6 +156,3 @@ class RoomModel(BaseModel):  # type: ignore
     @game_state.setter
     def game_state(self, value: Room.RoomState) -> None:
         self._game_state = Room.RoomState(value)
-
-
-
