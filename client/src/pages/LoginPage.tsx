@@ -85,7 +85,9 @@ export default function LoginPage(){
         .catch(
             (err)=>{
                 let error_message = 'Не удалось войти'
+                console.log(err.request);
                 if(err.response){
+                    console.log(err.response);
                     let error_code = err.response.status;
 
                     switch(error_code){

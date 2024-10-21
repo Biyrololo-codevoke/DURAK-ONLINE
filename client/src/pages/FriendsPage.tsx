@@ -48,6 +48,11 @@ export default function FriendsPage(){
             if (axios.isCancel(error)) {
                 return;
             }
+
+            if(error.response?.status === 404){
+                setFriends([]);
+                setIsLoading(false);
+            }
         })
 
         return () => {

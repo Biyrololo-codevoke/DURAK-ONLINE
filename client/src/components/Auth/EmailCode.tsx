@@ -30,6 +30,8 @@ export default function EmailCode(){
                 toast.error('Пользователь не найден');
             } else if(err.response?.status === 500){
                 toast.error('Проблемы с обработкой данных, повторите запрос')
+            } else {
+                toast.error('Неверный код');
             }
         })
     }
