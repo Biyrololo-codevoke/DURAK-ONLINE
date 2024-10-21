@@ -25,7 +25,7 @@ export default function SearchFriendPage() {
             .then(
                 res => {
                     const data : UserType[] = res.data.users;
-                    setUsers(data);
+                    setUsers(data.filter(user => String(user.id) !== localStorage.getItem('user_id')));
                 }
             )
             .catch(

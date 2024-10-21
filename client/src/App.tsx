@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import './Main.css';
 import axios from 'axios';
-import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage, FriendsPage, SearchFriendPage } from 'pages';
+import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage, FriendsPage, SearchFriendPage, NewsPage } from 'pages';
 import {SettingsPage, ConfirmEmailPage} from 'pages';
 import { GamePage, ConnectingPage } from 'pages';
 import { GameFiltersPage, PrivateGamesPage } from 'pages';
@@ -17,6 +17,7 @@ import {Protected} from 'hocs';
 import { useState } from 'react';
 import getAllResources from 'features/getAllResources';
 import { LinearProgress, Typography } from '@mui/material';
+import RulesPage from 'pages/RulesPage';
 
 const LOGIN_PAGES_URLS = ['/login', '/register']
 
@@ -133,6 +134,8 @@ function App() {
           <Route path="*" Component={DefaultPage} />
           <Route path="/register" Component={RegisterPage} />
           <Route path="/login" Component={LoginPage} />
+          <Route path='/rules' Component={RulesPage} />
+          <Route path='/news' Component={NewsPage} />
           <Route path="/profile" element={
             <Protected>
               <ProfilePage/>
