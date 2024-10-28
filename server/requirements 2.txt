@@ -11,4 +11,3 @@ passlib
 confluent_kafka
 
 gunicorn
-sqlalchemy-utils

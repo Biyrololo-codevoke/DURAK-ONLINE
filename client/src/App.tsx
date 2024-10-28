@@ -17,6 +17,8 @@ import {Protected} from 'hocs';
 import { useState } from 'react';
 import getAllResources from 'features/getAllResources';
 import { LinearProgress, Typography } from '@mui/material';
+import RulesPage from 'pages/RulesPage';
+import NewsPage from 'pages/NewsPage';
 
 const LOGIN_PAGES_URLS = ['/login', '/register']
 
@@ -43,7 +45,7 @@ function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
   axios.defaults.baseURL = '/api'; //https://codevoke.ru/api
-  // axios.defaults.baseURL = 'https://codevoke.ru/api'
+  axios.defaults.baseURL = 'http://127.0.0.1:5000/api'
 
   if(isMobile){
     document.body.id = 'mobile-view';
@@ -133,6 +135,8 @@ function App() {
           <Route path="*" Component={DefaultPage} />
           <Route path="/register" Component={RegisterPage} />
           <Route path="/login" Component={LoginPage} />
+          <Route path='/rules' Component={RulesPage} />
+          <Route path='/news' Component={NewsPage} />
           <Route path="/profile" element={
             <Protected>
               <ProfilePage/>

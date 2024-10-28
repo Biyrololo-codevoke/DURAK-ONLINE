@@ -80,3 +80,10 @@ footer{
     color: white !important;
     text-align: center;
 }
+
+.block-title{
+    width: 100%;
+    background: white;
+    padding: 13px 0;
+    position: relative;
+}

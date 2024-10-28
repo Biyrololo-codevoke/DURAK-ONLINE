@@ -1,0 +1,126 @@
+services:
+  client:
+    container_name: client
+    build: ./client
+    restart: on-failure
+    ports:
+      - "3000:3000"
+    command: serve -s build
+    depends_on:
+      - server
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+      ZOOKEEPER_LOG4J_ROOT_LOGLEVEL: ERROR
+    ports:
+      - "2181:2181"
+
+  kafka:
+    image: confluentinc/cp-kafka:latest
+    depends_on:
+      - zookeeper
+    ports:
+      - "9092:9092"
+    hostname: kafka
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 2
+      KAFKA_LOG4J_LOGGERS: "kafka.controller=ERROR,kafka.producer.async.DefaultEventHandler=ERROR,state.change.logger=ERROR,kafka.network.RequestChannel$=ERROR,kafka.request.logger=ERROR,kafka.coordinator.group.GroupMetadataManager=ERROR,kafka.log.LogCleaner=ERROR,state.change.logger=ERROR,kafka.authorizer.logger=ERROR"
+      KAFKA_LOG4J_ROOT_LOGLEVEL: ERROR
+
+  kafka-ui:
+    image: provectuslabs/kafka-ui
+    container_name: kafka-ui
+    ports:
+      - "8090:8080"
+    restart: always
+    environment:
+      - KAFKA_CLUSTERS_0_NAME=local
+      - KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS=kafka:9092
+      - KAFKA_CLUSTERS_0_ZOOKEEPER=zookeeper:2181
+    links:
+      - kafka
+      - zookeeper
+    logging:
+       driver: "json-file"
+       options:
+         max-size: "10m"
+         max-file: "5"
+
+  postgres:
+    image: 'postgres:15'
+    ports:
+      - '5432:5432'
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - MAX_CONNECTIONS=100
+      - SHARED_BUFFERS=256MB
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  server:
+    build: ./server
+    restart: on-failure
+    ports:
+      - '5000:5000'
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
+      - KAFKA_URI=kafka:9092
+      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
+    depends_on:
+      - kafka
+      - zookeeper
+    command: flask run --host 0.0.0.0 --port 5000
+
+  websocket-server:
+    build: ./websocket-server
+    restart: on-failure
+    ports:
+      - '9000:9000'
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
+      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
+      - KAFKA_URI=kafka:9092
+    deploy:
+      replicas: 1
+    depends_on:
+      - kafka
+      - zookeeper
+    command: python main.py
+
+  email-sender:
+    build: ./email-sender-service
+    restart: on-failure
+    ports:
+      - '5100:5100'
+    environment:
+      - KAFKA_URI=kafka:9092
+      - LOGO_PATH=https://codevoke.ru/static/logo512.png
+    depends_on:
+      - server
+    command: python main.py
+
+  image-service:
+    build: ./image-service
+    restart: on-failure
+    ports:
+      - '5200:5200'
+    environment:
+      - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
+    depends_on:
+      - server
+    volumes:
+    - ./image-service/images:/image-service/images
+    command: flask run --host 0.0.0.0 --port 5200
+
+volumes:
+  pgdata: {}

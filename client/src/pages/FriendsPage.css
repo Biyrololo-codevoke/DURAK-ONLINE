@@ -14,7 +14,8 @@
     padding: 10px 15px !important;
     display: flex;
     align-items: flex-start !important;
-    gap: 10px
+    gap: 10px;
+    position: relative;
 }
 
 .friend-avatar{

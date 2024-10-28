@@ -489,6 +489,32 @@ def route_game_events(payload: dict, room_id: int, key: str):
                 room.game_obj = s_game
                 room.save()
             
+        case "loose_on_time":
+            logger.info(f"player[{player_id}] loose on time")
+
+            game.is_end = False
+
+            each_reward = int(room.reward / (game.players_count - 1))
+
+            place_ = 0
+            for player in game.players:
+                if player.id == player_id:
+                    continue
+                send_to_room(room_id, {
+                    "event": "player_win",
+                    "top": place_,
+                    "money": each_reward,
+                    "player_id": player.id
+                })
+                place_ += 1
+
+            send_to_room(room_id, {
+                "event": "game_over",
+                "looser_id": player_id
+            })
+            
+            make_new_room(room_id, game)
+
         case _:
             send_to_player(player_id, {
                 "status": "error",

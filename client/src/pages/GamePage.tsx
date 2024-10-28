@@ -479,12 +479,24 @@ export default function GamePage(){
                         (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
                         (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
                     }
+                    set_enemy_cards_delta((prev) => {
+                        return {
+                            ...prev,
+                            [take_user_id]: 0
+                        }
+                    })
     
                     setTimeout(()=>{
                         setUsersCards((prev) => {
                             return {
                                 ...prev,
                                 [take_user_id]: prev[take_user_id] + taking_cards.length
+                            }
+                        })
+                        set_enemy_cards_delta((prev) => {
+                            return {
+                                ...prev,
+                                [take_user_id]: 0
                             }
                         })
                     }, 400)
@@ -735,7 +747,8 @@ export default function GamePage(){
         setUsersCards(prev=>{
             const new_cards = {...prev};
             delta = cards_count - new_cards[player_id];
-            new_cards[player_id] = cards_count;
+            if(String(player_id) !== localStorage.getItem('take_user_id')) 
+                new_cards[player_id] = cards_count;
             return new_cards
         })
 
@@ -1364,7 +1377,7 @@ export default function GamePage(){
         _socket.send(
             JSON.stringify(
                 {
-                    event: 'loose'
+                    event: 'loose_on_time'
                 }
             )
         )

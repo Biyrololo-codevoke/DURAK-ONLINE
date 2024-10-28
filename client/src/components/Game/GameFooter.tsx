@@ -96,48 +96,70 @@ export default function GameFooter({handle_start_game, handle_action_button, han
             }
         )
 
-        set_is_taking(gameState === 2 && _is_victim && !__has_message && __game_board !== null &&
-        __game_board.some(c => !c.upper) && __game_board.length > 0)
+        const new_taking = gameState === 2 && _is_victim && !__has_message && __game_board !== null &&
+        __game_board.some(c => !c.upper) && __game_board.length > 0;
 
-        set_is_bito(gameState === 2 && __game_board !== null && !__has_message &&
+        set_is_taking(new_taking);
+
+        localStorage.setItem('is_taking', String(new_taking));
+
+        const new_bito = gameState === 2 && __game_board !== null && !__has_message &&
         !__game_board.some(c => !c.upper) && __game_board.length > 0 && (
             _is_walking || (
                 !is_walking && !is_victim && (
                     messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text && m.user_id === _game_players.walking)
                 )
             )
-        ))
-
-        set_is_pass(gameState === 2 && !__has_message && 
-            __game_board.length > 0 &&
-            (
-                (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
-                (!is_walking && !_is_victim && 
-                    messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)
-                )
-            )
         )
+
+        set_is_bito(new_bito);
+        
+        localStorage.setItem('is_bito', String(new_bito));
+
+        const new_pass = gameState === 2 && !__has_message && 
+        __game_board.length > 0 &&
+        (
+            (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
+            (!is_walking && !_is_victim && 
+                messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)
+            )
+        );
+
+        set_is_pass(new_pass);
+
+        localStorage.setItem('is_pass', String(new_pass));
 
     }, [timers.timer_update, messages])
 
-    const handle_time_out = useMemo(() => {
-
-        return function(){
-            console.log(`Player time out!`)
-            if(is_pass){
-                console.log('PASS')
-                handle_action_button('pass')
-            }
-            else if(is_bito){
-                console.log('BITO')
-                handle_action_button('bito')
-            }
-            else if(is_taking){
-                console.log('IS TAKING')
-                handle_time_out_loose();
-            }
+    const handle_time_out = function(){
+        if(gameState === 0) return;
+        if(gameState === 1) {
+            handle_time_out_loose();
+            return;
         }
-    }, [is_pass, is_bito, is_taking])
+        const _is_taking = localStorage.getItem('is_taking') === 'true';
+        const _is_bito = localStorage.getItem('is_bito') === 'true';
+        const _is_pass = localStorage.getItem('is_pass') === 'true';
+        console.log(`Player time out!`)
+        console.table({
+            _is_pass,
+            _is_bito,                
+            _is_taking
+        })
+        if(_is_pass){
+            console.log('PASS')
+            handle_action_button('pass')
+        }
+        else if(_is_bito){
+            console.log('BITO')
+            handle_action_button('bito')
+        }
+        else{
+            console.log('IS TAKING')
+            // handle_action_button('bito')
+            handle_time_out_loose()
+        }
+    }
 
     return (
         <div id="game-footer">

@@ -3,25 +3,60 @@ import { List, TextField, Typography } from '@mui/material';
 import { useEffect, useState } from 'react';
 import Friend from 'components/FriendsPage/Friend';
 import axios from 'axios';
+import { UserType } from 'types/ApiTypes';
 
 export default function SearchFriendPage() {
 
-    const [users, setUsers] = useState<number[]>([]);
+    const [users, setUsers] = useState<UserType[]>([]);
 
     const [find_value, setFindValue] = useState('');
 
     useEffect(() => {
-        const delayRequest = setTimeout(() => {
-            // axios request
-        }, 1000);
 
-        return () => clearTimeout(delayRequest);
+        const cancelToken = axios.CancelToken.source();
+
+        const delayRequest = setTimeout(() => {
+            axios.get(
+                `/user?username=${find_value}&offset=${0}&limit=${999}`,
+                {
+                    cancelToken: cancelToken.token
+                }
+            )
+            .then(
+                res => {
+                    const data : UserType[] = res.data.users;
+                    setUsers(data.filter(user => String(user.id) !== localStorage.getItem('user_id')));
+                }
+            )
+            .catch(
+                err => {
+                    console.error(err);
+                    setUsers([]);
+                }
+            )
+        }, 500);
+
+        return () => {
+            clearTimeout(delayRequest);
+            cancelToken.cancel();
+        }
 
     }, [find_value]);
 
     function handle_add_friend(friend_id : number) {
-        // TODO
-        // axios request
+        const url = `/friend/offer`
+
+        axios.post(url, {
+            friend_id
+        }, {})
+        .then(
+            () => {
+                console.log('отправил в др')
+            }
+        )
+        .catch(
+            console.error
+        )
     }
 
     return (
@@ -54,9 +89,15 @@ export default function SearchFriendPage() {
             </div>
             <List id="friends-list">
                 {users.map((id) => (
-                    <Friend key={id} user_id={id} icon_type="add" onClick={handle_add_friend}/>
+                    <Friend key={id.id} user_id={id.id} icon_type="add" onClick={handle_add_friend}
+                    user={id}
+                    />
                 ))}
             </List>
+            {
+                users.length === 0 && 
+                <Typography variant='h5' style={{color: 'white', textAlign: 'center'}}>Никого не нашлось</Typography>
+            }
         </main>
     )
 }
