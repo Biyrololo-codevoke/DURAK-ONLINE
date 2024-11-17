@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-from typing import List, Dict, Literal
+from typing import List
 import json
 
-from .card import Card
-from .game_logger import logger
+from card import Card
 
 
 class GameBoard:

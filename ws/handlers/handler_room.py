@@ -22,7 +22,7 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         
     def on_message(self, message: dict):
         event = message.get("event")
-        # handle_list_event(event, message, self)
+        handle_room_event(event, message, self.user)
 
     def on_close(self):
         logger.info("WebSocket closed")
@@ -33,3 +33,32 @@ class WebSocketHandler(tornado.websocket.WebSocketHandler):
         logger.info("origin: " + origin)
         return True
 
+
+def handle_room_event(event: str, message: dict, user: User):
+    match event:
+        case "place_card":
+            ...
+
+        case "pass":
+            ...
+
+        case "bito":
+            ...
+
+        case "take":
+            ...
+        
+        case "throw_card":
+            ...
+
+        case "throw_card":
+            ...
+        
+        case "transfer_card":
+            ...
+
+        case _:
+            user.send({
+                "status": "error",
+                "message": "Unknown event"
+            })

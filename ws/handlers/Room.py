@@ -26,7 +26,7 @@ class Room:
         self.private = private
         self.password = password
         self.auth_keys = set()
-        self.recaovery_keys = dict()
+        self.recovery_keys = dict()
 
     def _add_player(self, player: User):
         self.players.add(player)
@@ -79,9 +79,9 @@ class Room:
         return True
     
     def reconnect_player(self, player: User, rkey: str):
-        if self.recaovery_keys[player.id] and rkey not in self.recovery_keys[player.id]:
+        if self.recovery_keys[player.id] and rkey not in self.recovery_keys[player.id]:
             return False, "Invalid recovery key"
-        elif not self.recaovery_keys[player.id]:
+        elif not self.recovery_keys[player.id]:
             return False, "Player lost all tries"
         
         self._add_player(player)
