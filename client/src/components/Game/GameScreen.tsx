@@ -38,7 +38,10 @@ type Props = {
     enemy_cards_delta: EnemyCardDelta;
     set_enemy_cards_delta: React.Dispatch<React.SetStateAction<EnemyCardDelta>>;
     users_cards: UserCards;
-    setUsersCards: React.Dispatch<React.SetStateAction<UserCards>>
+    setUsersCards: React.Dispatch<React.SetStateAction<UserCards>>;
+    disconnected_players: Set<number>;
+    current_turn_player: number;
+    turn_start_time: number;
 
     player_throw: (event: PlaceCard) => void;
     handle_transfer: (card: CardType) => void;
@@ -48,7 +51,7 @@ type Props = {
 
 export default function GameScreen(props: Props){
 
-    const {players_in_room, users_ids, setUsersIds} = props;
+    const {players_in_room, users_ids, setUsersIds, disconnected_players, current_turn_player, turn_start_time} = props;
 
     const {trump_card} = props;
 
@@ -287,37 +290,6 @@ export default function GameScreen(props: Props){
 
     const {enemy_cards_delta, set_enemy_cards_delta} = props;
 
-
-    // useEffect(
-    //     ()=>{
-    //         document.addEventListener('keypress', (e)=>{
-    //                 const new_card : CardType = 
-    //                 {
-    //                     suit: 2,
-    //                     value: 8
-    //                 };
-    //                 set_new_cards([
-    //                     new_card
-    //                 ])
-    //                 setUsersCards(prev=>(
-    //                     {
-    //                         ...prev,
-    //                         me: [...prev['me'], new_card]
-    //                     }
-    //                 ))
-    //                 set_enemy_cards_delta(prev=>(
-    //                     {
-    //                         3 : 11,
-    //                         5 : 12,
-    //                         4 : 13,
-    //                         6 : 14,
-    //                     }
-    //                 ))
-                
-    //         })
-    //     }
-    // )
-
     const sorted_player_cards = useMemo(
         ()=>{
             let cards : CardType[] = users_cards['me'];
@@ -337,6 +309,47 @@ export default function GameScreen(props: Props){
         },
         [users_cards['me'].length, trump_card.suit]
     )
+
+    // Timer state
+    const [timeLeft, setTimeLeft] = useState(30);
+
+    // Update timer every second
+    useEffect(() => {
+        if (current_turn_player) {
+            const timer = setInterval(() => {
+                const elapsed = Math.floor((Date.now() - turn_start_time) / 1000);
+                const remaining = Math.max(30 - elapsed, 0);
+                setTimeLeft(remaining);
+            }, 1000);
+
+            return () => clearInterval(timer);
+        }
+    }, [current_turn_player, turn_start_time]);
+
+    // Render player avatars with status indicators
+    const renderPlayerAvatar = useCallback((playerId: number) => {
+        const isDisconnected = disconnected_players.has(playerId);
+        const isCurrentTurn = playerId === current_turn_player;
+        
+        return (
+            <div className="player-avatar-container">
+                <UserAvatar 
+                    user_id={playerId} 
+                    className={`player-avatar ${isDisconnected ? 'disconnected' : ''} ${isCurrentTurn ? 'current-turn' : ''}`}
+                />
+                {isCurrentTurn && (
+                    <div className="turn-timer">
+                        {timeLeft}s
+                    </div>
+                )}
+                {isDisconnected && (
+                    <div className="disconnect-indicator">
+                        Disconnected
+                    </div>
+                )}
+            </div>
+        );
+    }, [disconnected_players, current_turn_player, timeLeft]);
 
     return (
         <GameBoardContext.Provider value={{
@@ -365,17 +378,7 @@ export default function GameScreen(props: Props){
                             }
 
                             return (
-                                <div key={index} className="user-avatar-container">
-                                    <UserAvatar user_id={user_id}/>
-                                    <EnemyCards cards_count={users_cards[user_id] as number} delta={enemy_cards_delta[user_id as keyof EnemyCardDelta]}
-                                    index={index}
-                                    />
-                                    <center>
-                                        <Typography variant="subtitle1" style={{color: '#FFFFFF'}}>
-                                            {(start_num + index) % players_in_room + 1}
-                                        </Typography>
-                                    </center>
-                                </div>
+                                renderPlayerAvatar(user_id as number)
                             )
                         })
                     }

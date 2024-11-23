@@ -11,7 +11,7 @@ type Props = {
     on_start_game: () => void;
     init_trump_card: (card: GameCard) => void;
     init_deck: (cards: GameCard[]) => void;
-    on_next_move: (victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, players_queue?: number[]) => void;
+    on_next_move: (victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, target?: number) => void;
     on_place_card: (event: {slot: number; card: GameCard}, player_id: number) => void;
     on_game_message: (data: {user_id: number; type: 'take' | 'bito' | 'pass'}) => void;
     on_give_enemies_cards: (player_id: number, cards_count: number) => void;
@@ -30,144 +30,118 @@ export default function handle_event(props: Props){
     
     const {data, setUsersIds} = props;
 
-    console.log(`recieved message`)
+    console.log(`received message`)
     console.table(data);
     if('event' in data){
-        if(data.event === 
-            'player_connected'
-        ) {
-            console.log('new player')
-            let new_id : number = data.player_id;
+        switch(data.event) {
+            case 'player_connected':
+                console.log('new player')
+                let new_id : number = data.player_id;
 
-            if(String(new_id) === localStorage.getItem('user_id')) return
+                if(String(new_id) === localStorage.getItem('user_id')) return
 
-            let is_reconnect = false;
+                let is_reconnect = false;
 
-            setUsersIds(prev=>{
-
-                if(prev.includes(new_id)){
-                    is_reconnect = true;
-                    return prev
-                }
-
-                console.log('updating ids')
-                const n_ids = [...prev];
-                for(let i = 0; i < prev.length; ++i){
-                    if(typeof(n_ids[i]) === 'number' && n_ids[i] < 0){
-                        n_ids[i] = new_id;
-                        break;
+                setUsersIds(prev=>{
+                    if(prev.includes(new_id)){
+                        is_reconnect = true;
+                        return prev
                     }
+                    return [...prev, new_id]
+                })
+
+                if(is_reconnect){
+                    props.on_player_reconnect(new_id);
+                } else {
+                    props.on_player_accept(new_id);
                 }
+                break;
 
-                localStorage.setItem('_users_ids', JSON.stringify(n_ids));
+            case 'player_disconnected':
+                props.on_player_leave(data.player_id);
+                break;
 
-                return n_ids
-            })
+            case 'game_timeout':
+                props.on_game_over(data.loser_id);
+                break;
 
-            if(is_reconnect){
-                props.on_player_reconnect(new_id);
-            }
-        }
+            case 'cards_taken':
+                props.on_player_took(data.cards_count, data.player_id);
+                props.on_next_move(data.next_defender, data.next_attacker, data.throwing_players);
+                break;
 
-        else if(
-            data.event === 'make_start'
-        ) {
-            props.make_start()
-        }
+            case 'start':
+                props.make_start();
+                break;
 
-        else if(
-            data.event === 'accept'
-        ) {
-            props.on_player_accept(data.player_id)
-        } 
+            case 'game_started':
+                props.on_start_game();
+                break;
 
-        else if(
-            data.event === 'start_game'
-        ) {
-            props.on_start_game();
-        }
+            case 'trump_card':
+                props.init_trump_card(convert_card(data.card));
+                break;
 
-        else if(
-            data.event === 'game_init'
-        ) {
-            props.init_trump_card(data.last_card);
-        }
+            case 'init_deck':
+                props.init_deck(data.cards.map(convert_card));
+                break;
 
-        else if(
-            data.event === 'init_deck'
-        ) {
-            props.init_deck(data.deck.cards);
-        }
+            case 'next_move':
+                props.on_next_move(
+                    data.victim,
+                    data.walking,
+                    data.throwing_players,
+                    data.type,
+                    data.deck_count,
+                    data.target
+                );
+                break;
 
-        else if(
-            data.event === 'next'
-        ) {
-            props.on_next_move(data.victim_player, data.walking_player, data.throwing_players, data.type, data.decKeck, data.players_queue);
-        }
+            case 'place_card':
+                props.on_place_card({
+                    slot: data.slot,
+                    card: convert_card(data.card)
+                }, data.player_id);
+                break;
 
-        else if(
-            data.event === 'place_card' || data.event === 'card_beat' || data.event === 'throw_card'
-        ) {
-            props.on_place_card(data, data.player_id);
-        }
+            case 'game_message':
+                props.on_game_message({
+                    user_id: data.user_id,
+                    type: data.type
+                });
+                break;
 
-        else if(
-            data.event === 'bito' || data.event === 'pass' || data.event === 'take'
-        ) {
-            props.on_game_message({
-                user_id: data.player_id,
-                type: data.event
-            })
-        }
-        else if(
-            data.event === 'surprise'
-        ) {
-            const converted_cards : CardType[] = data.cards.map(c => convert_card(c));
+            case 'give_enemies_cards':
+                props.on_give_enemies_cards(data.player_id, data.cards_count);
+                break;
 
-            props.on_give_player_cards(converted_cards);
-        }
-        else if(
-            data.event === 'give_cards'
-        ) {
-            props.on_give_enemies_cards(data.player_id, data.cards_count);
-        }
-        else if(
-            data.event === 'get_cards'
-        ) {
-            const converted_cards : CardType[] = data.cards.map(c => convert_card(c));
-            props.on_get_cards(converted_cards);
-        }
-        else if(
-            data.event === 'player_taked'
-        ) {
-            props.on_player_took(data.cards_count, data.player_id);
-        }
-        else if(
-            data.event === 'player_win'
-        ) {
-            props.on_player_win(data.player_id, data.money);
-        }
-        else if(
-            data.event === 'game_over'
-        ) {
-            props.on_game_over(data.looser_id);
-        }
-        else if(
-            data.event === 'transfer_card'
-        ) {
-            const c_card = convert_card(data.card)
-            props.on_transfer(c_card, data.player_id)
-        }
-        else if(
-            data.event === 'room_redirect'
-        ) {
-            setTimeout(()=>{
-                props.on_room_redirect(data.new_room_id, data.key)
-            }, 5000)
-        } else if(
-            data.event === 'leave'
-        ) {
-            props.on_player_leave(data.player_id)
+            case 'give_player_cards':
+                props.on_give_player_cards(data.cards.map(convert_card));
+                break;
+
+            case 'get_cards':
+                props.on_get_cards(data.cards.map(convert_card));
+                break;
+
+            case 'player_took':
+                props.on_player_took(data.cards_count, data.player_id);
+                break;
+
+            case 'player_win':
+                props.on_player_win(data.player_id, data.money);
+                break;
+
+            case 'game_over':
+                props.on_game_over(data.loser_id);
+                break;
+
+            case 'transfer':
+                props.on_transfer(convert_card(data.card), data.player_id);
+                break;
+
+            case 'room_redirect':
+                props.on_room_redirect(data.room_id, data.key);
+                break;
         }
     }
 }

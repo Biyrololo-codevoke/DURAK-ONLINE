@@ -64,9 +64,9 @@ class Room(BaseResource):
             room.game_state = RoomType.RoomState.OPEN
             room.save()
 
-            key = "athr" + uuid4().hex
+            key = "athr" + uuid4().hex + "_" + str(author_id)
 
-            send_new_room(room.id, author_id, key, room.json())
+            send_new_room(room.id, author_id, key)
 
             return {
                 "room": room.json(),
@@ -89,3 +89,4 @@ class Room(BaseResource):
                 return {
                     "error": "Cause some error. Room was not created."
                 }, HTTPStatus.INTERNAL_SERVER_ERROR
+

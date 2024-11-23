@@ -45,7 +45,6 @@ async def send_email(email: str, username: str, code: str) -> None:
     message.attach(part2)
 
     try:
-        logger.info("send email to %s with code %s" % (username, code))
         await smtp.send(
             message,
             hostname=SMTP_SERVER,
@@ -54,7 +53,6 @@ async def send_email(email: str, username: str, code: str) -> None:
             password=SMTP_PASSWORD,
             use_tls=True,
         )
-        logger.info("email sent successfully")
         return True
     except Exception as e:
         logger.error(f"Ошибка отправки письма: {e}")
@@ -81,6 +79,7 @@ async def main() -> None:
     global consumer, KAFKA_URI
 
     logger.info("waiting 40s for kafka to be ready")
+    await asyncio.sleep(40)
 
     logger.info(f"try to connect to kafka by uri: {KAFKA_URI}")
     consumer = AIOKafkaConsumer(

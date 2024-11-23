@@ -49,8 +49,8 @@ export default function EnemyCards(props: Props) {
                     let className = '';
                     let delay = -1;
                     let offset = '';
-                    if(delta && delta > 0){
-                        if(index >= props.cards_count - 1 - delta){
+                    if(delta > 0){
+                        if(index > props.cards_count - 1 - delta){
                             className = 'new_card';
                             if(index >= props.cards_count / 2){
                                 offset = `${-(index / (props.cards_count) - 0.5) * 80}px`

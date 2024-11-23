@@ -289,16 +289,16 @@ export default function PlayerCards(props: Props) {
         const x = clientX - left;
         const y = clientY - top;
 
-        if(y > player_cards_rect.y + player_cards_rect.height/3) {
-            const cards = document.querySelectorAll('.player-card') as NodeListOf<HTMLElement>;
-            cards.forEach(card => {
-                if (card) { // Ensuring card is not null or undefined
-                    card.classList.remove('hovered');
-                }
-            });
-            card.parentElement!.classList.add('hovered');
-            return
-        }
+        // if(y > player_cards_rect.y + player_cards_rect.height/3) {
+        //     const cards = document.querySelectorAll('.player-card') as NodeListOf<HTMLElement>;
+        //     cards.forEach(card => {
+        //         if (card) { // Ensuring card is not null or undefined
+        //             card.classList.remove('hovered');
+        //         }
+        //     });
+        //     card.parentElement!.classList.add('hovered');
+        //     return
+        // }
 
         const padding_x = clientX - card_left;
         const padding_y = clientY - card_top;
@@ -399,7 +399,7 @@ export default function PlayerCards(props: Props) {
                                         ...calculateCardStyles(index, props.cards!.length),
                                         opacity: draggin_card === index ? 0.3 : 1,
                                         '--offset': offset,
-                                        animationDelay: `${(props.cards!.length - 1 - index)*0.1}s`,
+                                        animationDelay: `${(props.cards!.length - 1 - index)*0.3}s`,
                                         ..._style
                                     } as CSSProperties
                                 }
@@ -434,12 +434,11 @@ export default function PlayerCards(props: Props) {
             </section>
             <div id="dragging-card" ref={draggin_card_ref}
             onContextMenu={(e) => e.preventDefault()}
-            onDragStart={e => e.preventDefault()}
             >
                 {
                     draggin_card !== -1 && 
                     <img src={getCardImage(props.cards[draggin_card])} alt="card"
-                    style={{width: '100%', height: '100%', userSelect: 'none'}} 
+                    style={{width: '100%', height: '100%'}} 
                     onContextMenu={(e) => e.preventDefault()}
                     onDragStart={(e) => e.preventDefault()}
                     />

@@ -43,14 +43,13 @@ def send_mail_letter(name:str , email:str, code:int) -> None:
     message = {"name": name, "email": email, "code": code}
     produce(KAFKA_TOPIC_email, message)
     
-def send_new_room(room_id: int, author_id: int, key: str, room: dict) -> None:
+def send_new_room(room_id: int, author_id: int, key: str) -> None:
     message = {
-      "event": "create_room",
-      "payload": {
-        "author_id": author_id,
-        "key": key,
-        "room_id": room_id,
-        "config": room
-      }
+      "dest_type": "list",
+      "event_type": "create_room",
+      "author_id": author_id,
+      "key": key,
+      "room_id": room_id
     }
     produce(KAFKA_TOPIC_room, message)
+

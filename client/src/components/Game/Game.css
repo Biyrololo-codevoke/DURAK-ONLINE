@@ -447,7 +447,6 @@ body:not(#mobile-view) #player-cards:not(.dragging) > .player-card:hover{
     display: none;
     cursor: grab;
     pointer-events: none;
-    user-select: none;
 }
 
 #card-deck{
@@ -891,16 +890,17 @@ body:not(#mobile-view) #trump__suit {
 
 .to-bito{
     position: absolute !important;
-    animation: board-to-bito 0.5s linear forwards !important;
+    /* animation: board-to-bito 0.5s linear forwards !important;
+    animation-delay: 0.05s !important; */
 }   
 
 @keyframes board-to-bito{
-    from {
+    0% {
         left: 0px;
         top: 0px;
     }
 
-    to {
+    100% {
         left: var(--to-bito-x) !important;
         top: var(--to-bito-y) !important;
     }
@@ -908,15 +908,15 @@ body:not(#mobile-view) #trump__suit {
 
 .taken-card {
     position: absolute !important;
-    animation: taking-cards 0.4s linear forwards !important;
+    /* animation: taking-cards 0.4s linear forwards !important; */
 }
 
 @keyframes taking-cards{
-    from {
+    0% {
         left: var(--card-absolute-left, 0px);
         top: var(--card-absolute-top, 0px);
     }
-    to {
+    100% {
         left: var(--taken-x) !important;
         top: var(--taken-y) !important;
         scale: 0.5;
@@ -925,21 +925,33 @@ body:not(#mobile-view) #trump__suit {
 
 .taken-card-player{
     position: absolute !important;
+    /* left: var(--taken-x) !important;
+    top: var(--taken-y) !important;
+    scale: 2.2 !important;
     animation: taking-cards-player 0.4s linear forwards !important;
+    for Safari 
+    -webkit-animation: taking-cards-player 0.4s linear forwards !important; */
 }
 
 @keyframes taking-cards-player{
-    from {
-        left: var(--card-absolute-left, 0px);
-        top: var(--card-absolute-top, 0px);
+    0% {
+        left: 0px;
+        top: 0px;
+        scale: 1;
     }
-    to {
-        left: var(--taken-x) !important;
-        top: var(--taken-y) !important;
-        scale: 2.2;
+    100% {
     }
 }
 
+@-webkit-keyframes taking-cards-player{
+    0% {
+        left: 0px;
+        top: 0px;
+        scale: 1;
+    }
+    100% {
+    }
+}
 /* End Game UI - REWARDS */
 
 #rewards{
@@ -1021,4 +1033,56 @@ body:not(#mobile-view) #trump__suit {
     transform: translateX(-50%);
     border: 1px dotted white;
     border-radius: 10px;
+}
+
+.player-avatar-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    transition: all 0.3s ease;
+}
+
+.player-avatar.disconnected {
+    opacity: 0.5;
+    filter: grayscale(100%);
+}
+
+.player-avatar.current-turn {
+    border-color: #ffd700;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+.turn-timer {
+    position: absolute;
+    top: -10px;
+    right: -10px;
+    background-color: #ffd700;
+    color: #000;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.disconnect-indicator {
+    position: absolute;
+    bottom: -20px;
+    background-color: #ff4444;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 10px;
+    white-space: nowrap;
 }

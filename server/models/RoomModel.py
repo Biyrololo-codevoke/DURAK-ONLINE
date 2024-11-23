@@ -40,7 +40,7 @@ class RoomModel(BaseModel):  # type: ignore
             "speed": self.speed,
             "game_type": self.game_type,
             "throw_type": self.throw_type,
-            "game_state": self.game_state,
+            "game_state": self._game_state.value,
             "win_type": self.win_type,
             "private": self.private,
             "user_ids": self.user_ids,
@@ -148,11 +148,3 @@ class RoomModel(BaseModel):  # type: ignore
     def win_type(self, value: Room.WinType) -> None:
         self._win_type = Room.WinType(value)
 
-    @property
-    @retry_on_exception(max_retries=1, delay=0.01)
-    def game_state(self) -> str:
-        return self._game_state.value if self._game_state else ""
-        
-    @game_state.setter
-    def game_state(self, value: Room.RoomState) -> None:
-        self._game_state = Room.RoomState(value)

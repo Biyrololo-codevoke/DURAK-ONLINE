@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import './App.css';
 import './Main.css';
 import axios from 'axios';
-import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage, FriendsPage, SearchFriendPage, NewsPage } from 'pages';
+import { RegisterPage, LoginPage, ProfilePage, CreateGamePage, OpenGamesPage, DefaultPage, FriendsPage, SearchFriendPage } from 'pages';
 import {SettingsPage, ConfirmEmailPage} from 'pages';
 import { GamePage, ConnectingPage } from 'pages';
 import { GameFiltersPage, PrivateGamesPage } from 'pages';
@@ -18,6 +18,8 @@ import { useState } from 'react';
 import getAllResources from 'features/getAllResources';
 import { LinearProgress, Typography } from '@mui/material';
 import RulesPage from 'pages/RulesPage';
+import NewsPage from 'pages/NewsPage';
+import {InviteNotification} from 'components/InviteNotification';
 
 const LOGIN_PAGES_URLS = ['/login', '/register']
 
@@ -44,7 +46,7 @@ function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
   axios.defaults.baseURL = '/api'; //https://codevoke.ru/api
-  // axios.defaults.baseURL = 'https://codevoke.ru/api'
+  axios.defaults.baseURL = 'http://185.239.51.125:5000/api'
 
   if(isMobile){
     document.body.id = 'mobile-view';
@@ -130,6 +132,7 @@ function App() {
   return (
     <>
       <BrowserRouter>
+        <InviteNotification />
         <Routes>
           <Route path="*" Component={DefaultPage} />
           <Route path="/register" Component={RegisterPage} />

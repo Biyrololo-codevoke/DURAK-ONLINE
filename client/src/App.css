@@ -8,6 +8,8 @@ body{
     /* width: 600px; */
     width: 100%;
     /* border: 1px solid white; */
+    touch-action: none;
+    -ms-touch-action: none;
 }
 
 body::-webkit-scrollbar { 

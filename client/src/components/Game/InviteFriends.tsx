@@ -38,7 +38,8 @@ export default function InviteFriends({is_open, on_close} : Props){
 
     function handle_invite_friend(friend_id: number){
         // invite friend
-        // TODO
+        
+        (window as any).invite_friend(friend_id);
     }
 
     if(!is_open) return null;

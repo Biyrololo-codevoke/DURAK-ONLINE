@@ -102,7 +102,6 @@ export default function PrivateRoomsList(){
 
         new_socket.onopen = () => {
             const _data = JSON.stringify({
-                event: 'auth',
                 access_token: Cookies.get('access_token'),
             })
             new_socket.send(_data);

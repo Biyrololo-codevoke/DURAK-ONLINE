@@ -6,10 +6,9 @@ import { GameBoardCard, GamePlayers } from "types/GameTypes";
 import { MESSAGES_CONFIGS } from "constants/GameParams";
 import MoneyShortName from "features/MoneyShortName";
 import Money from "components/Money/MoneyIcon";
-import {Button} from '@mui/material'
-import AddIcon from '@mui/icons-material/Add';
 import InviteFriends from 'components/Game/InviteFriends';
 import GroupAddIcon from '@mui/icons-material/GroupAdd';
+import {Button} from '@mui/material'
 
 type Props = {
     handle_start_game: () => void;
@@ -100,60 +99,70 @@ export default function GameFooter({handle_start_game, handle_action_button, han
             }
         )
 
-        set_is_taking(gameState === 2 && _is_victim && !__has_message && __game_board !== null &&
-        __game_board.some(c => !c.upper) && __game_board.length > 0)
+        const new_taking = gameState === 2 && _is_victim && !__has_message && __game_board !== null &&
+        __game_board.some(c => !c.upper) && __game_board.length > 0;
 
-        set_is_bito(gameState === 2 && __game_board !== null && !__has_message &&
+        set_is_taking(new_taking);
+
+        localStorage.setItem('is_taking', String(new_taking));
+
+        const new_bito = gameState === 2 && __game_board !== null && !__has_message &&
         !__game_board.some(c => !c.upper) && __game_board.length > 0 && (
             _is_walking || (
                 !is_walking && !is_victim && (
                     messages.some(m=>m.text === MESSAGES_CONFIGS.bito.text && m.user_id === _game_players.walking)
                 )
             )
-        ))
-
-        set_is_pass(gameState === 2 && !__has_message && 
-            __game_board.length > 0 &&
-            (
-                (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
-                (!is_walking && !_is_victim && 
-                    messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)
-                )
-            )
         )
+
+        set_is_bito(new_bito);
+        
+        localStorage.setItem('is_bito', String(new_bito));
+
+        const new_pass = gameState === 2 && !__has_message && 
+        __game_board.length > 0 &&
+        (
+            (_is_walking && messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)) ||
+            (!is_walking && !_is_victim && 
+                messages.some(m=>m.text === MESSAGES_CONFIGS.take.text)
+            )
+        );
+
+        set_is_pass(new_pass);
+
+        localStorage.setItem('is_pass', String(new_pass));
 
     }, [timers.timer_update, messages])
 
-    const handle_time_out = useMemo(() => {
-
-        console.table(
-            {
-                is_bito,
-                is_pass,
-                is_taking
-            }
-        )
-    
-        let is_b = is_bito;
-        let is_p = is_pass;
-        let is_t = is_taking;
-
-        return () => {
-            console.log(`Player time out!`)
-            if(is_p){
-                console.log('PASS')
-                handle_action_button('pass')
-            }
-            else if(is_b){
-                console.log('BITO')
-                handle_action_button('bito')
-            }
-            else if(is_t){
-                console.log('IS TAKING')
-                handle_time_out_loose();
-            }
+    const handle_time_out = function(){
+        if(gameState === 0) return;
+        if(gameState === 1) {
+            handle_time_out_loose();
+            return;
         }
-    }, [is_pass, is_bito, is_taking])
+        const _is_taking = localStorage.getItem('is_taking') === 'true';
+        const _is_bito = localStorage.getItem('is_bito') === 'true';
+        const _is_pass = localStorage.getItem('is_pass') === 'true';
+        console.log(`Player time out!`)
+        console.table({
+            _is_pass,
+            _is_bito,                
+            _is_taking
+        })
+        if(_is_pass){
+            console.log('PASS')
+            handle_action_button('pass')
+        }
+        else if(_is_bito){
+            console.log('BITO')
+            handle_action_button('bito')
+        }
+        else{
+            console.log('IS TAKING')
+            // handle_action_button('bito')
+            handle_time_out_loose()
+        }
+    }
 
     const [is_open, set_is_open] = useState(false);
 
@@ -186,7 +195,7 @@ export default function GameFooter({handle_start_game, handle_action_button, han
                         <Button style={{color: 'white', display: 'flex', 'alignItems': 'center'}} onClick={()=>{set_is_open(true)}}
                             variant="outlined"
                         >
-                            Пригласить друзей &nbsp;
+                            <span>Пригласить&nbsp;друзей</span>&nbsp;
                             <GroupAddIcon style={{color: 'white'}}/>
                         </Button>
                     </div>

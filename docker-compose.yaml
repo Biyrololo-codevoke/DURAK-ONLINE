@@ -9,6 +9,30 @@ services:
     depends_on:
       - server
 
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+
+  mongo-express:
+    image: mongo-express:latest
+    container_name: mongo-express
+    restart: always
+    ports:
+      - "8081:8081"
+    environment:
+      - ME_CONFIG_MONGODB_ADMINUSERNAME=root
+      - ME_CONFIG_MONGODB_ADMINPASSWORD=example
+      - ME_CONFIG_MONGODB_SERVER=mongodb
+    depends_on:
+      - mongodb
+
   zookeeper:
     image: confluentinc/cp-zookeeper:latest
     environment:
@@ -49,13 +73,13 @@ services:
       - kafka
       - zookeeper
     logging:
-       driver: "json-file"
-       options:
-         max-size: "10m"
-         max-file: "5"
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "5"
 
   postgres:
-    image: 'postgres:15'
+    image: 'postgres:latest'
     ports:
       - '5432:5432'
     environment:
@@ -81,8 +105,8 @@ services:
       - zookeeper
     command: flask run --host 0.0.0.0 --port 5000
 
-  websocket-server:
-    build: ./websocket-server
+  ws:
+    build: ./ws
     restart: on-failure
     ports:
       - '9000:9000'
@@ -90,16 +114,27 @@ services:
       - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
       - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
       - KAFKA_URI=kafka:9092
+    deploy:
+      replicas: 1
     depends_on:
       - kafka
       - zookeeper
+    command: python main.py
+
+  invite-service:
+    build: ./invites
+    restart: on-failure
+    ports:
+      - "9100:9100"
+    environment:
+      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
     command: python main.py
 
   email-sender:
     build: ./email-sender-service
     restart: on-failure
     ports:
-      - '1289:1289'
+      - '5100:5100'
     environment:
       - KAFKA_URI=kafka:9092
       - LOGO_PATH=https://codevoke.ru/static/logo512.png
@@ -122,3 +157,4 @@ services:
 
 volumes:
   pgdata: {}
+  mongodb_data: {}

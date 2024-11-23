@@ -24,7 +24,7 @@ function uploadPhoto(){
 }
 
 function roomListWS(){
-    // return `wss://codevoke.ru/ws/room-list`
+    return `ws://185.239.51.125:9000/ws/room-list`
     return `/ws/room-list` // wss://codevoke.ru/ws/room-list
 }
 
@@ -36,7 +36,7 @@ function gameWS(key: str_num_nu, room_id: str_num_nu){
     if(!key || !room_id){
         return ''
     }
-    // return `wss://codevoke.ru/ws/room?room_id=${room_id}&key=${key}`;
+    return `ws://185.239.51.125:9000/ws/room?room_id=${room_id}&key=${key}`;
     return `/ws/room?room_id=${room_id}&key=${key}`;
 }
 
@@ -49,3 +49,9 @@ function getRoomInfo(room_id: number){
 export {getRoomInfo}
 
 export {loginUser, registerUser, getUser, createRoom, confirmEmail, uploadPhoto}
+
+function invitesWS(){
+    return `ws://185.239.51.125:9100/invites`
+}
+
+export {invitesWS}

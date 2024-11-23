@@ -21,6 +21,8 @@ export default function EmailCode(){
         axios.post(ApiUrls.confirmEmail(), body)
         .then(() => {
             setIsCodeChecked(true);
+            if((window as any).updateInvites)
+                (window as any).updateInvites();
             navigate('/');
         })
         .catch((err) => {
@@ -30,8 +32,6 @@ export default function EmailCode(){
                 toast.error('Пользователь не найден');
             } else if(err.response?.status === 500){
                 toast.error('Проблемы с обработкой данных, повторите запрос')
-            } else {
-                toast.error('Неверный код');
             }
         })
     }

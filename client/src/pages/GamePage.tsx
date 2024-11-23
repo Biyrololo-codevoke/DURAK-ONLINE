@@ -17,6 +17,7 @@ import EndGameUI from "components/Game/EndGameUI";
 import {useNavigate} from 'react-router-dom'
 import { IconButton } from "@mui/material";
 import ExitToAppIcon from '@mui/icons-material/ExitToApp';
+import {animateCss} from 'features'
 
 type UserIdType = number | 'me'
 
@@ -278,26 +279,9 @@ export default function GamePage(){
         setGameState(1);
     }
 
-    useEffect(()=>{
-        if(!localStorage.getItem('room_id__')) return;
-
-        // RECONNECTING TO ROOM
-        // TODO
-
-    }, [])
-
-    useEffect(()=>{
-        return () => {
-            if(gameState === 2) return; 
-            console.log('айайай, удаляю рум ид')
-            localStorage.removeItem('room_id__');
-        }
-    }, [])
-
     // START GAME !!!
     function on_start_game(){
         setGameState(2);
-        localStorage.setItem('room_id__', `${room_id}`);
         setTimers([]);
         set_timers_update(prev => prev + 1);
     }
@@ -364,15 +348,9 @@ export default function GamePage(){
 
     // on next move
 
-    function on_next_move(victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, players_queue?: number[]){
+    function on_next_move(victim: number, walking: number, throwing_players: number[], type?: 'basic' | 'transfer', decKeck?: number, target?: number){
 
-        if(players_queue !== undefined){
-            localStorage.setItem('players_queue', JSON.stringify(players_queue));
-        } else {
-            const queue = JSON.parse(localStorage.getItem('players_queue') || '[]');
-            const transfer_target = queue[(queue.indexOf(victim) + 1) % queue.length];
-            localStorage.setItem('transfer_target', String(transfer_target));
-        }
+        localStorage.setItem('transfer_target', String(target));
 
         if(decKeck !== undefined){
             setRoom(prev => {
@@ -498,10 +476,32 @@ export default function GamePage(){
     
                         let _x = _rect.x - _card_rect.x;
                         let _y = _rect.y - _card_rect.y;
+
+                        animateCss(
+                            {
+                                element: _game_board[i] as HTMLElement,
+                                from: {
+                                    left: '0px',
+                                    top: '0px',
+                                },
+                                to: {
+                                    left: `${_x}px`,
+                                    top: `${_y}px`,
+                                    scale: 0.5
+                                },
+                                duration: `400ms linear`
+                            }
+                        )
     
-                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
-                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+                        // (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
+                        // (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
                     }
+                    set_enemy_cards_delta((prev) => {
+                        return {
+                            ...prev,
+                            [take_user_id]: 0
+                        }
+                    })
     
                     setTimeout(()=>{
                         setUsersCards((prev) => {
@@ -510,21 +510,52 @@ export default function GamePage(){
                                 [take_user_id]: prev[take_user_id] + taking_cards.length
                             }
                         })
+                        set_enemy_cards_delta((prev) => {
+                            return {
+                                ...prev,
+                                [take_user_id]: 0
+                            }
+                        })
                     }, 400)
                 }
                 else {
                     const _player_cards = document.querySelector('#player-cards')!.getBoundingClientRect();
     
                     for(let i = 0; i < taking_cards.length; i++){
-                        _game_board[i].classList.add('taken-card-player');
+                        // _game_board[i].classList.add('taken-card-player');
     
                         let _card_rect = _game_board[i].getBoundingClientRect();
+
+                        console.log(_card_rect, _game_board[i])
+
+                        console.log(` player cards: `, _player_cards)
     
                         let _x = (_player_cards.x + _player_cards.width/2 - _card_rect.width/2) - _card_rect.x;
                         let _y = _player_cards.y - _card_rect.y;
+
+                        console.log(`card x: ${_x}, card y: ${_y}`);
+
+                        animateCss(
+                            {
+                                element: _game_board[i] as HTMLElement,
+                                from: {
+                                    left: '0px',
+                                    top: '0px',
+                                    scale: 1
+                                },
+                                to: {
+                                    left: `${_x}px`,
+                                    top: `${_y}px`,
+                                    scale: 2.2
+                                },
+                                duration: `400ms linear`
+                            }
+                        )
     
-                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
-                        (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+                        // (_game_board[i] as HTMLImageElement).style.setProperty('--taken-x', `${_x}px`);
+                        // (_game_board[i] as HTMLImageElement).style.setProperty('--taken-y', `${_y}px`);
+
+                        // console.log((_game_board[i] as HTMLImageElement).style.getPropertyValue('--taken-x'), (_game_board[i] as HTMLImageElement).style.getPropertyValue('--taken-y'));
                     }
     
                     set_new_cards([]);
@@ -542,9 +573,27 @@ export default function GamePage(){
                     if(_game_board[i]){
                         _game_board[i].classList.add('to-bito');
                         let to_bito_x = _width - _game_board[i].getBoundingClientRect().x;
-                        console.table({_width, rect: _game_board[i].getBoundingClientRect(), to_bito_x, i});
-                        (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${to_bito_x + 200}px`);
-                        (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-y', `${_height - _game_board[i].getBoundingClientRect().y - _game_board[i].getBoundingClientRect().height / 2}px`);
+                        let _x = `${to_bito_x + 200}px`;
+                        let _y = `${_height - _game_board[i].getBoundingClientRect().y - _game_board[i].getBoundingClientRect().height / 2}px`;
+
+                        animateCss(
+                            {
+                                element: _game_board[i] as HTMLElement,
+                                from: {
+                                    left: 0,
+                                    top: 0
+                                },
+                                to: {
+                                    left: _x,
+                                    top: _y
+                                },
+                                duration: `500ms linear`
+                            }
+                        )
+
+                        // console.table({_width, rect: _game_board[i].getBoundingClientRect(), to_bito_x, i});
+                        // (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-x', `${to_bito_x + 200}px`);
+                        // (_game_board[i] as HTMLImageElement).style.setProperty('--to-bito-y', `${_height - _game_board[i].getBoundingClientRect().y - _game_board[i].getBoundingClientRect().height / 2}px`);
                     }
                 } 
     
@@ -630,10 +679,9 @@ export default function GamePage(){
                 y: _rect.y - deck_rect.y
             }
             setGameBoard(prev => {
-                let new_board = [...prev];
-                new_board[slot] = {
+                let new_board = [...prev, {
                     lower: _card,
-                };
+                }];
 
                 console.warn('NEW GAME BOARD ON_PLACE_CARD ', new_board);
 
@@ -744,8 +792,6 @@ export default function GamePage(){
                 return ts;
             })
         }
-
-        set_timers_update(prev => prev + 1);
     }
 
     function on_give_enemies_cards(player_id: number, cards_count: number){
@@ -761,7 +807,8 @@ export default function GamePage(){
         setUsersCards(prev=>{
             const new_cards = {...prev};
             delta = cards_count - new_cards[player_id];
-            new_cards[player_id] = cards_count;
+            if(String(player_id) !== localStorage.getItem('take_user_id')) 
+                new_cards[player_id] = cards_count;
             return new_cards
         })
 
@@ -786,7 +833,7 @@ export default function GamePage(){
                 else{
                     return {
                         ...prev,
-                        [player_id]: delta * 10 + 1
+                        [player_id]: delta * 10 + 1 + (prev[player_id] % 10)
                     }
                 }
             }
@@ -1390,7 +1437,7 @@ export default function GamePage(){
         _socket.send(
             JSON.stringify(
                 {
-                    event: 'loose'
+                    event: 'loose_on_time'
                 }
             )
         )

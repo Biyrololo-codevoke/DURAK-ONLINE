@@ -8,8 +8,8 @@ function handle_message(data: Types.RoomListResponseType |
     Types.RoomListEvent |
     Types.RoomListJoinEventType,
     navigate: (path: string) => void,
-    rooms: Room[],
-    setRooms: React.Dispatch<React.SetStateAction<Room[]>>,
+    rooms: Room[] | undefined,
+    setRooms: React.Dispatch<React.SetStateAction<Room[]>> | undefined,
     are_open_games = true
     ){
     console.log(data);
@@ -22,6 +22,9 @@ function handle_message(data: Types.RoomListResponseType |
         // ...
     }
     else{
+        if(rooms === undefined || setRooms === undefined){
+            return
+        }
         const rooms_ids = Object.keys(data).filter(key => key !== 'type').map(key => parseInt(key));
 
         if('type' in data && data.type === 'delete_room'){
