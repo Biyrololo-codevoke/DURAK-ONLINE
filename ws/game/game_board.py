@@ -1,179 +1,94 @@
 from __future__ import annotations
+from dataclasses import dataclass, field
+from typing import List, Dict, Optional, Any
+from .card import Card
 
-from typing import List
-import json
-
-from card import Card
-
-
+@dataclass
 class GameBoard:
-    """
-    Represents the game board, which is a list of slots.
-    Each slot is a dictionary with two keys: "down" and "up".
-    The "down" card is the bottom card in the slot, and the "up" card is the top one.
-    If a slot is empty, it doesn't have either "down" or "up" key.
-    """
-    SLOTS_COUNT: int = 6
+    """Represents the game board where cards are played."""
+    
+    attack_cards: List[Card] = field(default_factory=list)
+    defense_cards: Dict[int, Card] = field(default_factory=dict)
+    max_cards: int = 6
 
-    def __init__(self) -> None:
-        """
-        Initializes the game board with an empty list of slots.
-        """
-        self.slots_down: list[int | None] = [None] * self.SLOTS_COUNT
-        self.slots_up: list[int | None] = [None] * self.SLOTS_COUNT
-
-    def add_card(self, card: Card, slot_id: int) -> bool:
-        """
-        Adds a card to a slot on the game board.
-
-        Args:
-            card (Card): The card to add.
-            slot (int): The slot to add the card to.
-
-        Returns:
-            bool: True if the card was added successfully, False otherwise.
-        """
-        logger.info("try to add card. Curent state:\n " + str(self))
-        if self.slots_down[slot_id-1] is not None:
-            logger.info("Slot is not empty: " + str(self.slots_down[slot_id-1]))
+    def can_add_attack_card(self, card: Card) -> bool:
+        """Check if an attack card can be added to the board."""
+        if len(self.attack_cards) >= self.max_cards:
             return False
-        else:
-            logger.info("Slote is empty: " + str(self.slots_down[slot_id-1]))
-            self.slots_down[slot_id-1] = card
+            
+        if not self.attack_cards:
             return True
+            
+        return card.value in self.get_valid_values()
 
-    def beat_card(self, beat_card: Card, slot_id: int) -> bool:
-        """
-        Tries to beat a card on the game board.
-
-        Args:
-            beat_card (Card): The card to beat.
-            slot (int): The slot to beat the card in.
-
-        Returns:
-            bool: True if the card was beaten successfully, False otherwise.
-        """
-        logger.info("try to beat card. Curent state:\n " + str(self))
-        if self.slots_up[slot_id-1] is not None:
-            logger.info("already beated")
+    def can_add_defense_card(self, card: Card) -> bool:
+        """Check if a defense card can be added to the board."""
+        if not self.attack_cards:
             return False
-        else:
-            if self.slots_down[slot_id-1] is None:
-                logger.info("there is empty. can not beat empty slot")
-                return False
-            else:
-                logger.info("successfully beat")
-                self.slots_up[slot_id-1] = beat_card
-                return True
+            
+        undefended_attacks = self.get_undefended_attacks()
+        if not undefended_attacks:
+            return False
+            
+        attack_card = undefended_attacks[0]
+        return self._can_beat(attack_card, card)
 
-    def take_all(self) -> List[Card]:
-        """
-        Takes all the cards from the game board.
+    def add_attack_card(self, card: Card) -> None:
+        """Add an attack card to the board."""
+        self.attack_cards.append(card)
 
-        Returns:
-            List[Card]: A list of all the cards on the game board.
-        """
-        cards = [x for x in [*self.slots_down, *self.slots_up] if x is not None]
+    def add_defense_card(self, card: Card) -> None:
+        """Add a defense card to the board."""
+        undefended = self.get_undefended_attacks()
+        if undefended:
+            self.defense_cards[len(self.defense_cards)] = card
 
-        self.slots_down: list[int | None] = [None] * self.SLOTS_COUNT
-        self.slots_up: list[int | None] = [None] * self.SLOTS_COUNT
+    def get_undefended_attacks(self) -> List[Card]:
+        """Get list of attack cards that haven't been defended yet."""
+        return self.attack_cards[len(self.defense_cards):]
 
-        return cards
+    def get_valid_values(self) -> List[int]:
+        """Get list of valid card values that can be played."""
+        values = set()
+        for card in self.attack_cards:
+            values.add(card.value)
+        for card in self.defense_cards.values():
+            values.add(card.value)
+        return list(values)
+
+    def _can_beat(self, attack_card: Card, defense_card: Card) -> bool:
+        """Check if defense card can beat attack card."""
+        if defense_card.is_trump and not attack_card.is_trump:
+            return True
+            
+        if attack_card.suit == defense_card.suit:
+            return defense_card.value > attack_card.value
+            
+        return False
+
+    def clear(self) -> None:
+        """Clear the board for the next round."""
+        self.attack_cards.clear()
+        self.defense_cards.clear()
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert GameBoard to dictionary for serialization."""
+        return {
+            "attack_cards": [card.to_dict() for card in self.attack_cards],
+            "defense_cards": {
+                str(pos): card.to_dict() 
+                for pos, card in self.defense_cards.items()
+            }
+        }
     
-    def has_free_slot(self) -> bool:
-        """
-        Checks if there is a free slot on the game board.
-
-        Returns:
-            bool: True if there is a free slot, False otherwise.
-        """
-        return None in self.slots_down
-
-    def __str__(self) -> str:
-        """
-        Returns a string representation of the game board.
-
-        Returns:
-            str: The string representation of the game board.
-        """
-        
-        s = f"""
-            [{self.slots_up[0] or 'x'} / {self.slots_down[0] or 'x'}] [{self.slots_up[1] or 'x'} / {self.slots_down[1] or 'x'}] [{self.slots_up[2] or 'x'} / {self.slots_down[2] or 'x'}]
-            [{self.slots_up[3] or 'x'} / {self.slots_down[3] or 'x'}] [{self.slots_up[4] or 'x'} / {self.slots_down[4] or 'x'}] [{self.slots_up[5] or 'x'} / {self.slots_down[5] or 'x'}]
-        """
-        
-        return s
-    
-    def can_transfer(self, card: Card) -> tuple[bool, str]:
-        if any(self.slots_up):
-            return False, "There is some beaten cards"
-        
-        transfered_cards = [*self.slots_down, card]
-        
-        if len(set([card.value for card in transfered_cards if card])) != 1:
-            return False, "Some cards have different values"
-        
-        if not self.has_free_slot():
-            return False, "There is no free slot"
-        
-        free_slot = self.slots_down.index(None)
-        self.slots_down[free_slot] = card
-        return True, "successful transfer"
-
-    def serialize(self) -> str:
-        """
-        Serializes the game board to a JSON string.
-
-        Returns:
-            str: The serialized game board.
-        """
-        up_arr = []
-        dw_arr = []
-        
-        for down_card in self.slots_down:
-            if down_card is None:
-                dw_arr.append(None)
-            else:
-                dw_arr.append(down_card.serialize())
-        
-        for up_card in self.slots_up:
-            if up_card is None:
-                up_arr.append(None)
-            else:
-                up_arr.append(up_card.serialize())
-        
-        return json.dumps({
-            "down": dw_arr,
-            "up": up_arr
-        })
-
-    @staticmethod
-    def deserialize(raw_data: str) -> GameBoard:
-        """
-        Deserializes a game board from a JSON string.
-
-        Args:
-            raw_data (str): The serialized game board.
-
-        Returns:
-            GameBoard: The deserialized game board.
-        """
-        slots = json.loads(raw_data)
-        new_game_board = GameBoard()
-
-        new_game_board.slots_down = [None] * GameBoard.SLOTS_COUNT
-        new_game_board.slots_up = [None] * GameBoard.SLOTS_COUNT
-        
-        for i in range(len(slots["down"])):
-            if slots["down"][i]:
-                new_game_board.slots_down[i] = Card.deserialize(slots["down"][i])
-            else:
-                new_game_board.slots_down[i] = None
-        
-        for i in range(len(slots["up"])):
-            if slots["up"][i]:
-                new_game_board.slots_up[i] = Card.deserialize(slots["up"][i])
-            else:
-                new_game_board.slots_up[i] = None
-        
-        return new_game_board
+    @classmethod
+    def from_dict(cls, data: Dict[str, Any]) -> 'GameBoard':
+        """Create GameBoard instance from dictionary."""
+        board = cls()
+        board.attack_cards = [Card.from_dict(card_data) 
+                            for card_data in data.get("attack_cards", [])]
+        board.defense_cards = {
+            int(pos): Card.from_dict(card_data)
+            for pos, card_data in data.get("defense_cards", {}).items()
+        }
+        return board
