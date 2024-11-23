@@ -105,18 +105,20 @@ services:
       - zookeeper
     command: flask run --host 0.0.0.0 --port 5000
 
-  ws:
+  websocket-server:
     build: ./ws
+    container_name: websocket-server
     restart: on-failure
     ports:
-      - '9000:9000'
+      - "9000:9000"
     environment:
-      - DATABASE_URI=postgresql://postgres:postgres@postgres:5432/postgres
-      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
+      - MONGODB_HOST=mongodb
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
       - KAFKA_URI=kafka:9092
-    deploy:
-      replicas: 1
+      - JWT_SECRET_KEY=OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263
     depends_on:
+      - mongodb
       - kafka
       - zookeeper
     command: python main.py
