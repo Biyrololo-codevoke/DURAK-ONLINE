@@ -35,5 +35,3 @@ async def socket_listener(socket: WebSocket, path: str):
         # post auth event handling ( if auth was success )
         if auth:
             await router(path, payload, socket)
-
-start_server = make_websocket_server(socket_listener, "0.0.0.0", 9000)
