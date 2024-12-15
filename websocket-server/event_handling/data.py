@@ -1,6 +1,7 @@
 import json
 import time
 import asyncio
+from dataclasses import dataclass, field
 from uuid import uuid4
 
 from websockets import WebSocketServerProtocol as WS
@@ -9,13 +10,33 @@ from models import RoomModel, UserModel, RoomTypes, Exceptions
 from websocket_logger import logger
 
 from .game import Game, Player, Card
-from .utils import handle_socket_closing
 
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
-socket_identity = dict()
-user_socket = dict()
-key_identity = dict()
+
+@dataclass
+class Player:
+    id: int
+    type: str  # LIST | ROOM
+    socket: WS
+    key: str | None = field(default_factory=None)
+    room_id: int | None = field(default_factory=None)
+
+    def send(self, payload):
+        if not self.socket.closed:
+            asyncio.create_task(
+                self.socket.send(
+                    json.dumps(payload)
+                )
+            )
+
+    def disconnect(self):
+        self.socket.close()
+
+
+player_list = list[Player]
+game_list = list[Game]
+room_keys = dict[int, list[str]]
 
 
 class RoomListObserver:
@@ -281,7 +302,6 @@ def send_to_player(player_id: int, payload: dict):
     )
 
 
-@handle_socket_closing
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
     room = RoomModel.get_by_id(room_id)

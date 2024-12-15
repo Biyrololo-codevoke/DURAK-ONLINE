@@ -45,7 +45,7 @@ function App() {
 
   // axios.defaults.baseURL = process.env.REACT_APP_SERVER_URL;
   axios.defaults.baseURL = '/api'; //https://codevoke.ru/api
-  axios.defaults.baseURL = 'http://127.0.0.1:5000/api'
+  // axios.defaults.baseURL = 'http://127.0.0.1:5000/api'
 
   if(isMobile){
     document.body.id = 'mobile-view';

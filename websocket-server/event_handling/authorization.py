@@ -1,13 +1,35 @@
 from .utils import handle_jwt_token
+from .data import room_keys
 
 
-def auth_socket(message: dict) -> tuple[bool, dict]:
-    if "access_token" not in message.keys():
+def auth_socket_via_token(message: dict) -> tuple[bool, dict]:
+    access_token = message.get("access_token")
+
+    if not access_token:
         return False, {"status": "error", "message": "access token wasn't found in request"}
 
-    else:
-        status, data = handle_jwt_token(message["access_token"])
-        if not status:
-            return False, {"status": "error", "message": data}
-        else:
-            return True, {"status": "success", "message": "Successfully authorized", "user_id": data}
+    status, data = handle_jwt_token(access_token)
+    if not status:
+        return False, {"status": "error", "message": data}
+
+    return True, {"status": "success", "message": "Successfully authorized", "user_id": data}
+
+
+def auth_socket_via_key(message: dict) -> tuple[bool, dict]:
+    room_id = message.get("room_id")
+    key = message.get("key")
+
+    if not all([room_id, key]):
+        return False, {"status": "error", "message": "missed one of required args (room_id or key)"}
+
+    if key not in room_keys[room_id]:
+        return False, {"status": "error", "message": "invalid key"}
+
+    user_id = key.split("_")[-1]
+
+    return True, {
+        "status": "success", "message": "Successfully authorized",
+        "user_id": user_id,
+        "key": key,
+        "room_id": room_id
+    }
