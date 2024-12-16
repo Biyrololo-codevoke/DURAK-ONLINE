@@ -1,3 +1,5 @@
+from __future import annotations
+
 import json
 import time
 import asyncio
@@ -10,9 +12,12 @@ from models import RoomModel, UserModel, RoomTypes, Exceptions
 from websocket_logger import logger
 
 from .game import Game, Player, Card
+from .utils import model_to_room
+from .events import router
 
 
 JWT_SECRET_KEY = "OIDU#H-298ghd-7G@#DF^))GV31286f)D^#FV^2f06f6b-!%R@R^@!1263"
+
 
 @dataclass
 class Player:
@@ -30,13 +35,55 @@ class Player:
                 )
             )
 
+    def broadcast_room(self, payload):
+        for player in player_list:
+            if player.room_id == self.room_id and player.id != self.id:
+                player.send(payload)
+
     def disconnect(self):
         self.socket.close()
 
+    def serialize(self):
+        return { "id": self.id }
 
-player_list = list[Player]
-game_list = list[Game]
-room_keys = dict[int, list[str]]
+    @classmethod
+    def deserialize(self, data) -> Player | None:
+        id = data["id"]
+        for player in player_list:
+            if player.id == id:
+                return player
+        return None
+
+
+class FastRoom:
+    # spped up pattern
+    _rooms: dict[int, Room] = dict()
+
+    @classmethod
+    def get_room(cls, id: int) -> Game | None:
+        if id in _rooms.keys():
+            return _rooms[id]
+        else:
+            room = RoomModel.get_by_id(room_id)
+            if room:
+                game = model_to_room(room)
+                cls._rooms[id] = game
+                return game
+            else:
+                return None
+    
+    @classmethod
+    def update_room(cls, room_id: int, game: Game):
+        if room_id in cls._rooms.keys():
+            cls._rooms[room_id] = game
+            model = RoomModel.get_by_id(room_id)
+            model.game_obj = game.serialize()
+            model.save()
+
+
+player_list: list[Player] = list()
+game_list: dict[int, Game] = dict()
+room_keys: dict[int, list[str]] = dict()
 
 
 class RoomListObserver:
@@ -283,259 +330,237 @@ class RoomListObserver:
         asyncio.gather(*tasks)
 
 
-async def send_data(socket, payload):
-    serialized = json.dumps(payload)
-    await socket.send(serialized)
-
-
-def send_to_room(room_id: int, payload: dict, socket_id: int = None):
-    from .event_handlers import send_to_room as _send
-    asyncio.create_task(
-        _send(room_id, payload, socket_id)
-    )
-
-
-def send_to_player(player_id: int, payload: dict):
-    from .event_handlers import send_to_user as _send_y
-    asyncio.create_task(
-        _send_y(player_id, payload)
-    )
-
-
 def route_game_events(payload: dict, room_id: int, key: str):
     event = payload["event"]
-    room = RoomModel.get_by_id(room_id)
-
-    if not room:
-        send_to_player(player_id, {
-            "status": "error",
-            "message": "Room not found"
-        })
-
-    serialized_game = room.game_obj
-    game = Game.deserialize(serialized_game)
-    player_id = int(key.split('_')[-1])
-    socket_id = id(key_identity[key])
-
+    game_model = FastRoom.get_room(room_id)
+    game: Game = model_to_room(game_model)
     player = game.get_player(player_id)
-    
     transfered = False
 
-    match event:
-        case "place_card":
-            slot = payload["slot"]
-            card = Card(
-                suit = payload["card"]["suit"],
-                value = payload["card"]["value"],
-                is_trump = payload["card"]["suit"] == game.trump_suit
-            )
-            logger.info(f"player[{player_id}] place card {str(card)}")
-            logger.info(f"player[{player.id}] deck: {str(player.deck)}")
-            logger.info(str(game.board))
-            if not player.has_card(card):
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "карты нету такой!"
-                })
-                return
+    event_data = {
+        "event": event,
+        "player": player,
+        "game": game,
+        "updater": lambda game: FastRoom.update_room(room_id, game),
+        "payload": paylaod
+    }
+
+    router.route(event, event_data)
+    # match event:
+    #     case "place_card":
+    #         slot = payload["slot"]
+    #         card = Card(
+    #             suit = payload["card"]["suit"],
+    #             value = payload["card"]["value"],
+    #             is_trump = payload["card"]["suit"] == game.trump_suit
+    #         )
+    #         logger.info(f"player[{player_id}] place card {str(card)}")
+    #         logger.info(f"player[{player.id}] deck: {str(player.deck)}")
+    #         logger.info(str(game.board))
+    #         if not player.has_card(card):
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "карты нету такой!"
+    #             })
+    #             return
             
-            available_cards_count = len(game.victim_player.deck)
-            if available_cards_count == 0:
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "ТЫ ЕБЛАН? ЧЕЛУ НЕЧЕМ ОТБИТЬСЯ"
-                })
-                return
+    #         available_cards_count = len(game.victim_player.deck)
+    #         if available_cards_count == 0:
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "ТЫ ЕБЛАН? ЧЕЛУ НЕЧЕМ ОТБИТЬСЯ"
+    #             })
+    #             return
 
-            status = game.board.add_card(card, slot)
-            if not status:
-                status2 = game.board.beat_card(card, slot)
-                if not status2:
-                    send_to_player(player_id, {
-                        "status": "error",
-                        "message": "слот занят бля"
-                    })
-                    return
-                else:
-                    player.deck.remove_card(card)
-                    send_to_player(player_id, {
-                        "status": "success"
-                    })
-                    send_to_room(room_id, {
-                        "event": "card_beat",
-                        "card": card.json(),
-                        "slot": slot,
-                        "player_id": player_id
-                    }, socket_id)
-                    game.update_pl_hst(player)
-            else:
-                player.deck.remove_card(card)
-                payload["player_id"] = player_id
-                send_to_room(room_id, payload, socket_id)
-                game.update_pl_hst(player)
-            s_game = game.serialize()
-            room.game_obj = s_game
-            room.save()
+    #         status = game.board.add_card(card, slot)
+    #         if not status:
+    #             status2 = game.board.beat_card(card, slot)
+    #             if not status2:
+    #                 send_to_player(player_id, {
+    #                     "status": "error",
+    #                     "message": "слот занят бля"
+    #                 })
+    #                 return
+    #             else:
+    #                 player.deck.remove_card(card)
+    #                 send_to_player(player_id, {
+    #                     "status": "success"
+    #                 })
+    #                 send_to_room(room_id, {
+    #                     "event": "card_beat",
+    #                     "card": card.json(),
+    #                     "slot": slot,
+    #                     "player_id": player_id
+    #                 }, socket_id)
+    #                 game.update_pl_hst(player)
+    #         else:
+    #             player.deck.remove_card(card)
+    #             payload["player_id"] = player_id
+    #             send_to_room(room_id, payload, socket_id)
+    #             game.update_pl_hst(player)
+    #         s_game = game.serialize()
+    #         room.game_obj = s_game
+    #         room.save()
 
-        case "pass":
-            logger.info(f"player[{player_id}] pass")
-            if player_id in [*[player.id for player in game.throwing_players], game.attacker_player.id] and player_id not in game.passed_players:
-                send_to_player(player_id, {
-                    "status": "success"
-                })
-                send_to_room(room_id, {
-                    "event": "pass",
-                    "player_id": player_id
-                }, socket_id)
-                game.player_passed(player_id)
-                s_game = game.serialize()
-                room.game_obj = s_game
-                room.save()
-            else:
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "не время пасовать"
-                })
+    #     case "pass":
+    #         logger.info(f"player[{player_id}] pass")
+    #         if player_id in [*[player.id for player in game.throwing_players], game.attacker_player.id] and player_id not in game.passed_players:
+    #             send_to_player(player_id, {
+    #                 "status": "success"
+    #             })
+    #             send_to_room(room_id, {
+    #                 "event": "pass",
+    #                 "player_id": player_id
+    #             }, socket_id)
+    #             game.player_passed(player_id)
+    #             s_game = game.serialize()
+    #             room.game_obj = s_game
+    #             room.save()
+    #         else:
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "не время пасовать"
+    #             })
                 
-        case "bito":
-            logger.info(f"player[{player_id}] bito")
-            if player_id == game.attacker_player.id:
-                send_to_player(player_id, {
-                    "status": "success"
-                })
-                send_to_room(room_id, {
-                    "event": "bito",
-                    "player_id": player_id
-                }, socket_id)
-                game.player_bito()
-                s_game = game.serialize()
-                room.game_obj = s_game
-                room.save()
-            else:
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "нельзя щас тыкать бито"
-                })
+    #     case "bito":
+    #         logger.info(f"player[{player_id}] bito")
+    #         if player_id == game.attacker_player.id:
+    #             send_to_player(player_id, {
+    #                 "status": "success"
+    #             })
+    #             send_to_room(room_id, {
+    #                 "event": "bito",
+    #                 "player_id": player_id
+    #             }, socket_id)
+    #             game.player_bito()
+    #             s_game = game.serialize()
+    #             room.game_obj = s_game
+    #             room.save()
+    #         else:
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "нельзя щас тыкать бито"
+    #             })
         
-        case "take":
-            logger.info(f"player[{player_id}] take")
-            if player_id == game.victim_player.id:
-                send_to_player(player_id, {
-                    "status": "success"
-                })
-                send_to_room(room_id, {
-                    "event": "take",
-                    "player_id": player_id
-                }, socket_id)
-                game.player_took()
-            else:
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "Invalid move"
-                })
-            s_game = game.serialize()
-            room.game_obj = s_game
-            room.save()
+    #     case "take":
+    #         logger.info(f"player[{player_id}] take")
+    #         if player_id == game.victim_player.id:
+    #             send_to_player(player_id, {
+    #                 "status": "success"
+    #             })
+    #             send_to_room(room_id, {
+    #                 "event": "take",
+    #                 "player_id": player_id
+    #             }, socket_id)
+    #             game.player_took()
+    #         else:
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "Invalid move"
+    #             })
+    #         s_game = game.serialize()
+    #         room.game_obj = s_game
+    #         room.save()
 
-        case "throw_card":
-            if not game.board.has_free_slot():
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "Invalid move"
-                })
-                return
-            card = Card(
-                suit = payload["card"]["suit"],
-                value = payload["card"]["value"],
-                is_trump = payload["card"]["suit"] == game.trump_suit
-            )
-            logger.info(f"player[{player_id}] throw card {str(card)}")
+    #     case "throw_card":
+    #         if not game.board.has_free_slot():
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "Invalid move"
+    #             })
+    #             return
+    #         card = Card(
+    #             suit = payload["card"]["suit"],
+    #             value = payload["card"]["value"],
+    #             is_trump = payload["card"]["suit"] == game.trump_suit
+    #         )
+    #         logger.info(f"player[{player_id}] throw card {str(card)}")
 
-            if player_id in game.throwing_players and game.can_throw and player.has_card(card):
-                send_to_player(player_id, {
-                    "status": "success"
-                })
-                player.deck.remove_card(card)
-                send_to_room(room_id, {
-                    "event": "throw_card",
-                    "card": payload["card"],
-                    "player_id": player_id
-                }, socket_id)
-                game.update_pl_hst(player)
-                game.player_throws_card(payload["card"])
-                game.throw_players_in_time_id.append(player.id)
+    #         if player_id in game.throwing_players and game.can_throw and player.has_card(card):
+    #             send_to_player(player_id, {
+    #                 "status": "success"
+    #             })
+    #             player.deck.remove_card(card)
+    #             send_to_room(room_id, {
+    #                 "event": "throw_card",
+    #                 "card": payload["card"],
+    #                 "player_id": player_id
+    #             }, socket_id)
+    #             game.update_pl_hst(player)
+    #             game.player_throws_card(payload["card"])
+    #             game.throw_players_in_time_id.append(player.id)
 
-            else:
-                send_to_player(player_id, {
-                    "status": "error",
-                    "message": "Invalid move"
-                })
-            s_game = game.serialize()
-            room.game_obj = s_game
-            room.save()
+    #         else:
+    #             send_to_player(player_id, {
+    #                 "status": "error",
+    #                 "message": "Invalid move"
+    #             })
+    #         s_game = game.serialize()
+    #         room.game_obj = s_game
+    #         room.save()
  
-        case "transfer_card":
-            card = Card(
-                suit = payload["card"]["suit"],
-                value = payload["card"]["value"],
-                is_trump = payload["card"]["suit"] == game.trump_suit
-            )
-            logger.info(f"player[{player_id}] transfer card {str(card)}")
-            status, reason = game.board.can_transfer(card)
+    #     case "transfer_card":
+    #         card = Card(
+    #             suit = payload["card"]["suit"],
+    #             value = payload["card"]["value"],
+    #             is_trump = payload["card"]["suit"] == game.trump_suit
+    #         )
+    #         logger.info(f"player[{player_id}] transfer card {str(card)}")
+    #         status, reason = game.board.can_transfer(card)
 
-            send_to_player(player_id, {
-                "status": "success" if status else "error",
-                "message": reason
-            })
+    #         send_to_player(player_id, {
+    #             "status": "success" if status else "error",
+    #             "message": reason
+    #         })
             
-            if status:
-                game.is_end = True
-                transfered = True
-                # update move state
-                game.throw_players_in_time_id.append(player_id)
-                game.update_pl_hst(player)
-                # remove card and send event
-                player.deck.remove_card(card)
+    #         if status:
+    #             game.is_end = True
+    #             transfered = True
+    #             # update move state
+    #             game.throw_players_in_time_id.append(player_id)
+    #             game.update_pl_hst(player)
+    #             # remove card and send event
+    #             player.deck.remove_card(card)
                 
-                new_victim_player = game.players_deque[-2]
-                send_to_room(room_id, {
-                    "event": "transfer_card",
-                    "card": payload["card"],
-                    "player_id": player_id,
-                    "target": new_victim_player.id
-                }, socket_id)
+    #             new_victim_player = game.players_deque[-2]
+    #             send_to_room(room_id, {
+    #                 "event": "transfer_card",
+    #                 "card": payload["card"],
+    #                 "player_id": player_id,
+    #                 "target": new_victim_player.id
+    #             }, socket_id)
                 
-                s_game = game.serialize()
-                room.game_obj = s_game
-                room.save()
+    #             s_game = game.serialize()
+    #             room.game_obj = s_game
+    #             room.save()
             
-        case "loose_on_time":
-            logger.info(f"player[{player_id}] loose on time")
+    #     case "loose_on_time":
+    #         logger.info(f"player[{player_id}] loose on time")
 
-            game.is_end = False
+    #         game.is_end = False
 
-            each_reward = int(room.reward / (game.players_count - 1))
+    #         each_reward = int(room.reward / (game.players_count - 1))
 
-            place_ = 0
-            for player in game.players:
-                if player.id == player_id:
-                    continue
-                send_to_room(room_id, {
-                    "event": "player_win",
-                    "top": place_,
-                    "money": each_reward,
-                    "player_id": player.id
-                })
-                place_ += 1
+    #         place_ = 0
+    #         for player in game.players:
+    #             if player.id == player_id:
+    #                 continue
+    #             send_to_room(room_id, {
+    #                 "event": "player_win",
+    #                 "top": place_,
+    #                 "money": each_reward,
+    #                 "player_id": player.id
+    #             })
+    #             place_ += 1
 
-            send_to_room(room_id, {
-                "event": "game_over",
-                "looser_id": player_id
-            })
+    #         send_to_room(room_id, {
+    #             "event": "game_over",
+    #             "looser_id": player_id
+    #         })
             
-            make_new_room(room_id, game)
+    #         make_new_room(room_id, game)
 
-        case _:
+    #     case _:
             send_to_player(player_id, {
                 "status": "error",
                 "message": "Unknown event"

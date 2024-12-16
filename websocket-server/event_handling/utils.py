@@ -1,6 +1,7 @@
 import os
 import json
 from typing import Any, Tuple
+
 from websockets import ConnectionClosed
 
 import jwt
@@ -46,3 +47,7 @@ def serialize(dict_json: dict) -> str:  # serializes dict to json string
 def deserialize(str_json: str) -> dict:  # deserializes string json to dict
     return json.loads(str_json)
 
+
+def model_to_room(room: RoomModel) -> dict:
+    serialized_room = room.game_obj
+    return Game.deserialize(serialized_room)
