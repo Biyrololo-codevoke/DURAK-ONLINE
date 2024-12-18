@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import json
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
 
@@ -19,7 +20,7 @@ class ConfirmEmail(BaseResource):
                 "code": String[6]
             }
         ).parse_args()
-        payload = get_jwt_identity()
+        payload = json.loads(get_jwt_identity())
 
         try:
             user = UserModel.get_by_id(payload["id"])

@@ -18,7 +18,7 @@ config = {
 }
 
 logger.info("waiting 40s for kafka to be ready")
-time.sleep(40)
+time.sleep(5)
 
 # try to establish connection
 logger.info(f"try to establish connection with kafka by uri: {KAFKA_URI}")

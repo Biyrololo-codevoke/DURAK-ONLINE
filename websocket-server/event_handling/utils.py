@@ -16,7 +16,8 @@ def handle_jwt_token(token: str) -> tuple[bool, Any] | tuple[bool, str]:
     try:
         # Decode the JWT token
         payload = jwt.decode(token, JWT_SECRET_KEY, algorithms=['HS256'])
-        return True, payload["sub"]["id"]
+        return True, json.loads(payload["sub"])["id"]
+
     except jwt.ExpiredSignatureError:
         # Token has expired
         return False, "Token has expired"
@@ -48,6 +49,6 @@ def deserialize(str_json: str) -> dict:  # deserializes string json to dict
     return json.loads(str_json)
 
 
-def model_to_room(room: RoomModel) -> dict:
+def model_to_room(room) -> dict:
     serialized_room = room.game_obj
     return Game.deserialize(serialized_room)

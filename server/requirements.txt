@@ -5,7 +5,7 @@ Flask-SQLAlchemy
 psycopg2-binary
 
 Flask-RESTful
-Flask-JWT-extended
+Flask-JWT-extended==4.6.0
 passlib
 
 confluent_kafka

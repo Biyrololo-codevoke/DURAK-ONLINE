@@ -1,4 +1,5 @@
 from typing import Any
+import json
 from string import digits
 from http import HTTPStatus
 
@@ -38,7 +39,7 @@ class Register(BaseResource):  # type: ignore
             cls.logger.info("send verification email")
             send_verification(new_user)
             
-            access_token = create_access_token(identity=new_user.json())
+            access_token = create_access_token(identity=json.dumps(new_user.json()))
 
             return {
                 "user": new_user.json(),

@@ -1,4 +1,5 @@
 from http import HTTPStatus
+import json
 from uuid import uuid4
 
 from flask_jwt_extended import jwt_required, get_jwt_identity
@@ -46,7 +47,7 @@ class Room(BaseResource):
         )
 
         args = parser.parse_args()
-        author_id = get_jwt_identity()["id"]
+        author_id = json.loads(get_jwt_identity())["id"]
         
         player = UserModel.get_by_id(author_id)
         if player and player.money < args["reward"]:

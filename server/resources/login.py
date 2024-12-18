@@ -1,5 +1,6 @@
 from typing import Any
 from http import HTTPStatus
+import json
 
 from flask_jwt_extended import create_access_token
 
@@ -24,7 +25,7 @@ class Login(BaseResource):  # type: ignore
 
         try:
             user = UserModel.auth(args.email, args.password)
-            access_token = create_access_token(identity=user.json())
+            access_token = create_access_token(json.dumps(identity=user.json()))
 
             return {"user": user.json(), "access_token": access_token}, HTTPStatus.OK
 

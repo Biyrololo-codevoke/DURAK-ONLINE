@@ -3,7 +3,7 @@ import json
 
 from aiokafka import AIOKafkaConsumer, errors as kafka_errors
 
-from event_handling import send_to_user, send_to_room, room_list
+from event_handling import room_list
 from websocket_logger import logger
 
 
@@ -28,17 +28,12 @@ def handle_message(message):
         event_type = message["event_type"]
         
         if event_type == "create_room":  # { "event_type": "new_room", "room_id": 1 }
+            logger.info("kafka event. creating new room")
             room_list.add_room(
                 message["room_id"],          
                 author_id=message["author_id"],
-                key=message["key"]
+                author_key=message["key"]
             )
-
-        # if event_type == "update_room":  # { "event_type": "update_room", "room_id": 1, "room_count": 2 }
-        #     room_list.update_room(message["room_id"], message["room_count"])
-            
-        # if event_type == "remove_room":  # { "event_type": "remove_room", "room_id": 1 }
-        #     room_list.remove_room(message["room_id"])
 
 
 async def start_consumer() -> None:

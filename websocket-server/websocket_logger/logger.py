@@ -19,7 +19,7 @@ file_handler.setLevel(logging.WARNING)
 
 # log format
 date_format = "%d.%m.%y %H:%M"
-formatter = logging.Formatter("[%(asctime)s] %(name)s -> %(message)s", datefmt=date_format)
+formatter = logging.Formatter("[%(asctime)s]: %(message)s", datefmt=date_format)
 
 console_handler.setFormatter(formatter)
 file_handler.setFormatter(formatter)
