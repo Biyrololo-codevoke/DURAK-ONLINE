@@ -24,8 +24,8 @@ function uploadPhoto(){
 }
 
 function roomListWS(){
-    return `ws://127.0.0.1:9000/ws/room-list`
     return `/ws/room-list` // wss://codevoke.ru/ws/room-list
+    return `ws://127.0.0.1:9000/ws/room-list`
 }
 
 export {roomListWS}
@@ -36,8 +36,8 @@ function gameWS(key: str_num_nu, room_id: str_num_nu){
     if(!key || !room_id){
         return ''
     }
-    return `ws://127.0.0.1:9000/ws/room?room_id=${room_id}&key=${key}`;
     return `/ws/room?room_id=${room_id}&key=${key}`;
+    return `ws://127.0.0.1:9000/ws/room?room_id=${room_id}&key=${key}`;
 }
 
 export {gameWS}
