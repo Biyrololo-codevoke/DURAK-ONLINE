@@ -22,7 +22,7 @@ function handle_message(data: Types.RoomListResponseType |
         // ...
     }
     else{
-        const rooms_ids = Object.keys(data).filter(key => key !== 'type').map(key => parseInt(key));
+        const rooms_ids = Object.keys(data.rooms).filter(key => key !== 'type').map(key => parseInt(key));
 
         if('type' in data && data.type === 'delete_room'){
             // delete Rooms

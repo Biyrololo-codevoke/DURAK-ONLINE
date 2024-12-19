@@ -128,12 +128,16 @@ export type {CreateRoomRequestType, CreateRoomResponseType};
 // RoomList wss
 
 type RoomListResponseType = {
-    [key: number]: number
+    rooms: {
+        [key: number]: number
+    }
 }
 
 type RoomListEvent = {
     type: 'create_room' | 'update_room' | 'delete_room',
-    [key: number]: number
+    rooms: {
+        [key: number]: number
+    }
 }
 
 type RoomListStatusType = {

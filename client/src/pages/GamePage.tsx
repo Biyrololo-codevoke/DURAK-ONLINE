@@ -1133,6 +1133,14 @@ export default function GamePage(){
                 console.log('айайай, ошибка, ошибка')
                 setSocket(null)
             }
+
+            new_socket.onopen = () => {
+                const _data = JSON.stringify({
+                    key,
+                    room_id
+                })
+                new_socket.send(_data);
+            }
     
             socket_ref.current = new_socket;
 
