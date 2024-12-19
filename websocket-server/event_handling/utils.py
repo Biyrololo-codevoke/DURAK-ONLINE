@@ -4,6 +4,8 @@ from typing import Any, Tuple
 
 from websockets import ConnectionClosed
 
+from .game import Game
+
 import jwt
 from websocket_logger import logger
 
@@ -49,6 +51,8 @@ def deserialize(str_json: str) -> dict:  # deserializes string json to dict
     return json.loads(str_json)
 
 
-def model_to_room(room) -> dict:
-    serialized_room = room.game_obj
-    return Game.deserialize(serialized_room)
+def model_to_room(model) -> dict:
+    if model:
+        serialized_room = model.game_obj
+        if serialized_room:
+            return Game.deserialize(serialized_room)

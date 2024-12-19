@@ -30,7 +30,6 @@ class Player:
     accepted: bool | None = field(default_factory=bool)
 
     def send(self, payload):
-        logger.info(f"{self.socket} -> {dir(self.socket)}")
         if not self.socket.state == websockets.protocol.State.CLOSED:
             asyncio.create_task(
                 self.socket.send(
@@ -60,26 +59,29 @@ class Player:
 
 class FastRoom:
     # spped up pattern
-    _rooms: dict[int, Room] = dict()
+    _rooms: dict[int, RoomModel] = dict()
 
     @classmethod
     def get_room(cls, id: int) -> Game | None:
-        if id in _rooms.keys():
-            return _rooms[id]
-        else:
-            room = RoomModel.get_by_id(room_id)
-            if room:
-                game = model_to_room(room)
-                cls._rooms[id] = game
-                return game
-            else:
-                return None
+        return RoomModel.get_by_id(id)
+        # if id in cls._rooms.keys():
+        #     return cls._rooms[id]
+        # else:
+        #     model = RoomModel.get_by_id(id)
+        #     if model:
+        #         cls._rooms[id] = model
+        #         return model
+        #     else:
+        #         return None
     
     @classmethod
     def update_room(cls, room_id: int, game: Game):
         if room_id in cls._rooms.keys():
-            cls._rooms[room_id] = game
-            model = FastRoom
+            room = cls._rooms[room_id]
+            room.game_obj = game.serialize()
+            room.save()
+        else:
+            model = RoomModel.get_by_id(room_id)
             model.game_obj = game.serialize()
             model.save()
 
@@ -90,6 +92,7 @@ room_keys: dict[int, list[str]] = dict()
 
 get_player: callable[int, Player]       = lambda id: filter(lambda x: x.id == id, player_list).__next__()
 get_room:   callable[int, list[Player]] = lambda id: list(filter(lambda x: x.room_id == id, player_list))
+
 
 
 @dataclass 
@@ -168,14 +171,25 @@ class Room:
             })
             player.disconnect()
         else:
+            player.send({
+                "status": "success",
+                "message": "joined room"
+            })
+            player.broadcast_room({
+                "event": "player_connected",
+                "player_id": player.id
+            })
+            self.players.append(player)
             room_model = FastRoom.get_room(self.id)
             room_model.add_player(player.id)
-            self.players.append(player)
+            room_model.save()
             room_list.update_room()
 
             if not room_model.check_available():
-                # start the game (+ accept)
-                pass
+                room_list.remove_room(self.id)
+                accept_start()
+            else:
+                logger.info(f"model: {room_model}; {len(room_model.user_ids)} / {room_model._players_count}")
 
     def accept_start(self):
         self.wait_accept = True
@@ -183,6 +197,7 @@ class Room:
             player.send({
                 "event": "accept_start"
             })
+        logger.info(f"room ready for accepting;")
 
     def do_accept(self, player: Player):
         if not self.wait_accept:

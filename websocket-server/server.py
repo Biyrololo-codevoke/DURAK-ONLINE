@@ -59,6 +59,9 @@ async def socket_listener(socket: WebSocket):
                 if type == "LIST":
                     room_list.subscribe(player)
 
+                if type == "ROOM":
+                    room_list.room_list[room_id].join_room(player)
+
                 player_list.append(player)
 
                 asyncio.create_task(ping_socket(socket, player))

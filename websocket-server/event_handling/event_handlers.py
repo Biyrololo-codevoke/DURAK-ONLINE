@@ -5,7 +5,7 @@ from websockets import WebSocketServerProtocol as WebSocket
 
 from websocket_logger import logger
 
-from .data import room_list, Player, get_room
+from .data import room_list, Player
 from .game import Game
 
 
@@ -41,11 +41,10 @@ async def handle_list(player: Player, payload: dict):
             room_id   = payload.get("room_id")
             passsword = payload.get("password")  # nullable
 
-            room = get_room(room_id)
-
             if room_id is None:
                 player.send({"status": "error", "message": "room_id is missed"})
 
+            room = room_list.room_list.get(room_id)
             room.take_key(player, passsword)
 
         case _:

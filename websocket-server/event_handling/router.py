@@ -6,8 +6,9 @@ from .event_handlers import handle_list, handle_room
 from .data import Player
 
 
+
 async def router(path: str, payload: dict, player: Player):
-    endpoint, data = handle_path(path)
+    endpoint = path.split("?")[0].replace("/ws", "")
 
     match endpoint:
         case "/room-list":

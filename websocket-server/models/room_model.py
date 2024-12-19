@@ -4,6 +4,8 @@ from typing import Type
 from sqlalchemy import Column, Integer, String, Boolean, Enum, ARRAY
 from sqlalchemy.orm.exc import NoResultFound
 
+from websocket_logger import logger
+
 from .user_model import UserModel
 from .enum_types import RoomTypes
 from .db import retry_on_exception, BaseModel, session
@@ -51,6 +53,10 @@ class RoomModel(BaseModel):
             raise RoomExceptions.NotFound from e
 
     def add_player(self, user_id: int) -> None:
+        global logger
+
+        logger.info(f"Adding user {user_id} to room {self.id}")
+
         if self.user_ids is None:
             self.user_ids = []
 
@@ -59,6 +65,7 @@ class RoomModel(BaseModel):
 
         self.user_ids.append(user_id)
         self.save()
+        logger.info(f"updates: {self.user_ids}")
 
     def check_password(self, password: str) -> bool:
         return self.password == password
